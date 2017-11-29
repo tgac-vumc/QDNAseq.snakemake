@@ -1,0 +1,15 @@
+channels:
+  - conda-forge
+  - bioconda
+  - r
+  - defaults
+dependencies:
+  - bwa=0.7.12
+  - samtools=0.1.19
+  - snakemake=3.11.0
+  - pyyaml=3.11
+  - bioconductor-qdnaseq=1.10.0
+  - picard
+  - fastqc=0.11.5
+  - ucsc-bigwigaverageoverbed
+  - bioconductor-bsgenome 
