@@ -1,0 +1,40 @@
+Install the environment using conda:
+
+conda env create --name  QDNAseq-snakemake --file environment.yaml
+
+- activate the environment
+
+source activate QDNAseq-snakemake
+
+Install the following packages manually from R:
+
+R
+
+install.packages("R.cache")
+install.packages("gtools")
+install.packages("MASS")
+install.packages("denstrip")
+install.packages("survival")
+
+Installing CGHtest on server
+
+# source code at: http://www.few.vu.nl/~mavdwiel/CGHtest.html
+
+wget http://www.few.vu.nl/~mavdwiel/CGHtest/CGHtest_1.1.tar.gz
+install.packages("</path/to/CGHtest_1.1.tar.gz")
+
+
+install.packages('/ccagc/home/matias/tools/CGHtest_1.1.tar.gz')
+install.packages('/ccagc/home/matias/tools/CGHtestpar_0.0.tar.gz')
+
+library(CGHtest)
+
+install.packages('/net/nfs/PAT/home/matias/tools/CGHtest_1.1.tar.gz')
+
+install.packages("devtools")
+library(devtools)
+
+install_github("tgac-vumc/WECCA")
+
+options(unzip = 'internal')
+install_github("tgac-vumc/WECCA")

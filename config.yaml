@@ -1,0 +1,20 @@
+all:
+  REF: /net/nfs/PAT/data/ref/hg19/ensembl/bwa-0.7.5a/Homo_sapiens.GRCh37.69.dna_sm.primary_assembly.fa
+  THREADS: 4
+
+bwa:
+  max_edit_distance: 2  #n
+  read_trimming_param: 40 #q
+
+QDNAseq:
+  BINSIZES: [15 , 30 , 100, 1000]   #required binsizes comma seperated  1 5 10 15 30 100 1000
+  genome: hg19
+  dewave_dir: scripts/QDNAseq.dev-dewave/R
+  #CNAtools: /net/nfs/PAT/home/matias/tools/CNAtools
+  cytobands: /net/nfs/PAT/home/matias/data/ref/HG19.cytoBand.txt.gz
+  dewave_data: scripts/QDNAseq.dev-dewave/data/NormalCalibrationSet_{binSize}kb.rda
+
+CGHregions:
+  averror: 0.0075  #0.0075	 # default = 0.01
+  min_freq_focal: 25
+  max_focal_size_mb: 15

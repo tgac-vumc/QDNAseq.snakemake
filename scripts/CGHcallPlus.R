@@ -1,15 +1,19 @@
+#this script contain the functions: make_cghRawPlus, frequencyPlot, segmentDataWeighted,  CGHregionsPlus,
+#regioningPlus, repdata , WECCA.heatmapPlus, mark.genes , mark.bed,  add.cytobands , add.genes, plot.profiles
+
 library(CGHcall)
 library(CGHregions)
 library(WECCA)
 library(matrixStats)
 library(QDNAseq)
 
+# originally: QDNAseqReadCounts instead of QDNAseqSignals
 setMethod('plot', signature(x='cghRaw', y='missing'),
-  getMethod('plot', signature=c(x='QDNAseqReadCounts', y='missing')))
+  getMethod('plot', signature=c(x='QDNAseqSignals', y='missing')))
 setMethod('plot', signature(x='cghSeg', y='missing'),
-  getMethod('plot', signature=c(x='QDNAseqReadCounts', y='missing')))
+  getMethod('plot', signature=c(x='QDNAseqSignals', y='missing')))
 setMethod('plot', signature(x='cghCall', y='missing'),
-  getMethod('plot', signature=c(x='QDNAseqReadCounts', y='missing')))
+  getMethod('plot', signature=c(x='QDNAseqSignals', y='missing')))
 
 setMethod("frequencyPlot", signature(x="cghCall", y="missing"), frequencyPlotCalls)
 
@@ -58,12 +62,12 @@ function (x, y, main='Frequency Plot', gaincol='blue', losscol='red', misscol=NA
 })
 
 make_cghRawPlus <-
-function (input) 
+function (input)
 {
-    if (class(input) == "character") 
-        input <- read.table(input, header = T, sep = "\t", fill = T, 
+    if (class(input) == "character")
+        input <- read.table(input, header = T, sep = "\t", fill = T,
             quote = "")
-    if (class(input[, 2]) == "factor") 
+    if (class(input[, 2]) == "factor")
         input[, 2] <- as.character(input[, 2])
     if (class(input[, 2]) == "character") {
         input[, 2] <- sub("^chr", "", input[, 2])
@@ -83,15 +87,15 @@ function (input)
     input <- input[order(input[, 2], input[, 3]), ]
     copynumber <- as.matrix(input[, 5:ncol(input)])
     rownames(copynumber) <- input[, 1]
-    if (ncol(copynumber) == 1) 
+    if (ncol(copynumber) == 1)
         colnames(copynumber) <- colnames(input)[5]
-    annotation <- data.frame(Chromosome = input[, 2], Start = input[, 
+    annotation <- data.frame(Chromosome = input[, 2], Start = input[,
         3], End = input[, 4], row.names = input[, 1])
-    metadata <- data.frame(labelDescription = c("Chromosomal position", 
-        "Basepair position start", "Basepair position end"), 
+    metadata <- data.frame(labelDescription = c("Chromosomal position",
+        "Basepair position start", "Basepair position end"),
         row.names = c("Chromosome", "Start", "End"))
     dimLabels <- c("featureNames", "featureColumns")
-    annotation <- new("AnnotatedDataFrame", data = annotation, 
+    annotation <- new("AnnotatedDataFrame", data = annotation,
         dimLabels = dimLabels, varMetadata = metadata)
     result <- new("cghRaw", copynumber = copynumber, featureData = annotation)
 }
@@ -99,10 +103,10 @@ environment(make_cghRawPlus) <- environment(CGHbase:::make_cghRaw)
 make_cghRaw <- make_cghRawPlus
 
 segmentDataWeighted <-
-function (input, method = "DNAcopy", ...) 
+function (input, method = "DNAcopy", ...)
 {
     if (method == "DNAcopy") {
-        CNA.object <- DNAcopy::CNA(copynumber(input), chromosomes(input), 
+        CNA.object <- DNAcopy::CNA(copynumber(input), chromosomes(input),
             bpstart(input), data.type = "logratio")
         cat("Start data segmentation .. \n")
         segmented <- segment(CNA.object, ...)
@@ -137,7 +141,7 @@ CGHregionsPlus <- function(input, ...) {
 environment(CGHregionsPlus) <- environment(CGHregions:::CGHregions)
 CGHregions <- CGHregionsPlus
 
-regioningPlus <- function (cghdata.called, threshold = 0.00001, cghdata.regions = NULL) 
+regioningPlus <- function (cghdata.called, threshold = 0.00001, cghdata.regions = NULL)
 {
     find.reg.modus <- function(x) {
         if (nrow(x) == 1)
@@ -159,10 +163,10 @@ regioningPlus <- function (cghdata.called, threshold = 0.00001, cghdata.regions 
         }
         region.details <- NULL
         for (i in 1:length(splitter)) {
-            region.details <- rbind(region.details, c(min(splitter[[i]]), 
+            region.details <- rbind(region.details, c(min(splitter[[i]]),
                 max(splitter[[i]])))
         }
-        modus <- which.max(region.details[, 2] - region.details[, 
+        modus <- which.max(region.details[, 2] - region.details[,
             1] + 1)
         return(x[region.details[modus[1], 1], ])
     }
@@ -177,46 +181,46 @@ regioningPlus <- function (cghdata.called, threshold = 0.00001, cghdata.regions 
     reg.to.clones <- list()
     counter <- 0
     for (chr in unique(regions.annotation[, 1])) {
-        reg.ann.temp <- regions.annotation[regions.annotation[, 
+        reg.ann.temp <- regions.annotation[regions.annotation[,
             1] == chr, 1:4]
         for (r in 1:dim(reg.ann.temp)[1]) {
             counter <- counter + 1
             A1 <- which(calls.annotation[, 1] == chr)
-            A2 <- which(calls.annotation[, 2] >= reg.ann.temp[r, 
+            A2 <- which(calls.annotation[, 2] >= reg.ann.temp[r,
                 2])
-            A3 <- which(calls.annotation[, 3] <= reg.ann.temp[r, 
+            A3 <- which(calls.annotation[, 3] <= reg.ann.temp[r,
                 3])
-            reg.to.clones[[counter]] <- intersect(intersect(A1, 
+            reg.to.clones[[counter]] <- intersect(intersect(A1,
                 A2), A3)
         }
     }
     cat("...done", "\n")
     cghdata.probs <- numeric()
     for (i in 1:dim(calls(cghdata.called))[2]) {
-        cghdata.probs <- cbind(cghdata.probs, cbind(probloss(cghdata.called)[, 
-            i], probnorm(cghdata.called)[, i], probgain(cghdata.called)[, 
+        cghdata.probs <- cbind(cghdata.probs, cbind(probloss(cghdata.called)[,
+            i], probnorm(cghdata.called)[, i], probgain(cghdata.called)[,
             i], probamp(cghdata.called)[, i]))
     }
     cat("Calculate mode soft call signature for each region...")
     cghdata.regprobs <- numeric()
     for (i in 1:length(reg.to.clones)) {
-        cghdata.regprobs <- rbind(cghdata.regprobs, find.reg.modus(cghdata.probs[reg.to.clones[[i]], 
+        cghdata.regprobs <- rbind(cghdata.regprobs, find.reg.modus(cghdata.probs[reg.to.clones[[i]],
             , drop = FALSE]))
     }
     cat("...done", "\n")
     softcalls.samplenames <- character()
     for (i in 1:dim(calls(cghdata.called))[2]) {
-        if (dim(cghdata.regprobs)[2]/dim(calls(cghdata.called))[2] == 
+        if (dim(cghdata.regprobs)[2]/dim(calls(cghdata.called))[2] ==
             3) {
-            softcalls.samplenames <- c(softcalls.samplenames, 
-                paste(c("probloss_", "probnorm_", "probgain_"), 
+            softcalls.samplenames <- c(softcalls.samplenames,
+                paste(c("probloss_", "probnorm_", "probgain_"),
                   colnames(regions(cghdata.regions))[i], sep = ""))
         }
-        if (dim(cghdata.regprobs)[2]/dim(calls(cghdata.called))[2] == 
+        if (dim(cghdata.regprobs)[2]/dim(calls(cghdata.called))[2] ==
             4) {
-            softcalls.samplenames <- c(softcalls.samplenames, 
-                paste(c("probloss_", "probnorm_", "probgain_", 
-                  "probamp_"), colnames(regions(cghdata.regions))[i], 
+            softcalls.samplenames <- c(softcalls.samplenames,
+                paste(c("probloss_", "probnorm_", "probgain_",
+                  "probamp_"), colnames(regions(cghdata.regions))[i],
                   sep = ""))
         }
     }
@@ -247,7 +251,7 @@ WECCA.heatmapPlus <- function (cghdata.regioned, dendrogram, build='GRCh37',
 
   Y <- rep(FALSE, dim(cghdata.regioned$hardcalls)[1])
   for (i in 2:(dim(cghdata.regioned$ann)[1])) {
-      if ((cghdata.regioned$ann[i - 1, 1] != cghdata.regioned$ann[i, 
+      if ((cghdata.regioned$ann[i - 1, 1] != cghdata.regioned$ann[i,
           1])) {
           Y[i] <- TRUE
       }
@@ -257,30 +261,29 @@ WECCA.heatmapPlus <- function (cghdata.regioned, dendrogram, build='GRCh37',
   begin.chr[Y] <- cghdata.regioned$ann[Y, 1]
   color.coding <- c("-2"="darkred", "-1"="red", "0"="black", "1"="blue",
     "2"="darkblue")[as.character(nclasses)]
-  heatmap(cghdata.regioned$hardcalls, Colv = as.dendrogram(dendrogram), 
-      Rowv=NA, col=color.coding, labRow=begin.chr, RowSideColors=chr.color, 
+  heatmap(cghdata.regioned$hardcalls, Colv = as.dendrogram(dendrogram),
+      Rowv=NA, col=color.coding, labRow=begin.chr, RowSideColors=chr.color,
       scale="none", ...)
 }
 environment(WECCA.heatmapPlus) <- environment(WECCA:::WECCA.heatmap)
 WECCA.heatmap <- WECCA.heatmapPlus
 
 mark.genes <- function(symbols, chrs=1:24, build='GRCh37', side=3, line=-1, ...) {
-  if (!exists('genes')) {
-    genes <<- read.table(paste('http://www.cangem.org/download.php?platform=CG-PLM-26&flag=', build, sep=''), sep='\t', header=TRUE, as.is=TRUE)
-    rownames(genes) <- genes$gene
-    genes$chromosome[genes$chromosome == 'X'] <- '23'
-    genes$chromosome[genes$chromosome == 'Y'] <- '24'
-    genes$chromosome[genes$chromosome == 'MT'] <- '25'
-    genes$chromosome <- as.integer(genes$chromosome)
-  }
+  genes <- AnnotationDbi::select(Homo.sapiens::Homo.sapiens, keys=keys(Homo.sapiens::Homo.sapiens,
+    keytype='SYMBOL'), cols=c('CHRLOC', 'CHRLOCEND'), keytype='SYMBOL')
+  genes$CHRLOCCHR[genes$CHRLOCCHR == 'X'] <- '23'
+  genes$CHRLOCCHR[genes$CHRLOCCHR == 'Y'] <- '24'
+  genes$CHRLOCCHR[genes$CHRLOCCHR == 'MT'] <- '25'
+  genes <- genes[genes$CHRLOCCHR %in% as.character(1:25),]
+  genes$CHRLOCCHR <- as.integer(genes$CHRLOCCHR)
   if (length(side) == 1)
     side <- rep(side, length(symbols))
   if (length(line) == 1)
     line <- rep(line, length(symbols))
 
-  chrom           <- genes[,2]
-  pos             <- genes[,3]
-  pos2            <- genes[,4]
+  chrom           <- genes$CHRLOCCHR
+  pos             <- abs(genes$CHRLOC)
+  pos2            <- abs(genes$CHRLOCEND)
   uni.chrom <- chrs
   chrom.lengths <- CGHbase:::.getChromosomeLengths(build)[as.character(uni.chrom)]
   for (j in uni.chrom) {
@@ -290,9 +293,9 @@ mark.genes <- function(symbols, chrs=1:24, build='GRCh37', side=3, line=-1, ...)
   genes$pos <- pos
   genes$pos2 <- pos2
   for (i in 1:length(symbols)) {
-    matches <- genes[genes$symbol == symbols[i],]
-    rect(matches$pos, -6, matches$pos2, 6, col='#88888888', border='#88888888')
-    axis(side=side[i], at=matches$pos+(matches$pos2-matches$pos)/2, labels=symbols[i], tick=FALSE, line=line[i], cex.axis=.75, ...)
+    matches <- genes[genes$SYMBOL == symbols[i],]
+    rect(matches$pos, par('usr')[3], matches$pos2, par('usr')[4], col='#88888888', border='#88888888')
+    axis(side=side[i], at=matches$pos+(matches$pos2-matches$pos)/2, labels=rep(symbols[i], nrow(matches)), tick=FALSE, line=line[i], cex.axis=.75, ...)
   }
 }
 

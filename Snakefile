@@ -1,85 +1,276 @@
-import os
-from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
+#import os
+import re
+#from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
+#from snakemake.utils import makedirs
+configfile: "config.yaml"
+#HTTP = HTTPRemoteProvider()
+#REF = "/net/nfs/PAT/data/ref/iGenomes/Homo_sapiens/Ensembl/GRCh37/Sequence/BWAIndex/version0.6.0/genome.fa"
 
-HTTP = HTTPRemoteProvider()
-REF = "/net/nfs/PAT/data/ref/iGenomes/Homo_sapiens/Ensembl/GRCh37/Sequence/BWAIndex/version0.6.0/genome.fa"
+(wholenames,) = glob_wildcards("../fastq/{wholename}.fastq.gz")
+profiletypes = ["corrected", "segmented", "called","reCalled" ]
 
-SAMPLES, = glob_wildcards("fastq/{sample}.fastq.gz")
-BINSIZES = "1 5 10 15 30 100 1000".split()  
+def getnames():
+     SAMPLES=dict()
+     for wholename in wholenames:
+         sample = re.match('[a-zA-Z0-9\-]*', wholename).group(0)
+         fastqfile="../fastq/"+wholename+".fastq.gz"
+         SAMPLES[sample]=fastqfile
+     return(SAMPLES)
+
+SAMPLES=getnames()
+
+#TODO add log steps
+#TODO check R scripts if all source files are required and copy sourcefiles to sourcedir inside snakemakedir.
 
 rule all:
      input:
-        expand('binAnnotations/{binSize}k.rds', binSize=BINSIZES)
+        expand("../{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=config["QDNAseq"]["BINSIZES"]),
+        expand("../qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
+        expand("../qc-fastq/{sample}_fastqc.html", sample=wholenames),
+        expand("../{binSize}kbp/summary.html", binSize=config["QDNAseq"]["BINSIZES"]),
+        expand("../{binSize}kbp/BED/{sample}_Cosmic.bed", binSize=config["QDNAseq"]["BINSIZES"] ,sample=SAMPLES.keys()),
 
-rule bwa_mem:
+rule bwa_aln:
     input:
-        "fastq/{sample}.fastq.gz"
+        lambda wildcards: SAMPLES[wildcards.sample],
     output:
-        "bam/{sample}.bam"
-    threads: 12
+        sai=temp("../bam/{sample}.sai"),
+        samse=temp("../bam/{sample}.samse.sam")
+    params:
+        ref= config['all']['REF'],
+        n=config['bwa']['max_edit_distance'],
+        q=config['bwa']['read_trimming_param'],
+    threads: config['all']['THREADS']
+    log: "../logs/bwa/{sample}.log"
     shell:
-        "bwa mem -t 12 {REF} {input} | samtools view -Sb - > {output}"
+        "bwa aln -n {params.n} -t {threads} -q {params.q} {params.ref} {input} > {output.sai} 2> {log};"
+        "bwa samse -r '@RG\tID:{wildcards.sample}\tSM:{wildcards.sample}' -f {output.samse}"
+        " {params.ref} {output.sai} {input} 2>> {log}"
 
 rule samtools_sort:
     input:
-        "bam/{sample}.bam"
+        samse="../bam/{sample}.samse.sam",
+	    sai="../bam/{sample}.sai"
     output:
-        "bam/{sample}.sorted.bam"
+        temp("../tmp/{sample}.all.bam")
+    params:
+        output="../tmp/{sample}.all"
+    log: "../logs/samtools/{sample}.log"
     shell:
-        "samtools sort -o {output} {input}"
+        "samtools view -uS {input.samse} 2> {log}| samtools sort - {params.output} 2>> {log}"
 
 rule mark_duplicates:
     input:
-        "bam/{sample}.sorted.bam"
+        "../tmp/{sample}.all.bam"
     output:
-        "bam/{sample}.sorted.md.bam"
+        bam="../bam/{sample}.bam",
+        bai="../bam/{sample}.bai",
+        bambai="../bam/{sample}.bam.bai",
+        metrics_file="../stats/{sample}.md.metrics"
+    log: "../logs/mark_duplicates/{sample}.log"
     shell:
-        "picard MarkDuplicates I={input} O={output} M=stats/{wildcards.sample}.sorted.md.metrics "
-        "AS=true CREATE_INDEX=true VALIDATION_STRINGENCY=LENIENT"
+        "picard MarkDuplicates I={input} O={output.bam} M={output.metrics_file} "
+        "ASSUME_SORTED=true CREATE_INDEX=true VALIDATION_STRINGENCY=LENIENT &> {log} ;"
+        "ln -s {output.bai} {output.bambai}"
 
 rule generate_stats:
     input:
-        "bam/{sample}.sorted.md.bam"
+        bam="../bam/{sample}.bam",
+        script="scripts/stats.sh"
     output:
-        "stats/{sample}.reads.all"
-    shell:
-        "scripts/stats.sh {input} {wildcards.sample} stats {output}"
-
-rule QDNAseq:
-    input:
-        bams=expand("bam/{sample}.sorted.md.bam", sample=SAMPLES)
-    output:
-        "rds/{sample}kbp-raw.rds"
-    script:
-        "scripts/QDNAseq.R"
-
-rule QDNAseq_dewaved:
-    input:
-        #bams=expand("bam/{sample}.sorted.md.bam", sample=SAMPLES)
-	"rds/{sample}kbp-raw.rds"
-    output:
-        "rds/{sample}kbp-dewaved.rds"
-    script:
-        "scripts/QDNAseq.R"
-
-rule QDNAseq_CreateBinAnnotations:
-    input:
-        bams=expand("bam/{sample}.sorted.md.bam", sample=SAMPLES),
-        mappability="rds/mappabilityBins-{binSize}k.rds"
-    output:
-        "binAnnotations/{binSize}k.rds"
-    script:
-        "scripts/CreateBinAnnotations.R"
-
-rule QDNAseq_CreateMappability:
-    input:
-        bw="data/mappability/hg38.50mer.bw"
-    output:
-        "rds/mappabilityBins-{binSize}k.rds"
+        "../stats/{sample}.reads.all"
     params:
-        binSize="{binSize}"
-    log:
-        "logs/QDNAseq_CreateMappability_{binSize}.log"
-    script:
-        "scripts/CreateMappability.R"
+        outdir="../stats"
+    shell:
+        "scripts/stats.sh {input.bam} {wildcards.sample} {params.outdir} {output}"
 
+rule QDNAseq_binReadCounts:
+    input:
+        bams=expand("../bam/{sample}.bam", sample=SAMPLES.keys()),
+        script="scripts/binReadCounts.R"
+    output:
+        binReadCounts="../{binSize}kbp/data/{binSize}kbp-raw.rds"
+    params:
+        genome=config["QDNAseq"]["genome"],
+    log: "../{binSize}kbp/logs/binReadCounts.log"
+    script:
+        "scripts/binReadCounts.R"
+
+rule QDNAseq_normalize:
+    input:
+        binReadCounts="../{binSize}kbp/data/{binSize}kbp-raw.rds",
+        script="scripts/QDNAseq_normalize.R",
+    output:
+        corrected="../{binSize}kbp/data/{binSize}kbp-corrected.rds",
+        allprofiles=expand("../{{binSize}}kbp/profiles/corrected/{samples}.png",samples=SAMPLES.keys()),
+    params:
+        profiles="../{binSize}kbp/profiles/corrected/",
+        dewave_data=config["QDNAseq"]["dewave_data"],
+    log: "../{binSize}kbp/logs/normalizeBins.log"
+    script:
+        "scripts/QDNAseq_normalize.R"
+
+rule QDNAseq_segment:
+    input:
+        corrected="../{binSize}kbp/data/{binSize}kbp-corrected.rds",
+        script="scripts/QDNAseq_segment.R",
+    output:
+        segmented="../{binSize}kbp/data/{binSize}kbp-segmented.rds",
+        allprofiles=expand("../{{binSize}}kbp/profiles/segmented/{samples}.png",samples=SAMPLES.keys()),
+    params:
+        profiles="../{binSize}kbp/profiles/segmented/",
+    log: "../{binSize}kbp/logs/segment.log"
+    script:
+        "scripts/QDNAseq_segment.R"
+
+rule QDNAseq_call:
+    input:
+        segmented="../{binSize}kbp/data/{binSize}kbp-segmented.rds",
+        script="scripts/QDNAseq_call.R",
+    output:
+        called="../{binSize}kbp/data/{binSize}kbp-called.rds",
+        freqplot="../{binSize}kbp/profiles/freqPlot/freqPlot_{binSize}kbp.png",
+        allprofiles=expand("../{{binSize}}kbp/profiles/called/{samples}.png",samples=SAMPLES.keys()),
+    params:
+        profiles="../{binSize}kbp/profiles/called/",
+    log: "../{binSize}kbp/logs/call.log"
+    script:
+        "scripts/QDNAseq_call.R"
+
+rule QDNAseq_recall:
+    input:
+        called="../{binSize}kbp/data/{binSize}kbp-called.rds",
+        script="scripts/QDNAseq_recall.R",
+    output:
+        recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
+        copynumbers="../{binSize}kbp/data/{binSize}kbp-copynumbers.igv",
+        segments="../{binSize}kbp/data/{binSize}kbp-segments.igv",
+        calls="../{binSize}kbp/data/{binSize}kbp-calls.igv",
+        allprofiles=expand("../{{binSize}}kbp/profiles/reCalled/{samples}.png",samples=SAMPLES.keys()),
+    params:
+        profiles="../{binSize}kbp/profiles/reCalled/",
+    log: "../{binSize}kbp/logs/recall.log"
+    script:
+        "scripts/QDNAseq_recall.R"
+
+rule QDNAseq_bedfiles:
+    input:
+        recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
+        script="scripts/makeCNAbedFile.R",
+    output:
+        bedfile=expand('../{{binSize}}kbp/BED/{sample}_allCNAsPerBin.bed', sample=SAMPLES.keys()),
+        focalCNA=expand('../{{binSize}}kbp/BED/{sample}_focalCNAs.bed', sample=SAMPLES.keys()),
+    params:
+        beddir='../{binSize}kbp/BED/',
+        cytobands=config["QDNAseq"]["cytobands"],
+        max_focal_size_mb=3
+    log: "../{binSize}kbp/logs/bedfiles.log"
+    script:
+        "scripts/makeCNAbedFile.R"
+
+#TODO remove in annotateFocalCNAbed file hardcoded location: /net/nfs/PAT/home/stef/code/ENSEMBL_API/ensembl74/ensembl/modules/
+#TODO remove from addCosmicCencus census location: /net/nfs/PAT/home/matias/data/ref/cosmic/hg19_okt2015/CosmicMutantExport.tsv
+rule annotate_focalCNA:
+    input:
+        bedfile='../{binSize}kbp/BED/{sample}_focalCNAs.bed',
+        script="scripts/annotateFocalCNAbed.sh"
+    output:
+        "../{binSize}kbp/BED/{sample}_Cosmic.bed"
+    params:
+        outdir="../{binSize}kbp/BED/"
+    log: "../{binSize}kbp/logs/annotate_focalCNA.log"
+    shell:
+        "scripts/annotateFocalCNAbed.sh {input.bedfile} {wildcards.sample} {params.outdir} {output} 2> {log} "
+
+rule QDNAseq_CGHregions:
+    input:
+        recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
+        script="scripts/QDNAseq_CGHregions.R"
+    output:
+        RegionsCGH="../{binSize}kbp/data/{binSize}kbp-RegionsCGH.rds",
+        profiles='../{binSize}kbp/profiles/freqPlot/freqPlotREGIONS_{binSize}kbp.png'
+    params:
+        averr=config["CGHregions"]["averror"],
+    log: "../{binSize}kbp/logs/CGHregions.log"
+    script:
+        "scripts/QDNAseq_CGHregions.R"
+
+rule makeCGHregionsTable:
+    input:
+        RegionsCGH="../{binSize}kbp/data/{binSize}kbp-RegionsCGH.rds",
+        script="scripts/makeCGHregionstable.R",
+    output:
+        allRegions="../{binSize}kbp/profiles/freqPlot/allRegions.txt",
+        allFocalRegions="../{binSize}kbp/profiles/freqPlot/allFocalRegions.bed"
+    params:
+        min_freq_focal=config["CGHregions"]["min_freq_focal"],
+        max_focal_size_mb=config["CGHregions"]["max_focal_size_mb"],
+        cytobands=config["QDNAseq"]["cytobands"],
+    log: "../{binSize}kbp/logs/CGHregionstable.log"
+    script:
+        "scripts/makeCGHregionstable.R"
+
+rule annotate_RegionsFocalCNAbed:
+    input:
+        bedfile="../{binSize}kbp/profiles/freqPlot/allFocalRegions.bed",
+        script="scripts/annotateFocalCNAbed.sh"
+    output:
+        output="../{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed"
+    params:
+        outdir="../{binSize}kbp/profiles/freqPlot/",
+        filename="allFocalRegions"
+    log: "../{binSize}kbp/logs/annotatateregions.log"
+    shell:
+        "scripts/annotateFocalCNAbed.sh {input.bedfile} {params.filename} {params.outdir} {output} 2> {log}"
+
+
+rule lightBox:
+    input:
+        sample=expand("../{{binSize}}kbp/profiles/{{profiletype}}/{sample}.png", sample=SAMPLES.keys()),
+        script="scripts/createLightBox.sh"
+    output:
+        index="../{binSize}kbp/profiles/{profiletype}/index.html",
+    params:
+        profiles="../{binSize}kbp/profiles/{profiletype}/",
+        lb2dir="lb2/"
+    shell:
+        "scripts/createLightBox.sh {params.profiles} {params.lb2dir} > {output.index}"
+
+#TODO script lane-summary does contain relative links to files - maybe better to change
+rule summary:
+    input:
+        stats=expand("../stats/{sample}.reads.all", sample=SAMPLES.keys()),
+        index=expand("../{{binSize}}kbp/profiles/{profiletype}/index.html", profiletype=profiletypes)
+    output:
+        "../{binSize}kbp/summary.html"
+    params:
+        bamfolder="../bam/",
+    shell:
+        "scripts/lane-summary.sh {wildcards.binSize}kpb {params.bamfolder} > {output}"
+        #"scripts/lane-summary.sh {wildcards.binSize}kpb {input.stats} > {output}"
+
+rule qcfastq:
+    input:
+        expand("../fastq/{sample}.fastq.gz", sample=wholenames)
+    output:
+        qcfastq=expand("../qc-fastq/{sample}_fastqc.html", sample=wholenames),
+        qczip=temp(expand("../qc-fastq/{sample}_fastqc.zip", sample=wholenames))
+    threads: config['all']['THREADS']
+    params:
+        qcfastqdir="../qc-fastq/"
+    log: "../logs/fastqc.log"
+    shell:
+        "fastqc {input} --outdir {params.qcfastqdir} -t {threads} 2> {log}"
+
+rule qcbam:
+    input:
+        bam=expand("../bam/{sample}.bam", sample=SAMPLES.keys()),
+    output:
+        bamqc=expand("../qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
+        bamqczip=temp(expand("../qc-bam/{sample}_fastqc.zip", sample=SAMPLES.keys())),
+    threads: config['all']['THREADS']
+    params:
+        qcbamdir="../qc-bam/"
+    log: "../logs/fastqc-bam.log"
+    shell:
+        "fastqc {input.bam} --format bam_mapped --outdir {params.qcbamdir} -t {threads} 2> {log}"
