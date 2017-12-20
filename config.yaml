@@ -12,9 +12,20 @@ QDNAseq:
   dewave_dir: scripts/QDNAseq.dev-dewave/R
   #CNAtools: /net/nfs/PAT/home/matias/tools/CNAtools
   cytobands: /net/nfs/PAT/home/matias/data/ref/HG19.cytoBand.txt.gz
+  max_focal_size_mb: 3 #in creations bedfiles
   dewave_data: scripts/QDNAseq.dev-dewave/data/NormalCalibrationSet_{binSize}kb.rda
 
 CGHregions:
   averror: 0.0075  #0.0075	 # default = 0.01
   min_freq_focal: 25
   max_focal_size_mb: 15
+
+ACE:
+  ploidies: [2,4]   #required ploidies comma seperated
+  imagetype: png      #options are png, pdf
+  method: RMSE        #'RMSE' root mean squared error, 'MAE' weighs every error equally, 'SMRE' punish more the long segments that are a little bit off compared to the short segments that are way off
+  penalty: 0.5          #sets a penalty for the error calculated at lower cellularity
+  cap: 12             # which copy numbers are capped (highest value)
+  trncname: FALSE     #Samplenames are truncated after _
+  printsummaries: TRUE  #For very large datasets it is better to set to FALSE
+  ACEBINSIZES: [100 ] #required binsizes comma seperated 15 30 100 1000, be careful not to ask for binsizes not created by QDNAseq. Smaller binsizes are computationally harder.
