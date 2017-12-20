@@ -1,12 +1,29 @@
+
+To run this pipeline Snakemake is required.
+
+for easy installation you need (mini)conda.
+
+Miniconda installation:
+
+[wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh]
+[bash Miniconda3-latest-Linux-x86_64.sh]
+
+follow the instructions of the installation process, give the location where you want miniconda to be installed and answer YES to add miniconda to your path.
+
+
 Install the environment using conda:
 
-conda env create --name  QDNAseq-snakemake --file environment.yaml
+[conda env create --name  QDNAseq-snakemake --file environment.yaml]
 
-- activate the environment
+- activate the environment by:
 
-source activate QDNAseq-snakemake
+[source activate QDNAseq-snakemake]
 
-Install the following packages manually from R:
+Not all packages required by R can be installed by conda, these need to be installed manually from R. first download CGHtest:
+# source code at: http://www.few.vu.nl/~mavdwiel/CGHtest.html
+wget http://www.few.vu.nl/~mavdwiel/CGHtest/CGHtest_1.1.tar.gz
+
+Than open R and install the Packages using the following code:
 
 R
 
@@ -16,25 +33,18 @@ install.packages("MASS")
 install.packages("denstrip")
 install.packages("survival")
 
-Installing CGHtest on server
+Installing CGHtest on server:
 
-# source code at: http://www.few.vu.nl/~mavdwiel/CGHtest.html
+install.packages("</path/to/>CGHtest_1.1.tar.gz")
 
-wget http://www.few.vu.nl/~mavdwiel/CGHtest/CGHtest_1.1.tar.gz
-install.packages("</path/to/CGHtest_1.1.tar.gz")
+        #install.packages('/ccagc/home/matias/tools/CGHtestpar_0.0.tar.gz')
 
-
-install.packages('/ccagc/home/matias/tools/CGHtest_1.1.tar.gz')
-install.packages('/ccagc/home/matias/tools/CGHtestpar_0.0.tar.gz')
-
-library(CGHtest)
+          #library(CGHtest)
 
 install.packages('/net/nfs/PAT/home/matias/tools/CGHtest_1.1.tar.gz')
 
 install.packages("devtools")
 library(devtools)
-
-install_github("tgac-vumc/WECCA")
 
 options(unzip = 'internal')
 install_github("tgac-vumc/WECCA")

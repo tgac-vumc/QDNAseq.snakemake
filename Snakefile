@@ -8,6 +8,9 @@ configfile: "config.yaml"
 
 (wholenames,) = glob_wildcards("../fastq/{wholename}.fastq.gz")
 profiletypes = ["corrected", "segmented", "called","reCalled" ]
+BINSIZES=config["QDNAseq"]["BINSIZES"]
+imagetype=config["ACE"]["imagetype"]
+ACEBINSIZES=config["ACE"]["ACEBINSIZES"]
 
 def getnames():
      SAMPLES=dict()
@@ -24,11 +27,13 @@ SAMPLES=getnames()
 
 rule all:
      input:
-        expand("../{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=config["QDNAseq"]["BINSIZES"]),
+        expand("../{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES),
         expand("../qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
         expand("../qc-fastq/{sample}_fastqc.html", sample=wholenames),
-        expand("../{binSize}kbp/summary.html", binSize=config["QDNAseq"]["BINSIZES"]),
-        expand("../{binSize}kbp/BED/{sample}_Cosmic.bed", binSize=config["QDNAseq"]["BINSIZES"] ,sample=SAMPLES.keys()),
+        expand("../{binSize}kbp/summary.html", binSize=BINSIZES),
+        expand("../{binSize}kbp/BED/{sample}_Cosmic.bed", binSize=BINSIZES ,sample=SAMPLES.keys()),
+        expand("../{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys())
+
 
 rule bwa_aln:
     input:
@@ -223,7 +228,6 @@ rule annotate_RegionsFocalCNAbed:
     shell:
         "scripts/annotateFocalCNAbed.sh {input.bedfile} {params.filename} {params.outdir} {output} 2> {log}"
 
-
 rule lightBox:
     input:
         sample=expand("../{{binSize}}kbp/profiles/{{profiletype}}/{sample}.png", sample=SAMPLES.keys()),
@@ -274,3 +278,15 @@ rule qcbam:
     log: "../logs/fastqc-bam.log"
     shell:
         "fastqc {input.bam} --format bam_mapped --outdir {params.qcbamdir} -t {threads} 2> {log}"
+
+rule ACE:
+    input:
+        segmented="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-segmented.rds",
+        script="scripts/Run_ACE.R"
+    output:
+        ACE=expand("../{{ACEbinSize}}kbp/ACE/{{ploidy}}N/{sample}/summary_{sample}.{{imagetype}}", sample=SAMPLES.keys())
+    params:
+        outputdir="../{ACEbinSize}kbp/ACE/"
+    log:"../{ACEbinSize}kbp/ACE/{ploidy}N/log.tsv"
+    script:
+        "scripts/Run_ACE.R"
