@@ -60,7 +60,7 @@ makeCNAbedFile <- function(CalledQDNAseqReadCounts, max.focal.size.mb=3, beddir,
 		# collapse all adjacent bins based on unique segment values
 		coll.calls.bed <- c()
 		#all_segments <- uniquecreate.file()(allCNAsPerBin$segment)
-
+    if(length(unique(allCNAsPerBin$segment)) !=0){
 			for (j in 1:length(unique(allCNAsPerBin$segment))){
 			# first segment
 
@@ -90,6 +90,7 @@ makeCNAbedFile <- function(CalledQDNAseqReadCounts, max.focal.size.mb=3, beddir,
 					coll.calls.bed <- rbind(coll.calls.bed, SEG.coll)
 				}
 			}
+
 			# reorder dataframe
 			CNAbed <- coll.calls.bed
 			CNAbed <- CNAbed [ order(CNAbed[,1], CNAbed[,2]), ]
@@ -102,14 +103,15 @@ makeCNAbedFile <- function(CalledQDNAseqReadCounts, max.focal.size.mb=3, beddir,
 
 			CNAbed[,4] <- round( CNAbed[,4]/1000000, digits = 2)
 			CNAbed[,5] <- round( CNAbed[,5], digits=2)
-			colnames(CNAbed) <- c('chromo', 'start', 'end', 'sizeInMb', 'segment', 'call')
+
 
 			# add cytoband info
 			CNAbed <- addCytobands(CNAbed, cytoband_data)
 			CNAbed <- CNAbed[, c(1:4,7,5,6)]
-
-			fileName <- paste(beddir, sname, '_CNAs.bed', sep='')
-			write.table(CNAbed, fileName, sep='\t', row.names=F, col.names=T, quote=F)
+    }else{CNAbed<- data.frame(matrix(ncol = 7, nrow = 0))}
+      colnames(CNAbed) <- c('chromo', 'start', 'end', 'cytobands','sizeInMb', 'segment', 'call')
+      fileName <- paste(beddir, sname, '_CNAs.bed', sep='')
+      write.table(CNAbed, fileName, sep='\t', row.names=F, col.names=T, quote=F)
 
 			# make a separate BED file with only focal CNAs (< 3 Mb)
 			focal.ix <- which(CNAbed[,4] <= max.focal.size.mb)

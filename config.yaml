@@ -7,10 +7,11 @@ bwa:
   read_trimming_param: 40 #q
 
 QDNAseq:
-  BINSIZES: [15 , 30 , 100, 1000]   #required binsizes comma seperated  1 5 10 15 30 100 1000
+  BINSIZES: [15 , 30 , 100]   #required binsizes comma seperated  1 5 10 15 30 100 1000
   genome: hg19
   dewave_dir: scripts/QDNAseq.dev-dewave/R
   #CNAtools: /net/nfs/PAT/home/matias/tools/CNAtools
+  max_focal_size_mb: 3 #in creations bedfiles
   cytobands: /net/nfs/PAT/home/matias/data/ref/HG19.cytoBand.txt.gz
   dewave_data: scripts/QDNAseq.dev-dewave/data/NormalCalibrationSet_{binSize}kb.rda
 

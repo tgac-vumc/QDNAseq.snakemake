@@ -163,7 +163,7 @@ rule QDNAseq_bedfiles:
     params:
         beddir='../{binSize}kbp/BED/',
         cytobands=config["QDNAseq"]["cytobands"],
-        max_focal_size_mb=3
+        max_focal_size_mb=config["QDNAseq"]["max_focal_size_mb"]
     log: "../{binSize}kbp/logs/bedfiles.log"
     script:
         "scripts/makeCNAbedFile.R"
