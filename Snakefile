@@ -1,10 +1,6 @@
-#import os
 import re
-#from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-#from snakemake.utils import makedirs
+
 configfile: "config.yaml"
-#HTTP = HTTPRemoteProvider()
-#REF = "/net/nfs/PAT/data/ref/iGenomes/Homo_sapiens/Ensembl/GRCh37/Sequence/BWAIndex/version0.6.0/genome.fa"
 
 (wholenames,) = glob_wildcards("../fastq/{wholename}.fastq.gz")
 profiletypes = ["corrected", "segmented", "called","reCalled" ]
@@ -21,9 +17,6 @@ def getnames():
      return(SAMPLES)
 
 SAMPLES=getnames()
-
-#TODO add log steps
-#TODO check R scripts if all source files are required and copy sourcefiles to sourcedir inside snakemakedir.
 
 rule all:
      input:
@@ -128,10 +121,10 @@ rule QDNAseq_segment:
     script:
         "scripts/QDNAseq_segment.R"
 
-rule QDNAseq_call:
+rule CNA_call:
     input:
         segmented="../{binSize}kbp/data/{binSize}kbp-segmented.rds",
-        script="scripts/QDNAseq_call.R",
+        script="scripts/CNA_call.R",
     output:
         called="../{binSize}kbp/data/{binSize}kbp-called.rds",
         freqplot="../{binSize}kbp/profiles/freqPlot/freqPlot_{binSize}kbp.png",
@@ -140,12 +133,12 @@ rule QDNAseq_call:
         profiles="../{binSize}kbp/profiles/called/",
     log: "../{binSize}kbp/logs/call.log"
     script:
-        "scripts/QDNAseq_call.R"
+        "scripts/CNA_call.R"
 
-rule QDNAseq_recall:
+rule CNA_recall:
     input:
         called="../{binSize}kbp/data/{binSize}kbp-called.rds",
-        script="scripts/QDNAseq_recall.R",
+        script="scripts/CNA_recall.R",
     output:
         recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
         copynumbers="../{binSize}kbp/data/{binSize}kbp-copynumbers.igv",
@@ -156,9 +149,9 @@ rule QDNAseq_recall:
         profiles="../{binSize}kbp/profiles/reCalled/",
     log: "../{binSize}kbp/logs/recall.log"
     script:
-        "scripts/QDNAseq_recall.R"
+        "scripts/CNA_recall.R"
 
-rule QDNAseq_bedfiles:
+rule CNA_bedfiles:
     input:
         recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
         script="scripts/makeCNAbedFile.R",
@@ -167,8 +160,8 @@ rule QDNAseq_bedfiles:
         focalCNA=expand('../{{binSize}}kbp/BED/{sample}_focalCNAs.bed', sample=SAMPLES.keys()),
     params:
         beddir='../{binSize}kbp/BED/',
-        cytobands=config["QDNAseq"]["cytobands"],
-        max_focal_size_mb=config["QDNAseq"]["max_focal_size_mb"]
+        cytobands=config["CGHregions"]["cytobands"],
+        max_focal_size_bed=config["BED"]["max_focal_size_bed"]
     log: "../{binSize}kbp/logs/bedfiles.log"
     script:
         "scripts/makeCNAbedFile.R"
@@ -187,10 +180,10 @@ rule annotate_focalCNA:
     shell:
         "scripts/annotateFocalCNAbed.sh {input.bedfile} {wildcards.sample} {params.outdir} {output} 2> {log} "
 
-rule QDNAseq_CGHregions:
+rule CGHregions:
     input:
         recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
-        script="scripts/QDNAseq_CGHregions.R"
+        script="scripts/CGHregions.R"
     output:
         RegionsCGH="../{binSize}kbp/data/{binSize}kbp-RegionsCGH.rds",
         profiles='../{binSize}kbp/profiles/freqPlot/freqPlotREGIONS_{binSize}kbp.png'
@@ -198,7 +191,7 @@ rule QDNAseq_CGHregions:
         averr=config["CGHregions"]["averror"],
     log: "../{binSize}kbp/logs/CGHregions.log"
     script:
-        "scripts/QDNAseq_CGHregions.R"
+        "scripts/CGHregions.R"
 
 rule makeCGHregionsTable:
     input:
@@ -210,7 +203,7 @@ rule makeCGHregionsTable:
     params:
         min_freq_focal=config["CGHregions"]["min_freq_focal"],
         max_focal_size_mb=config["CGHregions"]["max_focal_size_mb"],
-        cytobands=config["QDNAseq"]["cytobands"],
+        cytobands=config["CGHregions"]["cytobands"],
     log: "../{binSize}kbp/logs/CGHregionstable.log"
     script:
         "scripts/makeCGHregionstable.R"
