@@ -3,7 +3,7 @@ import re
 configfile: "config.yaml"
 
 (wholenames,) = glob_wildcards("../fastq/{wholename}.fastq.gz")
-profiletypes = ["corrected", "segmented", "called","reCalled", 'dewaved' ]
+profiletypes = config["all"]["profiletypes"]
 BINSIZES=config["QDNAseq"]["BINSIZES"]
 imagetype=config["ACE"]["imagetype"]
 ACEBINSIZES=config["ACE"]["ACEBINSIZES"]
@@ -21,8 +21,6 @@ SAMPLES=getnames()
 rule all:
      input:
         expand("../{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES),
-        expand("../qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
-        expand("../qc-fastq/{sample}_fastqc.html", sample=wholenames),
         expand("../{binSize}kbp/summary.html", binSize=BINSIZES),
         expand("../{binSize}kbp/BED/{sample}_Cosmic.bed", binSize=BINSIZES ,sample=SAMPLES.keys()),
         expand("../{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys())
@@ -252,13 +250,14 @@ rule summary:
         stats=expand("../stats/{sample}.reads.all", sample=SAMPLES.keys()),
         index=expand("../{{binSize}}kbp/profiles/{profiletype}/index.html", profiletype=profiletypes),
         script='scripts/lane-summary.sh',
+        qcfastq=expand("../qc-fastq/{wholename}_fastqc.html", wholename=wholenames),
+        bamqc=expand("../qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
     output:
         "../{binSize}kbp/summary.html"
     params:
         bamfolder="../bam/",
     shell:
         "scripts/lane-summary.sh {wildcards.binSize}kpb {params.bamfolder} > {output}"
-        #"scripts/lane-summary.sh {wildcards.binSize}kpb {input.stats} > {output}"
 
 rule qcfastq:
     input:
