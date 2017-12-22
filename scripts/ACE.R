@@ -1,5 +1,5 @@
 ##### ACE has arrived! #####
-# There are a number of functions: ACE, ploidyplotloop, ObjectsampleToTemplate, singlemodel, squaremodel, singleplot,
+# There are a number of functions: ACE, ploidyplotloop, ObjectsampleToTemplate, singlemodel, squaremodel, singleplot, 
 # getadjustedsegments, linkmutationdata, postanalysisloop, analyzegenomiclocations.
 # I have also added the "multiplot" function for making summary sheets.
 
@@ -9,7 +9,7 @@
 # note that output will be larger and programs will run longer with the smaller binsizes (1 kbp is pretty hardcore)
 # ploidies specifies for which ploidies fits will be made: default is 2 but you can input a vector with all desired ploidies, e.g. c(2,4)
 # beggers be choosers! ACE likes pdf-files, but for large datasets or small binsizes you might want to go with 'png'
-# a standard method for error calculation is the root mean squared error (RMSE), but you can argue you should actually punish more the
+# a standard method for error calculation is the root mean squared error (RMSE), but you can argue you should actually punish more the 
 #   long segments that are a little bit off compared to the short segments that are way off
 # 'MAE' weighs every error equally, whereas 'SMRE' does the latter; these will generally generate more fits (I see that as a downside)
 #   but it is more likely that the segments of which you are sure are sticking tighter to the integer ploidy in the best fit
@@ -18,11 +18,11 @@
 # new functionality for large data sets (many samples!):
 # fits will always have to be chosen manually, but you can now open the file with all errorlists to pick the most likely fit without looking at the profile
 # use the generated tab-delimited file to fill in the column with the likely fit
-# added argument trncname (truncate name) which truncates the name to everything before the first instance of _ - set TRUE if applicable,
+# added argument trncname (truncate name) which truncates the name to everything before the first instance of _ - set TRUE if applicable, 
 #   or specify regular expression, e.g. "-.*" to REMOVE everything after and including the first dash found in a sample name
 # added argument printsummaries: superbig summary files may crash the program, so you can set this argument to FALSE or 2 if you still want the error plots
 
-# ploidyplotloop is the meat of ACE, and it can be run as a separate function as well;
+# ploidyplotloop is the meat of ACE, and it can be run as a separate function as well; 
 # it takes a QDNAseq-object as input and also needs a folder to write the files to
 # this is particularly handy if you want to analyze a whole QDNAseq-object that is loaded in your R environment
 
@@ -45,7 +45,7 @@
 
 # getadjustedsegments: get info of the actual segments in a handy dataframe! Contains start and end location, "number of probes" (number of bins supporting the segment value),
 # value of the segment (Segment_Mean is the value from QDNAseq, Segment_Mean2 is calculated from adjustedcopynumbers within the segment),
-# and the nearest ploidy with the chance (log10 p-value) that the segment has this ploidy. A very low p-value indicates a high chance of subclonality,
+# and the nearest ploidy with the chance (log10 p-value) that the segment has this ploidy. A very low p-value indicates a high chance of subclonality, 
 # although this value should be approached with extreme caution (and is at the moment not corrected for multiple testing)
 
 # linkmutationdata: now we're talking! Give a tab-delimited file with mutation data, and this function will tell you what the copy number is
@@ -56,13 +56,13 @@
 # only for the brave of heart
 
 # analyzegenomiclocations: a sort of simplified version of linkmutationdata, you can manually input a single genomic location as specified by chromosome and position
-# you can also input multiple locations using vectors of the same length. The output will be a dataframe. You can also enter frequencies
+# you can also input multiple locations using vectors of the same length. The output will be a dataframe. You can also enter frequencies 
 # to quickly calculate mutant copies, but then you also need to enter cellularity! Note: the function requires the dataframe with
 # adjusted segments (output of getadjustedsegments)
 
 # That's pretty much it for now, let me know if you run into some errors or oddities j.poell@vumc.nl
 
-ACE <- function(inputdir = "./", outputdir, filetype = 'rds', binsizes, ploidies = 2, imagetype = 'pdf', method = 'RMSE', penalty = 0, cap = 12, trncname = FALSE, printsummaries = TRUE) {
+ACE <- function(inputdir = "./", outputdir, filetype = 'rds', binsizes, ploidies = 2, imagetype = 'pdf', method = 'RMSE', penalty = 0, cap = 12, trncname = FALSE, printsummaries = TRUE) { 
 	imagefunction <- get(imagetype)
   library(QDNAseq)
 	if(substr(inputdir,nchar(inputdir),nchar(inputdir)) != "/") {inputdir <- paste0(inputdir,"/")}
@@ -70,7 +70,7 @@ ACE <- function(inputdir = "./", outputdir, filetype = 'rds', binsizes, ploidies
 	if(!dir.exists(outputdir)) {dir.create(outputdir)}
 	if(filetype=='bam'){
 		if(missing(binsizes)) { binsizes <- c(30,100,500,1000) }
-	  parameters <- data.frame(options = c("inputdir","outputdir","filetype","binsizes","ploidies","imagetype","method","penalty","cap","trncname","printsummaries"),
+	  parameters <- data.frame(options = c("inputdir","outputdir","filetype","binsizes","ploidies","imagetype","method","penalty","cap","trncname","printsummaries"), 
 	                           values = c(inputdir,outputdir,filetype,paste0(binsizes,collapse=", "),paste0(ploidies,collapse=", "),imagetype,method,penalty,cap,trncname,printsummaries))
 	  for (b in binsizes) {
 		  currentdir <- file.path(outputdir,paste0(b,"kbp"))
@@ -86,13 +86,13 @@ ACE <- function(inputdir = "./", outputdir, filetype = 'rds', binsizes, ploidies
 		  copyNumbersSegmented <- segmentBins(copyNumbers, transformFun = 'sqrt') # the transformFun is not available in older versions of QDNAseq!
 		  copyNumbersSegmented <- normalizeSegmentedBins(copyNumbersSegmented)
 		  saveRDS(copyNumbersSegmented, file = file.path(outputdir,paste0(b,"kbp.rds")))
-
+		  
 		  ploidyplotloop(copyNumbersSegmented,currentdir,ploidies,imagetype,method,penalty,cap,trncname,printsummaries)
-
+		  
 		}
 	}
 	else if(filetype=='rds'){
-	  parameters <- data.frame(options = c("inputdir","outputdir","filetype","ploidies","imagetype","method","penalty","cap","trncname","printsummaries"),
+	  parameters <- data.frame(options = c("inputdir","outputdir","filetype","ploidies","imagetype","method","penalty","cap","trncname","printsummaries"), 
 	                           values = c(inputdir,outputdir,filetype,paste0(ploidies,collapse=", "),imagetype,method,penalty,cap,trncname,printsummaries))
 	  files <- list.files(inputdir, pattern = "\\.rds$")
 	  for (f in 1:length(files)) {
@@ -117,29 +117,29 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
 	if(trncname==TRUE) {pd$name <- gsub("_.*","",pd$name)}
 	if(trncname!=FALSE&&trncname!=TRUE) {pd$name <- gsub(trncname,"",pd$name)}
 	binsize <- fd$end[1]/1000
-# I have commented out the best fit and last minimum plots, they are all in likely fits anyway
+# I have commented out the best fit and last minimum plots, they are all in likely fits anyway	
 #	bfplots <- vector(mode = 'list', length = 4*length(pd$name))
 #	lmplots <- vector(mode = 'list', length = 4*length(pd$name))
-
+	
 	for (q in ploidies) {
 	  qdir <- file.path(currentdir,paste0(q,"N"))
 	  dir.create(qdir)
-
+	  
   	likelyplots <- vector(mode = 'list', length = 3*length(pd$name))
   	listerrorplots <- vector(mode = 'list', length = length(pd$name))
   	fitpicker <- matrix(ncol = 16, nrow = length(pd$name))
   	colnames(fitpicker) <- c("sample","likely_fit","ploidy","standard","fit_1","fit_2","fit_3","fit_4","fit_5","fit_6","fit_7","fit_8","fit_9","fit_10","fit_11","fit_12")
-  	dir.create(file.path(qdir,"likelyfits"))
-
+  	dir.create(file.path(qdir,"likelyfits"))  
+  	
   	for (a in 1:length(pd$name)) {
   		segmentdata <- rle(as.vector(na.exclude(copyNumbersSegmented@assayData$segmented[,a])))
   		standard <- median(rep(segmentdata$values,segmentdata$lengths))
-
+  			
   		fraction <- c()
   		expected <- c()
   		temp <- c()
   		errorlist <- c()
-
+  		
   		for (i in 5:100) {
   		  fraction[i-4] <- i/100
   		  for (p in 1:12) {
@@ -155,32 +155,32 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		  if(method=='RMSE') {errorlist[i-4] <- sqrt(sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths))}
   		  else if(method=='SMRE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)^2}
   		  else if(method=='MAE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)}
-
+  		  
   		}
-
+  			
   		minima <- c()
   		rerror <- c()
-
+  		
   		if (round(errorlist[1], digits = 10) < round(errorlist[2], digits = 10)) {
   		  lastminimum <- fraction[1]
   		  minima[1] <- fraction[1]
   		  rerror[1] <- errorlist[1]/max(errorlist)
   		}
-
+  		
   		for (l in 6:99) {
-  		  if (round(errorlist[l-4], digits = 10) < round(errorlist[l-5], digits = 10) & round(errorlist[l-4], digits = 10) < round(errorlist[l-3], digits = 10)) {
+  		  if (round(errorlist[l-4], digits = 10) < round(errorlist[l-5], digits = 10) & round(errorlist[l-4], digits = 10) < round(errorlist[l-3], digits = 10)) { 
   			lastminimum <- fraction[l-4]
   			minima <- append(minima,fraction[l-4])
   			rerror <- append(rerror,(errorlist[l-4]/max(errorlist)))
   		  }
   		}
-
+  		
   		if (errorlist[100-4] <= errorlist[100-5]) {
   		  lastminimum <- fraction[100-4]
   		  minima <- append(minima, fraction[100-4])
   		  rerror <- append(rerror, errorlist[100-4]/max(errorlist))
   		}
-
+  		 			
   		expsd <- sqrt(pd$expected.variance[a])
   		obssd <- QDNAseq:::sdDiffTrim(copyNumbersSegmented@assayData$copynumber[,a], na.rm=T)
   		bin <- 1:length(fd$chromosome)
@@ -195,15 +195,15 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		  binchrend <- append(binchrend, currentbin)
   		  binchrmdl <- append(binchrmdl, currentmiddle)
   		}
-
+  		
   		# create a subdirectory for your sample
   		fp <- file.path(qdir,pd$name[a])
   		if(!dir.exists(fp)) {
   		  dir.create(fp)
   		}
-
+  			
   		dir.create(file.path(fp,"graphs"))
-
+  		
   		cellularity <- 5:100
   		tempdf <- data.frame(cellularity,errorlist=errorlist/max(errorlist))
   		tempplot <- ggplot() +
@@ -215,23 +215,23 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		    axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
   		  ggtitle(paste0(pd$name[a], " - errorlist")) +
   		  theme(plot.title = element_text(hjust = 0.5))
-
+  		
   #		bfplots[[(4*(a-1)+2)]] <- tempplot
   #		lmplots[[(4*(a-1)+2)]] <- tempplot
   		likelyplots[[(3*(a-1)+3)]] <- tempplot
   		listerrorplots[[a]] <- tempplot
-
+  		
   		imagefunction(file.path(fp,paste0(pd$name[a],"_errorlist.",imagetype)))
   		print(tempplot)
   		dev.off()
 
   		plots <- vector(mode = 'list', length = (length(minima)))
-
+  		
   		fitpicker[a,1] <- pd$name[a]
   		fitpicker[a,2] <- ""
   		fitpicker[a,3] <- q
   		fitpicker[a,4] <- standard
-
+  		
   		bfi <- tail(which(rerror==min(rerror)))
 
   		for (m in 1:length(minima)) {
@@ -255,7 +255,7 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		  line3 <- paste0("Expected Noise: ", round(expsd,digits = 4))
   		  line4 <- paste0("Observed Noise: ", round(obssd,digits = 4))
   		  fn <- file.path(fp,"graphs",paste0(pd$name[a], " - ",q,"N fit ", m, ".",imagetype))
-
+  		  
   		  tempplot <- ggplot() +
     			scale_y_continuous(name = "copies", limits = c(0,12), breaks = c(0:12), expand=c(0,0)) +
     			scale_x_continuous(name = "chromosome", limits = c(0,binchrend[22]), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
@@ -276,69 +276,69 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
     			annotate("text", x = binchrmdl[2], y = cap-0.7, label = line2) +
     			geom_rect(aes(xmin=binchrmdl[12], xmax = binchrmdl[22], ymin = cap-0.9, ymax = cap), fill = 'white') +
     			annotate("text", x = binchrmdl[16], y = cap-0.3, label = line3) +
-    			annotate("text", x = binchrmdl[16], y = cap-0.7, label = line4)
+    			annotate("text", x = binchrmdl[16], y = cap-0.7, label = line4) +
+  		    theme(plot.title = element_text(hjust = 0.5))
   		  plots[[m]] <- tempplot
   		  if(bfi==m) {
-  #		    bfplots[[(4*(a-1)+1)]] <- tempplot
   		    likelyplots[[(3*(a-1)+1)]] <- tempplot
-  		    imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_bestfit_",q,"N.",imagetype)))
+  		    if(imagetype %in% c('pdf','svg')) {
+  		      imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_bestfit_",q,"N.",imagetype)),width=10.5)
+  		    } else {
+  		      imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_bestfit_",q,"N.",imagetype)),width=720)
+  		    }  
   		    print(tempplot)
-  		    dev.off()
+  		    dev.off()  
   		  }
   		  if(m==length(minima)) {
-  #		    lmplots[[(4*(a-1)+1)]] <- tempplot
   		    likelyplots[[(3*(a-1)+2)]] <- tempplot
-  		    imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_lastminimum_",q,"N.",imagetype)))
+  		    if(imagetype %in% c('pdf','svg')) {
+  		      imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_lastminimum_",q,"N.",imagetype)),width=10.5)
+  		    } else {
+  		      imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_lastminimum_",q,"N.",imagetype)),width=720)
+  		    }
   		    print(tempplot)
-  		    dev.off()
+  		    dev.off() 
   		  }
-			if(imagetype %in% c("pdf","svg")) {
-				imagefunction(fn, width=10.5)
-  		  # the print command is necessary when ggplotting in loops!
+  		  if(imagetype %in% c('pdf','svg')) {
+  		    imagefunction(fn,width=10.5)
+  		  } else {
+  		    imagefunction(fn,width=720)
+  		  }
   		  print(tempplot)
   		  dev.off()
-			}else{
-				imagefunction(fn, width=720)
-				print(tempplot)
-  		  dev.off()
-			}
   		}
-
-  		if(imagetype == 'pdf') {
-  		  imagefunction(file.path(fp,paste0("summary_",pd$name[a],".",imagetype)))
+  			
+  		if(imagetype %in% c('pdf','svg')) {
+  		  pdf(file.path(fp,paste0("summary_",pd$name[a],".pdf")),width=10.5)
   		  print(plots)
   		  dev.off()
   		} else {
-  		  imagefunction(file.path(fp,paste0("summary_",pd$name[a],".",imagetype)), width = 1920, height = 480*ceiling(length(plots)/4))
-  		  if (length(plots)==1) {print(plots)} else { print(multiplot(plotlist = plots, cols=4)) }
-  		  dev.off()
+  		  if (length(plots)==1) {
+  		    imagefunction(file.path(fp,paste0("summary_",pd$name[a],".",imagetype)), width = 720)
+  		    print(plots)
+  		    dev.off()
+  		  } else {
+    		  imagefunction(file.path(fp,paste0("summary_",pd$name[a],".",imagetype)), width = 2160, height = 480*ceiling(length(plots)/3))
+    		  print(multiplot(plotlist = plots, cols=3)) 
+    		  dev.off()
+    		}
+    		  
   		}
-
+  		  
   	}
-
-
+	
+	
+  	
   	if(printsummaries == TRUE) {
-    	if(imagetype == 'pdf') {
-  #    	  imagefunction(file.path(qdir,paste0("summary_bestfits.",imagetype)))
-  #    	  print(bfplots)
-  #    	  dev.off()
-  #  	  imagefunction(file.path(qdir,paste0("summary_lastminima.",imagetype)))
-  #    	  print(lmplots)
-  #    	  dev.off()
-    	  imagefunction(file.path(qdir,paste0("summary_likelyfits.",imagetype)))
+    	if(imagetype %in% c('pdf','svg')) {
+    	  pdf(file.path(qdir,"summary_likelyfits.pdf"),width=10.5)
       	  print(likelyplots)
       	  dev.off()
-      	imagefunction(file.path(qdir,paste0("summary_errors.",imagetype)))
+      	pdf(file.path(qdir,"summary_errors.pdf"))
       	  print(listerrorplots)
       	  dev.off()
-      	} else {
-  #    	  imagefunction(file.path(qdir,paste0("summary_bestfits.",imagetype)), width = 1920, height = 480*length(pd$name))
-  #    	  print(multiplot(plotlist = bfplots, cols=4))
-  #    	  dev.off()
-  #  	  imagefunction(file.path(qdir,paste0("summary_lastminima.",imagetype)), width = 1920, height = 480*length(pd$name))
-  #    	  print(multiplot(plotlist = lmplots, cols=4))
-  #    	  dev.off()
-    	  imagefunction(file.path(qdir,paste0("summary_likelyfits.",imagetype)), width = 1440, height = 480*length(pd$name))
+      	} else { 
+    	  imagefunction(file.path(qdir,paste0("summary_likelyfits.",imagetype)), width = 2160, height = 480*length(pd$name))
       	  print(multiplot(plotlist = likelyplots, cols=3))
       	  dev.off()
       	imagefunction(file.path(qdir,paste0("summary_errors.",imagetype)), width = 1920, height = 480*ceiling(length(pd$name)/4))
@@ -346,19 +346,19 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
       	  dev.off()
       	}
   	} else if(printsummaries == 2) {
-  	  if(imagetype == 'pdf') {
-  	    imagefunction(file.path(qdir,paste0("summary_errors.",imagetype)))
+  	  if(imagetype %in% c('pdf','svg')) {
+  	    pdf(file.path(qdir,"summary_errors.pdf"))
   	    print(listerrorplots)
   	    dev.off()
-  	    } else {
+  	    } else { 
   	    imagefunction(file.path(qdir,paste0("summary_errors.",imagetype)), width = 1920, height = 480*ceiling(length(pd$name)/4))
   	    if (length(listerrorplots)==1){print(listerrorplots)} else {print(multiplot(plotlist = listerrorplots, cols=4))}
-  	    dev.off()
+  	      dev.off()
   	   }
-  	}
-
+  	} 
+	
   	write.table(fitpicker, file=file.path(qdir,paste0("fitpicker_",q,"N.tsv")), quote = FALSE, sep = "\t", na = "", row.names = FALSE)
-
+  	
 	}
 }
 
@@ -388,7 +388,7 @@ singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FAL
   if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
 	segmentdata <- rle(as.vector(na.exclude(template$segments)))
 	if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
-
+			
 	fraction <- c()
 	expected <- c()
 	temp <- c()
@@ -407,19 +407,19 @@ singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FAL
 		if(method=='RMSE') {errorlist[i-4] <- sqrt(sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths))}
 		else if(method=='SMRE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)^2}
 		else if(method=='MAE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)}
-
+		
 	}
-
+		
 	minima <- c()
 	rerror <- c()
-
+	
 	if (round(errorlist[1], digits = 10) < round(errorlist[2], digits = 10)) {
 		lastminimum <- fraction[1]
 		minima[1] <- fraction[1]
 		rerror[1] <- errorlist[1]/max(errorlist)
 	}
 	for (l in 6:99) {
-		if (round(errorlist[l-4], digits = 10) < round(errorlist[l-5], digits = 10) & round(errorlist[l-4], digits = 10) < round(errorlist[l-3], digits =10)) {
+		if (round(errorlist[l-4], digits = 10) < round(errorlist[l-5], digits = 10) & round(errorlist[l-4], digits = 10) < round(errorlist[l-3], digits =10)) { 
 			lastminimum <- fraction[l-4]
 			minima <- append(minima,fraction[l-4])
 			rerror <- append(rerror,(errorlist[l-4]/max(errorlist)))
@@ -430,7 +430,7 @@ singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FAL
 		minima <- append(minima, fraction[100-4])
 		rerror <- append(rerror, errorlist[100-4]/max(errorlist))
 	}
-
+  
 	cellularity <- 5:100
 	tempdf <- data.frame(cellularity,errorlist=errorlist/max(errorlist))
 	minimadf <- data.frame(minima=minima*100,rerror)
@@ -456,16 +456,16 @@ singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FAL
 	    ggtitle("errorlist") +
 	    theme(plot.title = element_text(hjust = 0.5))
 	}
-
+	
 	return(list(ploidy=ploidy,standard=standard,method=method,penalty=penalty,minima=minima,rerror=rerror,errorlist=errorlist,errorplot=tempplot))
-
+	
 }
 
 
 # Turns out, tumors are often quite messy, genomically speaking
 # Occasionally, you might want to be able to compare the fits at 2N directly with the fits at other ploidies
 # Also, with pooring quality or lots of subclonality, it is more common for the standard to be messed up
-# In line with graphs presented by ASCAT and CELLULOID, squaremodel will do fitting and plot a graph for
+# In line with graphs presented by ASCAT and CELLULOID, squaremodel will do fitting and plot a graph for 
 #   fits using two variables: ploidy and cellularity
 # The use of a standard is no longer necessary: the fits are all using standard = 1
 # This is relevant to keep in mind, because you have to specify standard = 1 if you use the fit in singleplot
@@ -479,7 +479,7 @@ squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5
   library(Biobase)
   if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
   segmentdata <- rle(as.vector(na.exclude(template$segments)))
-
+  
   fraction <- c()
   errormatrix <- matrix(nrow=(prows+1),ncol=96)
   listofploidy <- c()
@@ -509,7 +509,7 @@ squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5
     listofcellularity <- append(listofcellularity, fraction)
     listoferrors <- append(listoferrors, errorlist)
     errormatrix[t+1,] <- errorlist
-
+    
   }
   minimat <- matrix(nrow=(prows+1),ncol=96)
   for (i in 1:(prows+1)) {
@@ -545,29 +545,40 @@ squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5
       theme(plot.title = element_text(hjust = 0.5))
   }
 
-  return(list(method=method,
-              penalty=penalty,
+  return(list(method=method, 
+              penalty=penalty, 
               penploidy=penploidy,
-              errormatrix=errormatrix,
-              minimatrix = minimat,
-              errordf=errordf,
-              minimadf=minimadf,
+              errormatrix=errormatrix, 
+              minimatrix = minimat, 
+              errordf=errordf, 
+              minimadf=minimadf, 
               matrixplot=tempplot))
-
+  
 }
 
 # this function takes a template dataframe as specified in ObjectsampleToTemplate
 # you can use a QDNAseq object as "template", then specify QDNAseqobjectsample by the sample number!
 # don't forget to specify cellularity, error, ploidy, and standard; you can find these in the model output
-singleplot <- function(template,cellularity = 1, error, ploidy = 2, standard, title = "Plot",QDNAseqobjectsample = FALSE, cap = 12, chrsubset) {
+singleplot <- function(template,cellularity = 1, error, ploidy = 2, standard, title,
+                       QDNAseqobjectsample = FALSE, trncname = FALSE, cap = 12, chrsubset) {
   library(ggplot2)
-  if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
+  library(Biobase)
+  if(QDNAseqobjectsample) {
+    if(missing(title)) {
+      pd<-pData(template)
+      if(trncname==TRUE) {pd$name <- gsub("_.*","",pd$name)}
+      if(trncname!=FALSE&&trncname!=TRUE) {pd$name <- gsub(trncname,"",pd$name)}
+      title <- pd$name[QDNAseqobjectsample]
+    }
+    template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)
+  }
+  if(missing(title)) {title <- "Plot"}
   segmentdata <- rle(as.vector(na.exclude(template$segments)))
   if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
   adjustedcopynumbers <- ploidy + ((template$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
 	adjustedsegments <- ploidy + ((template$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
 	df <- data.frame(bin=template$bin,adjustedcopynumbers,adjustedsegments)
-
+	
 	rlechr <- rle(as.vector(template$chr))
 	binchrend <- c()
 	currentbin <- 0
@@ -577,10 +588,10 @@ singleplot <- function(template,cellularity = 1, error, ploidy = 2, standard, ti
 		currentbin <- currentbin+rlechr$lengths[i]
 		binchrend <- append(binchrend, currentbin)
 		binchrmdl <- append(binchrmdl, currentmiddle)
-	}
+	} 
 	colnames(df)[2] <- "copynumbers"
 	colnames(df)[3] <- "segments"
-
+	
 	dfna <- na.exclude(df)
 	cappedcopynumbers <- dfna[which(dfna$copynumbers > cap),]
 	if(length(cappedcopynumbers$copynumbers)>0) {cappedcopynumbers$copynumbers <- cap-0.1}
@@ -590,7 +601,7 @@ singleplot <- function(template,cellularity = 1, error, ploidy = 2, standard, ti
 	if(length(toppedcopynumbers$copynumbers)>0) {toppedcopynumbers$copynumbers <- 0.1}
 	toppedsegments <- dfna[which(dfna$segments <= 0),]
 	if(length(toppedsegments$segments)>0) {toppedsegments$segments <- 0.1}
-
+	
 	line1 <- paste0("Cellularity: ", cellularity)
 	line2 <- paste0("")
 	if(!missing(error)) {
@@ -691,7 +702,7 @@ getadjustedsegments <- function(template,cellularity = 1, ploidy = 2, standard, 
 # The file should end with .txt, .csv or .tsv and not have any other dots beside the one before the extension!
 # It expects the file to have a header row, which may be commented with a #
 # You also need your segmentvalues using the getadjustedsegments function, either as a dataframe or file
-# You can append the new columns to the original file (it will still save it under a new name)
+# You can append the new columns to the original file (it will still save it under a new name) 
 # or only output the used columns and new columns (filename is the same)
 # In case of "append": note that R messes up column names if they have "special" characters or start with numbers
 # outputdir can be specified, so you don't have to save in the same directory (especially handy in loops)
@@ -755,8 +766,8 @@ linkmutationdata <- function(filename, segmentdf, cellularity = 1,chrindex=1,pos
 # copyNumbersSegmented can either be a QDNAseq-object already loaded into R or a file path to an RDS-file of the object
 # trncname: get rid of everything from and including the underscore in the samplename; make sure it still matches the sample names in the mutation files!
 # dontmatchnames: if you set this to TRUE, the function will just use the sample number in the QDNAseq-object as the row number in the modelsfile. Risky!
-# inputdir is a bit of a convenience function. You can give a file path, and the function will look for the appropriate files there.
-#   It will still check for the first arguments, which will take priority over anything it finds in the directory.
+# inputdir is a bit of a convenience function. You can give a file path, and the function will look for the appropriate files there. 
+#   It will still check for the first arguments, which will take priority over anything it finds in the directory. 
 #   If not specified, it will look for a subdirectory mutationdata, if it doesn't find it, it will assume the files are in the inputdir
 #   If it doesn't find the mutationdata, it should give the appropriate error
 #   The models need to be in "models.txt" or otherwise specified
@@ -811,9 +822,9 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
       cellularity <- as.numeric(models[currentindex,2])
       if(is.na(cellularity)){
         print(paste0("no valid cellularity given for ", pd$name[a]))
-        newplots[[a]] <- ggplot() +
-          annotate("text", x=1, y=1, label = paste0("no plot available for ",pd$name[a]," - missing cellularity")) +
-          theme_classic() +
+        newplots[[a]] <- ggplot() + 
+          annotate("text", x=1, y=1, label = paste0("no plot available for ",pd$name[a]," - missing cellularity")) + 
+          theme_classic() + 
           theme(line = element_blank(), axis.title =  element_blank(), axis.text = element_blank())
       } else {
         ploidy <- as.numeric(models[currentindex,3])
@@ -830,7 +841,7 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
         imagefunction <- get(imagetype)
         if(printnewplots==TRUE) {
           if (!dir.exists(file.path(outputdir,"newplots"))) {dir.create(file.path(outputdir,"newplots"))}
-          if(imagetype=='pdf'){
+          if(imagetype %in% c('pdf','svg')) {
             imagefunction(file.path(outputdir,"newplots",paste0(pd$name[a],".",imagetype)),width=10.5)
             print(newplots[[a]])
             dev.off()
@@ -894,12 +905,12 @@ analyzegenomiclocations <- function(segmentdf, Chromosome, Position, Frequency, 
 #
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   library(grid)
-
+  
   # Make a list from the ... arguments and plotlist
   plots <- c(list(...), plotlist)
-
+  
   numPlots = length(plots)
-
+  
   # If layout is NULL, then use 'cols' to determine layout
   if (is.null(layout)) {
     # Make the panel
@@ -908,20 +919,20 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
     layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
                      ncol = cols, nrow = ceiling(numPlots/cols), byrow=TRUE)
   }
-
+  
   if (numPlots==1) {
     print(plots[[1]])
-
+    
   } else {
     # Set up the page
     grid.newpage()
     pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-
+    
     # Make each plot, in the correct location
     for (i in 1:numPlots) {
       # Get the i,j matrix positions of the regions that contain this subplot
       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-
+      
       print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
                                       layout.pos.col = matchidx$col))
     }

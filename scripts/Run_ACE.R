@@ -18,7 +18,7 @@ log<-snakemake@log[[1]]
 
 imagetype <- snakemake@config[["ACE"]][["imagetype"]]
 method<-snakemake@config[["ACE"]][["method"]]
-penalty<-as.integer(snakemake@config[["ACE"]][["penalty"]])
+penalty<-as.numeric(snakemake@config[["ACE"]][["penalty"]])
 cap<-as.integer(snakemake@config[["ACE"]][["cap"]])
 trncname<- snakemake@config[["ACE"]][["trncname"]]
 printsummaries<- snakemake@config[["ACE"]][["printsummaries"]]
