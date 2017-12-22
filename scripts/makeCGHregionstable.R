@@ -69,7 +69,7 @@ makeCGHregionsTable <- function(CGHregions, max.focal.size.mb=3, min.freq.focal=
 	cutoff.ix <- sort( c(loss.cutoff.ix, gain.cutoff.ix ))
 
 	focalRegions <- focalRegions[cutoff.ix, ]
-	rownames(focalRegions) <- c(1:nrow(focalRegions))
+	if(nrow(focalRegions != 0){rownames(focalRegions) <- c(1:nrow(focalRegions))}
 
 	write.table(focalRegions, output_allFocalRegions, sep='\t', row.names=F, col.names=F, quote=F)
 }
