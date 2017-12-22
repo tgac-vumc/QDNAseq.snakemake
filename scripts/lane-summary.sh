@@ -37,6 +37,7 @@ echo -e '\t\t\t\t<th colspan="2">q1</th>'
 echo -e '\t\t\t\t<th colspan="2">q37</th>'
 echo -e '\t\t\t\t<th>qc</th>'
 echo -e '\t\t\t\t<th><a href="profiles/corrected/index.html">corrected</a></th>'
+echo -e '\t\t\t\t<th><a href="profiles/dewaved/index.html">dewaved</a></th>'
 echo -e '\t\t\t\t<th><a href="profiles/segmented/index.html">segmented</a></th>'
 echo -e '\t\t\t\t<th><a href="profiles/called/index.html">called</a></th>'
 echo -e '\t\t\t\t<th><a href="profiles/reCalled/index.html">reCalled</a></th>'
@@ -53,6 +54,7 @@ for sample in $samples
 do
   n=`echo $n + 1 | bc -l`
   sample=`basename $sample .bam`
+  sample3=`echo ../qc-fastq/${sample}*_fastqc.html`
   sample2=`echo $sample | sed -r 's/^[0-9]{6}_[A-Z0-9]{9}_L[1-8]{1}_//'`   #TOTO - remove line and remove sample lines
   total=`cat "../stats/${sample}.reads.all"`
   aligned=`cat "../stats/${sample}.reads.aligned"`
@@ -75,8 +77,8 @@ do
   printf "\t\t\t\t<td>%.2f%%</td>\n" `echo $q1/$unique*100 | bc -l`
   printf "\t\t\t\t<td>%'i</td>\n" $q37
   printf "\t\t\t\t<td>%.2f%%</td>\n" `echo $q37/$unique*100 | bc -l`
-  echo -en '\t\t\t\t<td><a href="qc-fastq/'$sample'_fastqc.html">fastq</a>, '
-  echo -e '<a href="qc-bam/'$sample'_fastqc.html">bam</a></td>'
+  echo -en '\t\t\t\t<td><a href='$sample3'>fastq</a>, '
+  echo -e '<a href="../qc-bam/'$sample'_fastqc.html">bam</a></td>'
   if [ -f "stats/$sample2.mad.15kbp" ]
   then
     echo -e '\t\t\t\t<td><a href="15kbp-segmented/'$sample2'.png" data-lightbox="b15k">'`cat stats/$sample2.mad.15kbp`'</a></td>'
@@ -100,6 +102,7 @@ do
     echo -e '\t\t\t\t<td><a href="1000kbp-segmented/'$sample2'.png" data-lightbox="1000k">'`cat stats/$sample2.mad.1000kbp`'</a></td>'
   else
     echo -e '\t\t\t\t<td>&nbsp;</td>'
+    echo -e '\t\t\t\t<td>&nbsp;</td>'
   fi
   echo -e '\t\t\t</tr>'
 done
@@ -119,6 +122,7 @@ echo -e '\t\t\t\t<td>&nbsp;</td>'
 echo -e '\t\t\t\t<td>&nbsp;</td>'
 echo -e '\t\t\t\t<td>&nbsp;</td>'
 echo -e '\t\t\t\t<td>&nbsp;</td>'
+echo -e '\t\t\t\t<td>&nbsp;</td>'
 echo -e '\t\t\t</tr>'
 echo -e '\t\t\t<tr>'
 echo -e '\t\t\t\t<td style="text-align: left;">Average</td>'
@@ -130,6 +134,7 @@ echo -e '\t\t\t\t<td>&nbsp;</td>'
 printf "\t\t\t\t<td>%'.0f</td>\n" `echo $sumq1 / $n | bc -l`
 echo -e '\t\t\t\t<td>&nbsp;</td>'
 printf "\t\t\t\t<td>%'.0f</td>\n" `echo $sumq37 / $n | bc -l`
+echo -e '\t\t\t\t<td>&nbsp;</td>'
 echo -e '\t\t\t\t<td>&nbsp;</td>'
 echo -e '\t\t\t\t<td>&nbsp;</td>'
 echo -e '\t\t\t\t<td>&nbsp;</td>'

@@ -8,13 +8,22 @@
 suppressMessages(library(QDNAseq))
 suppressMessages(library(Biobase))
 
+# for dewaving:
+suppressMessages(library(limma))
+suppressMessages(library(gtools))
+suppressMessages(library(impute))
+suppressMessages(library(MASS))
+
+
 source("scripts/functions.R")
 source("scripts/plotQDNAseq.R")
+sourceDir(snakemake@config[["QDNAseq"]][["dewave_dir"]])
+load(snakemake@params[["dewave_data"]])
 
-binReadCounts <- snakemake@input[["binReadCounts"]]
 bin <- as.integer(snakemake@wildcards[["binSize"]])
-corrected <- snakemake@output[["corrected"]]
+corrected <- snakemake@input[["corrected"]]
 profiles <- snakemake@params[["profiles"]]
+dewaved <- snakemake@output[["dewaved"]]
 
 log<-snakemake@log[[1]]
 log<-file(log, open="wt")
@@ -22,13 +31,12 @@ sink(log, append=T , split=FALSE)
 ##############################################################################################################
 # Correct, Normalize & Dewave raw data
 ##############################################################################################################
-QRC <- readRDS(binReadCounts)
 
-QRC.f <- applyFilters(QRC, residual=TRUE, blacklist=TRUE, mappability=FALSE, bases=FALSE)
-QRC.f <- estimateCorrection(QRC.f)
-QCN.fc <- correctBins(QRC.f)
-QCN.fcn <- normalizeBins(QCN.fc)
-QCN.fcns <- smoothOutlierBins(QCN.fcn)
+QCN.fcns <- readRDS(corrected)
 
-saveRDS(QCN.fcns, corrected)
+if(bin!=1000){
+QCN.fcns <- dewaveBins(QCN.fcns)
+}
+
+saveRDS(QCN.fcns, dewaved)
 plotQDNAseq(QCN.fcns, profiles)

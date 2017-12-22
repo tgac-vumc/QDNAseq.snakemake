@@ -9,7 +9,7 @@ suppressMessages(library(QDNAseq))
 suppressMessages(library(Biobase))
 source("scripts/plotQDNAseq.R")
 
-corrected <- snakemake@input[["corrected"]]
+dewaved<- snakemake@input[["dewaved"]]
 bin <- as.integer(snakemake@wildcards[["binSize"]])
 segmented <- snakemake@output[["segmented"]]
 profiles <- snakemake@params[["profiles"]]
@@ -26,7 +26,7 @@ if (bin==1000) {SDundo=0.10; alph=1e-20}
 # TODO: mogelijk hogere alpha nodig, om meer segmenten te krijgen: 0.01 (1e-2). Deze setting used in tmp_100kbp
 
 # load data
-QCN.fcnsd <- readRDS(corrected)
+QCN.fcnsd <- readRDS(dewaved)
 
 QCN.fcnsds <- segmentBins(QCN.fcnsd, undo.splits='sdundo', undo.SD=SDundo, alpha=alph, transformFun="sqrt")
 QCN.fcnsdsn <- normalizeSegmentedBins(QCN.fcnsds)

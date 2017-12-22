@@ -3,7 +3,7 @@ import re
 configfile: "config.yaml"
 
 (wholenames,) = glob_wildcards("../fastq/{wholename}.fastq.gz")
-profiletypes = ["corrected", "segmented", "called","reCalled" ]
+profiletypes = ["corrected", "segmented", "called","reCalled", 'dewaved' ]
 BINSIZES=config["QDNAseq"]["BINSIZES"]
 imagetype=config["ACE"]["imagetype"]
 ACEBINSIZES=config["ACE"]["ACEBINSIZES"]
@@ -103,14 +103,27 @@ rule QDNAseq_normalize:
         allprofiles=expand("../{{binSize}}kbp/profiles/corrected/{samples}.png",samples=SAMPLES.keys()),
     params:
         profiles="../{binSize}kbp/profiles/corrected/",
-        dewave_data=config["QDNAseq"]["dewave_data"],
     log: "../{binSize}kbp/logs/normalizeBins.log"
     script:
         "scripts/QDNAseq_normalize.R"
 
-rule QDNAseq_segment:
+rule deWave:
     input:
         corrected="../{binSize}kbp/data/{binSize}kbp-corrected.rds",
+        script="scripts/deWave.R",
+    output:
+        dewaved="../{binSize}kbp/data/{binSize}kbp-dewaved.rds",
+        allprofiles=expand("../{{binSize}}kbp/profiles/dewaved/{samples}.png",samples=SAMPLES.keys()),
+    params:
+        profiles="../{binSize}kbp/profiles/dewaved/",
+        dewave_data=config["QDNAseq"]["dewave_data"],
+    log: "../{binSize}kbp/logs/dewave.log"
+    script:
+        "scripts/deWave.R"
+
+rule QDNAseq_segment:
+    input:
+        dewaved="../{binSize}kbp/data/{binSize}kbp-dewaved.rds",
         script="scripts/QDNAseq_segment.R",
     output:
         segmented="../{binSize}kbp/data/{binSize}kbp-segmented.rds",
@@ -224,7 +237,7 @@ rule annotate_RegionsFocalCNAbed:
 rule lightBox:
     input:
         sample=expand("../{{binSize}}kbp/profiles/{{profiletype}}/{sample}.png", sample=SAMPLES.keys()),
-        script="scripts/createLightBox.sh"
+        script="scripts/createLightBox.sh",
     output:
         index="../{binSize}kbp/profiles/{profiletype}/index.html",
     params:
@@ -237,7 +250,8 @@ rule lightBox:
 rule summary:
     input:
         stats=expand("../stats/{sample}.reads.all", sample=SAMPLES.keys()),
-        index=expand("../{{binSize}}kbp/profiles/{profiletype}/index.html", profiletype=profiletypes)
+        index=expand("../{{binSize}}kbp/profiles/{profiletype}/index.html", profiletype=profiletypes),
+        script='scripts/lane-summary.sh',
     output:
         "../{binSize}kbp/summary.html"
     params:
