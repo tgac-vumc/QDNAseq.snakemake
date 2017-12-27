@@ -5,11 +5,11 @@
 # date: December 2017
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
-library(QDNAseq)
-library(Biobase)
-library(CGHcall)
-library(CGHtest)
-library(denstrip)
+suppressMessages(library(QDNAseq))
+suppressMessages(library(Biobase))
+suppressMessages(library(CGHcall))
+suppressMessages(library(CGHtest))
+suppressMessages(library(denstrip))
 
 source('scripts/CGHcallPlus.R')
 source('scripts/reCall5levelCNAs.R')
@@ -21,6 +21,7 @@ profiles <- snakemake@params[["profiles"]]
 copynumbers<-snakemake@output[["copynumbers"]]
 segments<-snakemake@output[["segments"]]
 calls<-snakemake@output[["calls"]]
+copynumbersbed<-snakemake@params[["copynumbersbed"]]
 
 log<-snakemake@log[[1]]
 log<-file(log, open="wt")
@@ -45,3 +46,4 @@ plotQDNAseq(reCalledRCs, profiles)
 exportBins(reCalledRCs, copynumbers, format="igv", type="copynumber")
 exportBins(reCalledRCs, segments, format="igv", type="segments")
 exportBins(reCalledRCs, calls, format="igv", logTransform=FALSE, type="calls")
+exportBins(reCalledRCs, file=copynumbersbed, format="bed", logTransform=TRUE, type="copynumber")

@@ -9,17 +9,17 @@ imagetype=config["ACE"]["imagetype"]
 ACEBINSIZES=config["ACE"]["ACEBINSIZES"]
 
 def getnames():
-     SAMPLES=dict()
-     for wholename in wholenames:
-         sample = re.match('[a-zA-Z0-9\-]*', wholename).group(0)
-         fastqfile="../fastq/"+wholename+".fastq.gz"
-         SAMPLES[sample]=fastqfile
-     return(SAMPLES)
+    SAMPLES=dict()
+    for wholename in wholenames:
+        sample = re.match('[a-zA-Z0-9\-]*', wholename).group(0)
+        fastqfile="../fastq/"+wholename+".fastq.gz"
+        SAMPLES[sample]=fastqfile
+    return(SAMPLES)
 
 SAMPLES=getnames()
 
 rule all:
-     input:
+    input:
         expand("../{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES),
         expand("../{binSize}kbp/summary.html", binSize=BINSIZES),
         expand("../{binSize}kbp/BED/{sample}_Cosmic.bed", binSize=BINSIZES ,sample=SAMPLES.keys()),
@@ -156,8 +156,10 @@ rule CNA_recall:
         segments="../{binSize}kbp/data/{binSize}kbp-segments.igv",
         calls="../{binSize}kbp/data/{binSize}kbp-calls.igv",
         allprofiles=expand("../{{binSize}}kbp/profiles/reCalled/{samples}.png",samples=SAMPLES.keys()),
+        copynumbersb=expand("../{{binSize}}kbp/BED/{samples}-copynumbers.bed",samples=SAMPLES.keys()),
     params:
         profiles="../{binSize}kbp/profiles/reCalled/",
+        copynumbersbed="../{binSize}kbp/BED/%s-copynumbers.bed",
     log: "../{binSize}kbp/logs/recall.log"
     script:
         "scripts/CNA_recall.R"
