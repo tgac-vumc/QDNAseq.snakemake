@@ -53,7 +53,7 @@ rule samtools_sort:
         output="../tmp/{sample}.all"
     log: "../logs/samtools/{sample}.log"
     shell:
-        "samtools view -uS {input.samse} 2> {log}| samtools sort - {params.output} 2>> {log}"
+        "samtools view -uS {input.samse} 2> {log}| samtools sort - -o {output} 2>> {log}"
 
 rule mark_duplicates:
     input:
