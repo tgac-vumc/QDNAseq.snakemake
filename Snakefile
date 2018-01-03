@@ -78,7 +78,7 @@ rule generate_stats:
     params:
         outdir="../stats"
     shell:
-        "scripts/stats.sh {input.bam} {wildcards.sample} {params.outdir} {output}"
+        "{input.script} {input.bam} {wildcards.sample} {params.outdir} {output}"
 
 rule QDNAseq_binReadCounts:
     input:
@@ -90,7 +90,7 @@ rule QDNAseq_binReadCounts:
         genome=config["QDNAseq"]["genome"],
     log: "../{binSize}kbp/logs/binReadCounts.log"
     script:
-        "scripts/binReadCounts.R"
+        "{input.script}"
 
 rule QDNAseq_normalize:
     input:
@@ -103,7 +103,7 @@ rule QDNAseq_normalize:
         profiles="../{binSize}kbp/profiles/corrected/",
     log: "../{binSize}kbp/logs/normalizeBins.log"
     script:
-        "scripts/QDNAseq_normalize.R"
+        "{input.script}"
 
 rule deWave:
     input:
@@ -117,7 +117,7 @@ rule deWave:
         dewave_data=config["QDNAseq"]["dewave_data"],
     log: "../{binSize}kbp/logs/dewave.log"
     script:
-        "scripts/deWave.R"
+        "{input.script}"
 
 rule QDNAseq_segment:
     input:
@@ -130,7 +130,7 @@ rule QDNAseq_segment:
         profiles="../{binSize}kbp/profiles/segmented/",
     log: "../{binSize}kbp/logs/segment.log"
     script:
-        "scripts/QDNAseq_segment.R"
+        "{input.script}"
 
 rule CNA_call:
     input:
@@ -144,7 +144,7 @@ rule CNA_call:
         profiles="../{binSize}kbp/profiles/called/",
     log: "../{binSize}kbp/logs/call.log"
     script:
-        "scripts/CNA_call.R"
+        "{input.script}"
 
 rule CNA_recall:
     input:
@@ -156,13 +156,15 @@ rule CNA_recall:
         segments="../{binSize}kbp/data/{binSize}kbp-segments.igv",
         calls="../{binSize}kbp/data/{binSize}kbp-calls.igv",
         allprofiles=expand("../{{binSize}}kbp/profiles/reCalled/{samples}.png",samples=SAMPLES.keys()),
-        copynumbersb=expand("../{{binSize}}kbp/BED/{samples}-copynumbers.bed",samples=SAMPLES.keys()),
+        copynumbersbed=expand("../{{binSize}}kbp/BED/{samples}-copynumbers.bed",samples=SAMPLES.keys()),
+        segmentsbed=expand("../{{binSize}}kbp/BED/{samples}-segments.bed",samples=SAMPLES.keys()),
     params:
         profiles="../{binSize}kbp/profiles/reCalled/",
         copynumbersbed="../{binSize}kbp/BED/%s-copynumbers.bed",
+        segmentsbed="../{binSize}kbp/BED/%s-segments.bed",
     log: "../{binSize}kbp/logs/recall.log"
     script:
-        "scripts/CNA_recall.R"
+        "{input.script}"
 
 rule CNA_bedfiles:
     input:
@@ -171,13 +173,14 @@ rule CNA_bedfiles:
     output:
         bedfile=expand('../{{binSize}}kbp/BED/{sample}_allCNAsPerBin.bed', sample=SAMPLES.keys()),
         focalCNA=expand('../{{binSize}}kbp/BED/{sample}_focalCNAs.bed', sample=SAMPLES.keys()),
+        CNAs=expand('../{{binSize}}kbp/BED/{sample}_CNAs.bed',sample=SAMPLES.keys()),
     params:
         beddir='../{binSize}kbp/BED/',
         cytobands=config["CGHregions"]["cytobands"],
         max_focal_size_bed=config["BED"]["max_focal_size_bed"]
     log: "../{binSize}kbp/logs/bedfiles.log"
     script:
-        "scripts/makeCNAbedFile.R"
+        "{input.script}"
 
 #TODO remove in annotateFocalCNAbed file hardcoded location: /net/nfs/PAT/home/stef/code/ENSEMBL_API/ensembl74/ensembl/modules/
 #TODO remove from addCosmicCencus census location: /net/nfs/PAT/home/matias/data/ref/cosmic/hg19_okt2015/CosmicMutantExport.tsv
@@ -191,7 +194,7 @@ rule annotate_focalCNA:
         outdir="../{binSize}kbp/BED/"
     log: "../{binSize}kbp/logs/annotate_focalCNA.log"
     shell:
-        "scripts/annotateFocalCNAbed.sh {input.bedfile} {wildcards.sample} {params.outdir} {output} 2> {log} "
+        "{input.script} {input.bedfile} {wildcards.sample} {params.outdir} {output} 2> {log} "
 
 rule CGHregions:
     input:
@@ -204,7 +207,7 @@ rule CGHregions:
         averr=config["CGHregions"]["averror"],
     log: "../{binSize}kbp/logs/CGHregions.log"
     script:
-        "scripts/CGHregions.R"
+        "{input.script}"
 
 rule makeCGHregionsTable:
     input:
@@ -219,7 +222,7 @@ rule makeCGHregionsTable:
         cytobands=config["CGHregions"]["cytobands"],
     log: "../{binSize}kbp/logs/CGHregionstable.log"
     script:
-        "scripts/makeCGHregionstable.R"
+        "{input.script}"
 
 rule annotate_RegionsFocalCNAbed:
     input:
@@ -232,7 +235,7 @@ rule annotate_RegionsFocalCNAbed:
         filename="allFocalRegions"
     log: "../{binSize}kbp/logs/annotatateregions.log"
     shell:
-        "scripts/annotateFocalCNAbed.sh {input.bedfile} {params.filename} {params.outdir} {output} 2> {log}"
+        "{input.script} {input.bedfile} {params.filename} {params.outdir} {output} 2> {log}"
 
 rule lightBox:
     input:
@@ -244,7 +247,7 @@ rule lightBox:
         profiles="../{binSize}kbp/profiles/{profiletype}/",
         lb2dir="lb2/"
     shell:
-        "scripts/createLightBox.sh {params.profiles} {params.lb2dir} > {output.index}"
+        "{input.script} {params.profiles} {params.lb2dir} > {output.index}"
 
 #TODO script lane-summary does contain relative links to files - maybe better to change
 rule summary:
@@ -259,7 +262,7 @@ rule summary:
     params:
         bamfolder="../bam/",
     shell:
-        "scripts/lane-summary.sh {wildcards.binSize}kpb {params.bamfolder} > {output}"
+        "{input.script} {wildcards.binSize}kpb {params.bamfolder} > {output}"
 
 rule qcfastq:
     input:
@@ -297,4 +300,4 @@ rule ACE:
         outputdir="../{ACEbinSize}kbp/ACE/"
     log:"../{ACEbinSize}kbp/ACE/{ploidy}N/log.tsv"
     script:
-        "scripts/Run_ACE.R"
+        "{input.script}"

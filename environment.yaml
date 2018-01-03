@@ -14,5 +14,9 @@ dependencies:
   - ucsc-bigwigaverageoverbed
   - bioconductor-bsgenome
   - bioconductor-CGHregions
+  - r-MASS
+  - r-R.cache
+  - r-gtools
+  - r-survival
   - perl-bioperl
-  - perl-dbd-mysql 
+  - perl-dbd-mysql

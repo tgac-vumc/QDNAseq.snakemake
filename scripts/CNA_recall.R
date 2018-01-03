@@ -22,6 +22,7 @@ copynumbers<-snakemake@output[["copynumbers"]]
 segments<-snakemake@output[["segments"]]
 calls<-snakemake@output[["calls"]]
 copynumbersbed<-snakemake@params[["copynumbersbed"]]
+segmentsbed<-snakemake@params[["segmentsbed"]]
 
 log<-snakemake@log[[1]]
 log<-file(log, open="wt")
@@ -47,3 +48,4 @@ exportBins(reCalledRCs, copynumbers, format="igv", type="copynumber")
 exportBins(reCalledRCs, segments, format="igv", type="segments")
 exportBins(reCalledRCs, calls, format="igv", logTransform=FALSE, type="calls")
 exportBins(reCalledRCs, file=copynumbersbed, format="bed", logTransform=TRUE, type="copynumber")
+exportBins(reCalledRCs, file=segmentsbed, format="bed", type="segments")
