@@ -1,11 +1,11 @@
 #this script contain the functions: make_cghRawPlus, frequencyPlot, segmentDataWeighted,  CGHregionsPlus,
 #regioningPlus, repdata , WECCA.heatmapPlus, mark.genes , mark.bed,  add.cytobands , add.genes, plot.profiles
 
-library(CGHcall)
-library(CGHregions)
-library(WECCA)
-library(matrixStats)
-library(QDNAseq)
+suppressMessages(library(CGHcall))
+suppressMessages(library(CGHregions))
+suppressMessages(library(WECCA))
+suppressMessages(library(matrixStats))
+suppressMessages(library(QDNAseq))
 
 # originally: QDNAseqReadCounts instead of QDNAseqSignals
 setMethod('plot', signature(x='cghRaw', y='missing'),
@@ -21,7 +21,7 @@ setMethod("frequencyPlot", signature(x="cghCall", y="missing"), frequencyPlotCal
 evalq({
 
 setMethod("frequencyPlot", signature(x="cghRegions", y="missing"),
-function (x, y, main='Frequency Plot', gaincol='blue', losscol='red', misscol=NA, build='GRCh37',... )
+function (x, y, main='Frequency Plot', gaincol='red', losscol='blue', misscol=NA, build='GRCh37',... ) #TLos changed colors loss bleu, gain red
 {
   chrom <- chromosomes(x)
   pos <- bpstart(x)
@@ -259,8 +259,8 @@ WECCA.heatmapPlus <- function (cghdata.regioned, dendrogram, build='GRCh37',
   Y[1] <- TRUE
   begin.chr <- rep("", dim(cghdata.regioned$ann)[1])
   begin.chr[Y] <- cghdata.regioned$ann[Y, 1]
-  color.coding <- c("-2"="darkred", "-1"="red", "0"="black", "1"="blue",
-    "2"="darkblue")[as.character(nclasses)]
+  color.coding <- c("-2"="darkblue", "-1"="blue", "0"="black", "1"="red",
+    "2"="darkred")[as.character(nclasses)]  #TLos changed colors loss bleu, gain red.
   heatmap(cghdata.regioned$hardcalls, Colv = as.dendrogram(dendrogram),
       Rowv=NA, col=color.coding, labRow=begin.chr, RowSideColors=chr.color,
       scale="none", ...)

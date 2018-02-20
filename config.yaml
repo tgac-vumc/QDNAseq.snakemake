@@ -12,6 +12,7 @@ QDNAseq:
   genome: hg19
   dewave_dir: scripts/QDNAseq.dev-dewave/R
   dewave_data: scripts/QDNAseq.dev-dewave/data/NormalCalibrationSet_{binSize}kb.rda
+  minimal_used_reads: 1000
 
 BED:
   max_focal_size_bed: 3 #in creations bedfiles
@@ -29,5 +30,5 @@ ACE:
   penalty: 0.5          #sets a penalty for the error calculated at lower cellularity
   cap: 12             # which copy numbers are capped (highest value)
   trncname: FALSE     #Samplenames are truncated after _
-  printsummaries: TRUE  #For very large datasets it is better to set to FALSE
+  printsummaries: FALSE  #options: TRUE, FALSE or 2, TRUE is only possible for less than ~ 50 samples. 2 means that only the errorplots are in a summary file.
   ACEBINSIZES: [100 ] #required binsizes comma seperated 15 30 100 1000, be careful not to ask for binsizes not created by QDNAseq. Smaller binsizes are computationally harder.

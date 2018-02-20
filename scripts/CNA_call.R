@@ -18,10 +18,11 @@ bin <- as.integer(snakemake@wildcards[["binSize"]])
 called <- snakemake@output[["called"]]
 profiles <- snakemake@params[["profiles"]]
 freqplots <- snakemake@output[["freqplot"]]
+failed <- snakemake@params[["failed"]]
 
 log<-snakemake@log[[1]]
 log<-file(log, open="wt")
-sink(log, append=T, split=FALSE)
+sink(log, append=TRUE, split=FALSE)
 
 ##############################################################################################################
 # Call data & frequency plot calls
@@ -40,5 +41,10 @@ plotQDNAseq(QCN.fcnsdsnc, profiles)
 
 # frequency plot calls
 png(freqplots, res=300, width=14, height=7, unit='in')
-frequencyPlot(QCN.fcnsdsnc)
+frequencyPlot(QCN.fcnsdsnc, losscol='blue', gaincol='red', delcol="darkblue", apmcol="darkred")
 dev.off()
+
+#create output for failed samples - for snakemake compatibility.
+failed_samples<-read.table(failed, stringsAsFactors=FALSE, header=TRUE)
+if(length(failed_samples[,1]>0)){for(file in failed_samples[,1]){file.create(paste(profiles, file,".png",sep=""))
+}}

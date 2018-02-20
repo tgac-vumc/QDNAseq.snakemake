@@ -79,31 +79,11 @@ do
   printf "\t\t\t\t<td>%.2f%%</td>\n" `echo $q37/$unique*100 | bc -l`
   echo -en '\t\t\t\t<td><a href='$sample3'>fastq</a>, '
   echo -e '<a href="../qc-bam/'$sample'_fastqc.html">bam</a></td>'
-  if [ -f "stats/$sample2.mad.15kbp" ]
-  then
-    echo -e '\t\t\t\t<td><a href="15kbp-segmented/'$sample2'.png" data-lightbox="b15k">'`cat stats/$sample2.mad.15kbp`'</a></td>'
-  else
-    echo -e '\t\t\t\t<td>&nbsp;</td>'
-  fi
-  if [ -f "stats/$sample2.mad.30kbp" ]
-  then
-    echo -e '\t\t\t\t<td><a href="30kbp-segmented/'$sample2'.png" data-lightbox="30k">'`cat stats/$sample2.mad.30kbp`'</a></td>'
-  else
-    echo -e '\t\t\t\t<td>&nbsp;</td>'
-  fi
-  if [ -f "stats/$sample2.mad.100kbp" ]
-  then
-    echo -e '\t\t\t\t<td><a href="100kbp-segmented/'$sample2'.png" data-lightbox="100k">'`cat stats/$sample2.mad.100kbp`'</a></td>'
-  else
-    echo -e '\t\t\t\t<td>&nbsp;</td>'
-  fi
-  if [ -f "stats/$sample2.mad.1000kbp" ]
-  then
-    echo -e '\t\t\t\t<td><a href="1000kbp-segmented/'$sample2'.png" data-lightbox="1000k">'`cat stats/$sample2.mad.1000kbp`'</a></td>'
-  else
-    echo -e '\t\t\t\t<td>&nbsp;</td>'
-    echo -e '\t\t\t\t<td>&nbsp;</td>'
-  fi
+  echo -e '\t\t\t\t<td><a href="profiles/corrected/'$sample'.png">corrected</a></td>'
+  echo -e '\t\t\t\t<td><a href="profiles/dewaved/'$sample'.png">dewaved</a></td>'
+  echo -e '\t\t\t\t<td><a href="profiles/segmented/'$sample'.png">segmented</a></td>'
+  echo -e '\t\t\t\t<td><a href="profiles/called/'$sample'.png">called</a></td>'
+  echo -e '\t\t\t\t<td><a href="profiles/reCalled'$sample'.png">reCalled</a></td>'  
   echo -e '\t\t\t</tr>'
 done
 echo -e '\t\t\t<tr style="border-top: double;">'

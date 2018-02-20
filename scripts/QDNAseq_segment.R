@@ -13,10 +13,12 @@ dewaved<- snakemake@input[["dewaved"]]
 bin <- as.integer(snakemake@wildcards[["binSize"]])
 segmented <- snakemake@output[["segmented"]]
 profiles <- snakemake@params[["profiles"]]
+failed<- snakemake@params[["failed"]]
+min_used_reads<-snakemake@params[["minimal_used_reads"]]
 
 log<-snakemake@log[[1]]
 log<-file(log, open="wt")
-sink(log, append=T , split=FALSE)
+sink(log, append=TRUE , split=FALSE)
 
 # Adjust segmentation settings based on binsize
 if (bin==15) {SDundo=0.75; alph=1e-15}
@@ -28,8 +30,14 @@ if (bin==1000) {SDundo=0.10; alph=1e-20}
 # load data
 QCN.fcnsd <- readRDS(dewaved)
 
-QCN.fcnsds <- segmentBins(QCN.fcnsd, undo.splits='sdundo', undo.SD=SDundo, alpha=alph, transformFun="sqrt")
+QCN.fcnsds <- segmentBins(QCN.fcnsd[,QCN.fcnsd$used.reads > min_used_reads ], undo.splits='sdundo', undo.SD=SDundo, alpha=alph, transformFun="sqrt")
 QCN.fcnsdsn <- normalizeSegmentedBins(QCN.fcnsds)
 
 saveRDS(QCN.fcnsdsn, segmented)
 plotQDNAseq(QCN.fcnsdsn, profiles)
+
+littledata<-colnames(QCN.fcnsd[,QCN.fcnsd$used.reads <= min_used_reads ])
+if(length(littledata>0)){for(file in littledata){file.create(paste(profiles, file,".png",sep=""))
+}}
+
+write.table(littledata, file=failed )

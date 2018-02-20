@@ -18,10 +18,11 @@ recalled <- snakemake@input[["recalled"]]
 beddir <- snakemake@params[["beddir"]]
 cytoband_data<-snakemake@params[["cytobands"]]
 max.focal.size.mb<-snakemake@params[["max_focal_size_mb"]]
+failed <- snakemake@params[["failed"]]
 
 log<-snakemake@log[[1]]
 log<-file(log, open="wt")
-sink(log, append=T, split=FALSE)
+sink(log, append=TRUE, split=FALSE)
 
 ##############################################################################################################
 
@@ -124,4 +125,11 @@ makeCNAbedFile <- function(CalledQDNAseqReadCounts, max.focal.size.mb=3, beddir,
 }
 
 makeCNAbedFile(QCN.reCalled, max.focal.size.mb, beddir, cytoband_data)
-#file.create(logfile)
+
+#create output for failed samples - for snakemake compatibility.
+failed_samples<-read.table(failed, stringsAsFactors=FALSE, header=TRUE)
+if(length(failed_samples[,1]>0)){for(file in failed_samples[,1]){
+    file.create(paste(beddir, file, '_allCNAsPerBin.bed', sep=""))
+    file.create(paste(beddir, file, '_CNAs.bed', sep=''))
+    file.create(paste(beddir, file, '_focalCNAs.bed', sep=''))
+}}

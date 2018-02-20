@@ -128,6 +128,8 @@ rule QDNAseq_segment:
         allprofiles=expand("../{{binSize}}kbp/profiles/segmented/{samples}.png",samples=SAMPLES.keys()),
     params:
         profiles="../{binSize}kbp/profiles/segmented/",
+        failed="../{binSize}kbp/logs/failed_samples.txt",
+        minimal_used_reads=config["QDNAseq"]["minimal_used_reads"]
     log: "../{binSize}kbp/logs/segment.log"
     script:
         "{input.script}"
@@ -142,6 +144,7 @@ rule CNA_call:
         allprofiles=expand("../{{binSize}}kbp/profiles/called/{samples}.png",samples=SAMPLES.keys()),
     params:
         profiles="../{binSize}kbp/profiles/called/",
+        failed="../{binSize}kbp/logs/failed_samples.txt",
     log: "../{binSize}kbp/logs/call.log"
     script:
         "{input.script}"
@@ -162,6 +165,8 @@ rule CNA_recall:
         profiles="../{binSize}kbp/profiles/reCalled/",
         copynumbersbed="../{binSize}kbp/BED/%s-copynumbers.bed",
         segmentsbed="../{binSize}kbp/BED/%s-segments.bed",
+        bedfolder="../{binSize}kbp/BED/",
+        failed="../{binSize}kbp/logs/failed_samples.txt",
     log: "../{binSize}kbp/logs/recall.log"
     script:
         "{input.script}"
@@ -177,7 +182,8 @@ rule CNA_bedfiles:
     params:
         beddir='../{binSize}kbp/BED/',
         cytobands=config["CGHregions"]["cytobands"],
-        max_focal_size_bed=config["BED"]["max_focal_size_bed"]
+        max_focal_size_bed=config["BED"]["max_focal_size_bed"],
+        failed="../{binSize}kbp/logs/failed_samples.txt",
     log: "../{binSize}kbp/logs/bedfiles.log"
     script:
         "{input.script}"
@@ -297,7 +303,8 @@ rule ACE:
     output:
         ACE=expand("../{{ACEbinSize}}kbp/ACE/{{ploidy}}N/{sample}/summary_{sample}.{{imagetype}}", sample=SAMPLES.keys())
     params:
-        outputdir="../{ACEbinSize}kbp/ACE/"
+        outputdir="../{ACEbinSize}kbp/ACE/",
+        failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
     log:"../{ACEbinSize}kbp/ACE/{ploidy}N/log.tsv"
     script:
         "{input.script}"
