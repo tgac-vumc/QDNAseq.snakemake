@@ -198,7 +198,7 @@ rule annotate_focalCNA:
         "../{binSize}kbp/BED/{sample}_Cosmic.bed"
     params:
         outdir="../{binSize}kbp/BED/"
-    log: "../{binSize}kbp/logs/annotate_focalCNA.log"
+    log: "../{binSize}kbp/logs/{sample}_annotate_focalCNA.log"
     shell:
         "{input.script} {input.bedfile} {wildcards.sample} {params.outdir} {output} 2> {log} "
 
