@@ -202,6 +202,11 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		  dir.create(fp)
   		}
 
+		summary_dir <- file.path(qdir,"summary_files")  #TL added summary dir
+		if(!dir.exists(summary_dir)) {
+  		  dir.create(summary_dir)
+  		}
+
   		dir.create(file.path(fp,"graphs"))
 
   		cellularity <- 5:100
@@ -234,8 +239,6 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		fitpicker[a,3] <- q
   		fitpicker[a,4] <- standard
 
-
-
   		for (m in 1:length(minima)) {
   		  fitpicker[a,m+4] <- minima[m]
   		  adjustedcopynumbers <- q + ((copyNumbersSegmented@assayData$copynumber[,a]-standard)*(minima[m]*(q-2)+2))/(minima[m]*standard)
@@ -265,11 +268,11 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
     			geom_hline(yintercept = c(5:cap-1), color = 'lightgray', size = 0.5) +
     			geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
     			geom_point(aes(x = bin,y = copynumbers),data=df, size = 0.1, color = 'black') +
-  		    geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'black', shape = 24) +
-  		    geom_point(aes(x = bin,y = copynumbers),data=toppedcopynumbers, size = 0.5, color = 'black', shape = 25) +
-    			geom_point(aes(x = bin,y = segments),data=df, size = 1, color = 'darkorange') +
-  		    geom_point(aes(x = bin,y = segments),data=cappedsegments, size = 1, color = 'darkorange', shape = 24) +
-  		    geom_point(aes(x = bin,y = segments),data=toppedsegments, size = 1, color = 'darkorange', shape = 25) +
+  		    geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.4, color = 'black', shape = 24) + #TL changes size from 0.5 to 0.4
+  		    geom_point(aes(x = bin,y = copynumbers),data=toppedcopynumbers, size = 0.4, color = 'black', shape = 25) + #TL changes size from 0.5 to 0.4
+    			geom_point(aes(x = bin,y = segments),data=df, size = 0.5, color = 'darkorange') + #changes size  from 1 to 0.5
+  		    geom_point(aes(x = bin,y = segments),data=cappedsegments, size = 0.5, color = 'darkorange', shape = 24) +  #changes size  from 1 to 0.5
+  		    geom_point(aes(x = bin,y = segments),data=toppedsegments, size = 0.5, color = 'darkorange', shape = 25) + #changes size  from 1 to 0.5
   		    theme_classic() + theme(
   		      axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
   		    ggtitle(paste0(pd$name[a], " - binsize ", binsize, " kbp - ", pd$used.reads[a], " reads - ",q,"N fit ", m)) +
@@ -309,18 +312,19 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		  print(tempplot)
   		  dev.off()
   		}
+		plots[[(m+1)]] <- listerrorplots[[a]] #TL added errorplot to all plots
 
   		if(imagetype %in% c('pdf','svg')) {
-  		  pdf(file.path(fp,paste0("summary_",pd$name[a],".pdf")),width=10.5)
+  		  pdf(file.path(summary_dir,paste0("summary_",pd$name[a],".pdf")),width=10.5)  #TL changed place of summary files
   		  print(plots)
   		  dev.off()
   		} else {
   		  if (length(plots)==1) {
-  		    imagefunction(file.path(fp,paste0("summary_",pd$name[a],".",imagetype)), width = 720)
+  		    imagefunction(file.path(summary_dir,paste0("summary_",pd$name[a],".",imagetype)), width = 720)  #TL changed place of summary files
   		    print(plots)
   		    dev.off()
   		  } else {
-    		  imagefunction(file.path(fp,paste0("summary_",pd$name[a],".",imagetype)), width = 2160, height = 480*ceiling(length(plots)/3))
+    		  imagefunction(file.path(summary_dir,paste0("summary_",pd$name[a],".",imagetype)), width = 2160, height = 480*ceiling(length(plots)/3))  #TL changed place of summary files
     		  print(multiplot(plotlist = plots, cols=3))
     		  dev.off()
     		}

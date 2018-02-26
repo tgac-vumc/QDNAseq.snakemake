@@ -23,8 +23,8 @@ rule all:
         expand("../{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES),
         expand("../{binSize}kbp/summary.html", binSize=BINSIZES),
         expand("../{binSize}kbp/BED/{sample}_Cosmic.bed", binSize=BINSIZES ,sample=SAMPLES.keys()),
-        expand("../{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys())
-
+        expand("../{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
+        expand("../{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys())
 
 rule bwa_aln:
     input:
@@ -121,7 +121,7 @@ rule deWave:
 
 rule QDNAseq_segment:
     input:
-        dewaved="../{binSize}kbp/data/{binSize}kbp-dewaved.rds",
+        dewaved="../{binSize}kbp/data/{binSize}kbp-dewaved.rds" if config['QDNAseq']['dewave'] else "../{binSize}kbp/data/{binSize}kbp-corrected.rds",
         script="scripts/QDNAseq_segment.R",
     output:
         segmented="../{binSize}kbp/data/{binSize}kbp-segmented.rds",
@@ -301,10 +301,25 @@ rule ACE:
         segmented="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-segmented.rds",
         script="scripts/Run_ACE.R"
     output:
-        ACE=expand("../{{ACEbinSize}}kbp/ACE/{{ploidy}}N/{sample}/summary_{sample}.{{imagetype}}", sample=SAMPLES.keys())
+        #ACE=expand("../{{ACEbinSize}}kbp/ACE/{{ploidy}}N/summary_files/summary_{sample}.{{imagetype}}", sample=SAMPLES.keys()),
+        fitpicker="../{ACEbinSize}kbp/ACE/{ploidy}N/fitpicker_{ploidy}N.tsv",
     params:
         outputdir="../{ACEbinSize}kbp/ACE/",
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
     log:"../{ACEbinSize}kbp/ACE/{ploidy}N/log.tsv"
+    script:
+        "{input.script}"
+
+rule postanalysisloop_ACE:
+    input:
+        segmented="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-segmented.rds",
+        fitpicker="../{ACEbinSize}kbp/ACE/{ploidy}N/fitpicker_{ploidy}N.tsv",
+        script="scripts/Run_postanalysisloop_ACE.R",
+    output:
+        ACE_post=expand("../{{ACEbinSize}}kbp/ACE/{{ploidy}}N/segmentfiles/{sample}_segments.tsv", sample=SAMPLES.keys()),
+    params:
+        outputdir="../{ACEbinSize}kbp/ACE/{ploidy}N/",
+        failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
+    log:"../{ACEbinSize}kbp/ACE/post_log.tsv"
     script:
         "{input.script}"

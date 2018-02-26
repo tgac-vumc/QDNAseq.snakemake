@@ -11,7 +11,6 @@ suppressMessages(library(QDNAseq))
 source('scripts/ACE.R')
 
 ploidies<-as.integer(snakemake@wildcards[["ploidy"]])
-binsizes<-as.integer(snakemake@wildcards[["binSize"]])
 inputfile <-snakemake@input[["segmented"]]
 outputdir<-snakemake@params[["outputdir"]]
 failed <- snakemake@params[["failed"]]

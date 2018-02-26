@@ -86,6 +86,7 @@ done
 ```
 
 go to QDNAseq.snakemake directory and optionally change configfile, than start snakemake.
+One of the options in the configfile is dewaving, if set to true QNDAseq objects will be dewaved before segmentation. 
 
 ```
 cd ../QDNAseq.snakemake
