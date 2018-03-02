@@ -23,7 +23,7 @@ rule all:
         expand("../{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES),
         expand("../{binSize}kbp/summary.html", binSize=BINSIZES),
         expand("../{binSize}kbp/BED/{sample}_Cosmic.bed", binSize=BINSIZES ,sample=SAMPLES.keys()),
-        expand("../{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
+        #expand("../{binSize}kbp/ACE/{ploidy}N/summary_files/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
         expand("../{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys())
 
 rule bwa_aln:
