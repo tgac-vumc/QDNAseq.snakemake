@@ -41,7 +41,7 @@ plotQDNAseq(QCN.fcnsdsnc, profiles)
 
 # frequency plot calls
 png(freqplots, res=300, width=14, height=7, unit='in')
-frequencyPlot(QCN.fcnsdsnc, losscol='blue', gaincol='red', delcol="darkblue", apmcol="darkred")
+frequencyPlot(QCN.fcnsdsnc, losscol='blue', gaincol='red', delcol="darkblue", ampcol="darkred")
 dev.off()
 
 #create output for failed samples - for snakemake compatibility.
