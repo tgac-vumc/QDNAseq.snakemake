@@ -10,7 +10,7 @@ bwa:
 QDNAseq:
   BINSIZES: [15 , 30 , 100, 1000]   #required binsizes comma seperated  1 5 10 15 30 100 1000
   genome: hg19
-  dewave: Treu #dewaving is an optional setting, if Treu samples will be dewaved before segmentation, if False dewaving will be skipped.
+  dewave: True #dewaving is an optional setting, if True samples will be dewaved before segmentation, if False dewaving will be skipped.
   dewave_dir: scripts/QDNAseq.dev-dewave/R
   dewave_data: scripts/QDNAseq.dev-dewave/data/NormalCalibrationSet_{binSize}kb.rda
   minimal_used_reads: 1000

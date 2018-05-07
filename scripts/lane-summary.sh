@@ -83,7 +83,7 @@ do
   echo -e '\t\t\t\t<td><a href="profiles/dewaved/'$sample'.png">dewaved</a></td>'
   echo -e '\t\t\t\t<td><a href="profiles/segmented/'$sample'.png">segmented</a></td>'
   echo -e '\t\t\t\t<td><a href="profiles/called/'$sample'.png">called</a></td>'
-  echo -e '\t\t\t\t<td><a href="profiles/reCalled'$sample'.png">reCalled</a></td>'  
+  echo -e '\t\t\t\t<td><a href="profiles/reCalled/'$sample'.png">reCalled</a></td>'  
   echo -e '\t\t\t</tr>'
 done
 echo -e '\t\t\t<tr style="border-top: double;">'
