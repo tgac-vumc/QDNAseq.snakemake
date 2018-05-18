@@ -24,7 +24,9 @@ rule all:
         expand("../{binSize}kbp/summary.html", binSize=BINSIZES),
         expand("../{binSize}kbp/BED/{sample}_Cosmic.bed", binSize=BINSIZES ,sample=SAMPLES.keys()),
         #expand("../{binSize}kbp/ACE/{ploidy}N/summary_files/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
-        expand("../{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys())
+        expand("../{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
+        expand("../qc-fastq/{sample}_fastqc.html", sample=wholenames),
+        expand("../qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
 
 rule bwa_aln:
     input:
@@ -272,29 +274,29 @@ rule summary:
 
 rule qcfastq:
     input:
-        expand("../fastq/{sample}.fastq.gz", sample=wholenames)
+        fastq="../fastq/{sample}.fastq.gz"
     output:
-        qcfastq=expand("../qc-fastq/{sample}_fastqc.html", sample=wholenames),
-        qczip=temp(expand("../qc-fastq/{sample}_fastqc.zip", sample=wholenames))
+        qcfastq="../qc-fastq/{sample}_fastqc.html",
+        qczip=temp("../qc-fastq/{sample}_fastqc.zip")
     threads: config['all']['THREADS']
     params:
         qcfastqdir="../qc-fastq/"
     log: "../logs/fastqc.log"
     shell:
-        "fastqc {input} --outdir {params.qcfastqdir} -t {threads} 2> {log}"
+        "fastqc {input} --outdir {params.qcfastqdir} -t {threads} 2>> {log}"
 
 rule qcbam:
     input:
-        bam=expand("../bam/{sample}.bam", sample=SAMPLES.keys()),
+        bam="../bam/{sample}.bam",
     output:
-        bamqc=expand("../qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
-        bamqczip=temp(expand("../qc-bam/{sample}_fastqc.zip", sample=SAMPLES.keys())),
+        bamqc="../qc-bam/{sample}_fastqc.html",
+        bamqczip=temp("../qc-bam/{sample}_fastqc.zip"),
     threads: config['all']['THREADS']
     params:
         qcbamdir="../qc-bam/"
     log: "../logs/fastqc-bam.log"
     shell:
-        "fastqc {input.bam} --format bam_mapped --outdir {params.qcbamdir} -t {threads} 2> {log}"
+        "fastqc {input.bam} --format bam_mapped --outdir {params.qcbamdir} -t {threads} 2>> {log}"
 
 rule ACE:
     input:
