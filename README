@@ -19,7 +19,7 @@ go to the directory where the analysis need to be performed
 cd </path/to/analysis/dir>
 git clone https://github.com/tgac-vumc/QDNAseq.snakemake/
 cd QDNAseq.snakemake
-git checkout Tjitskehttp://pa-ngs-res01/analysis/MPS-359/QDNAseq/100kbp/summary.html
+git checkout Tjitske
 ```
 
 install the environment using conda:
@@ -42,7 +42,7 @@ wget http://www.few.vu.nl/~mavdwiel/CGHtest/CGHtest_1.1.tar.gz
 ```
 
 Than open R and install the Packages using the following code:
-http://pa-ngs-res01/analysis/MPS-359/QDNAseq/100kbp/summary.html
+
 ```
 R
 library(devtools)
