@@ -15,6 +15,7 @@ binReadCounts <- snakemake@input[["binReadCounts"]]
 bin <- as.integer(snakemake@wildcards[["binSize"]])
 corrected <- snakemake@output[["corrected"]]
 profiles <- snakemake@params[["profiles"]]
+chrom_filter <- c(snakemake@params[["chrom_filter"]])
 
 log<-snakemake@log[[1]]
 log<-file(log, open="wt")
@@ -24,8 +25,16 @@ sink(log, append=T , split=FALSE)
 ##############################################################################################################
 QRC <- readRDS(binReadCounts)
 
-QRC.f <- applyFilters(QRC, residual=TRUE, blacklist=TRUE, mappability=FALSE, bases=FALSE)
+#did these steps manualy as is described in second part creationofblacklist.R for samples with chrX.
+
+QRC.f <- applyFilters(QRC, residual=TRUE, blacklist=TRUE, mappability=FALSE, bases=FALSE , chromosomes=chrom_filter)
+
+featureData(QRC.f)$use[c(22232:22237)]<-F  # segment 14:22400001-22500000 t/m 14:22900001-23000000 on chr14
 QRC.f <- estimateCorrection(QRC.f)
+#QRC.f <- applyFilters(QRC, residual=TRUE, blacklist=TRUE, mappability=FALSE, bases=FALSE)  - used for bia-ALCL (2019-07-09 not)
+#QRC.f <- estimateCorrection(QRC.f, residual=TRUE, blacklist=TRUE, mappability=FALSE, bases=FALSE) - used for bia-ALCL(2019-07-09 not)
+#QRC.f <- applyFilters(QRC.f, residual=TRUE, blacklist=TRUE, mappability=FALSE, bases=FALSE, chromosome="Y") - used for bia-ALCL(2019-07-09 not)
+
 QCN.fc <- correctBins(QRC.f)
 QCN.fcn <- normalizeBins(QCN.fc)
 QCN.fcns <- smoothOutlierBins(QCN.fcn)

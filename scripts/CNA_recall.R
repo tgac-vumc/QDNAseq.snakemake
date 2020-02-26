@@ -18,13 +18,13 @@ source('scripts/plotQDNAseq.R')
 called <- snakemake@input[["called"]]
 recalled <- snakemake@output[["recalled"]]
 profiles <- snakemake@params[["profiles"]]
-copynumbers<-snakemake@output[["copynumbers"]]
-segments<-snakemake@output[["segments"]]
+#copynumbers<-snakemake@output[["copynumbers"]]
+#segments<-snakemake@output[["segments"]]
 calls<-snakemake@output[["calls"]]
-copynumbersbed<-snakemake@params[["copynumbersbed"]]
-segmentsbed<-snakemake@params[["segmentsbed"]]
+#copynumbersbed<-snakemake@params[["copynumbersbed"]]
+#segmentsbed<-snakemake@params[["segmentsbed"]]
 failed <- snakemake@params[["failed"]]
-bedfolder <- snakemake@params[["bedfolder"]]
+#bedfolder <- snakemake@params[["bedfolder"]]
 
 log<-snakemake@log[[1]]
 log<-file(log, open="wt")
@@ -46,15 +46,15 @@ plotQDNAseq(reCalledRCs, profiles)
 # Create IGV objects from readcounts
 ##############################################################################################################
 
-exportBins(reCalledRCs, copynumbers, format="igv", type="copynumber")
-exportBins(reCalledRCs, segments, format="igv", type="segments")
+#exportBins(reCalledRCs, copynumbers, format="igv", type="copynumber")
+#exportBins(reCalledRCs, segments, format="igv", type="segments")
 exportBins(reCalledRCs, calls, format="igv", logTransform=FALSE, type="calls")
-exportBins(reCalledRCs, file=copynumbersbed, format="bed", logTransform=TRUE, type="copynumber")
-exportBins(reCalledRCs, file=segmentsbed, format="bed", type="segments")
+#exportBins(reCalledRCs, file=copynumbersbed, format="bed", logTransform=TRUE, type="copynumber")
+#exportBins(reCalledRCs, file=segmentsbed, format="bed", type="segments")
 
 #create output for failed samples - for snakemake compatibility.
 failed_samples<-read.table(failed, stringsAsFactors=FALSE, header=TRUE)
 if(length(failed_samples[,1]>0)){for(file in failed_samples[,1]){file.create(paste(profiles, file,".png",sep=""))
-file.create(paste(bedfolder, file,"-copynumbers.bed",sep=""))
-file.create(paste(bedfolder, file,"-segments.bed",sep=""))
+#file.create(paste(bedfolder, file,"-copynumbers.bed",sep=""))
+#file.create(paste(bedfolder, file,"-segments.bed",sep=""))
 }}

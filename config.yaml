@@ -1,31 +1,34 @@
 all:
   REF: /net/nfs/PAT/data/ref/hg19/ensembl/bwa-0.7.5a/Homo_sapiens.GRCh37.69.dna_sm.primary_assembly.fa
   THREADS: 4
-  profiletypes: ["corrected", "segmented", "called","reCalled", 'dewaved']
+  profiletypes: ["corrected", "segmented", "called","reCalled",'dewaved']
 
 bwa:
   max_edit_distance: 2  #n
   read_trimming_param: 40 #q
 
 QDNAseq:
-  BINSIZES: [15 , 30 , 100, 1000]   #required binsizes comma seperated  1 5 10 15 30 100 1000
+  BINSIZES: [100]   #required binsizes comma seperated  1 5 10 15 30 100 1000
   genome: hg19
-  dewave: Treu #dewaving is an optional setting, if Treu samples will be dewaved before segmentation, if False dewaving will be skipped.
+  chrom_filter: ["Y", "X"] # comma separated quoted to specify which chromosomes to filter out. "X","Y"
+  dewave: True #dewaving is an optional setting, if Treu samples will be dewaved before segmentation, if False dewaving will be skipped.
   dewave_dir: scripts/QDNAseq.dev-dewave/R
   dewave_data: scripts/QDNAseq.dev-dewave/data/NormalCalibrationSet_{binSize}kb.rda
-  minimal_used_reads: 1000
+  minimal_used_reads: 100000
+  minimum_cellularity: 0.2  # minimum cellularity used for calling, a to low cellularity cause over calling.
 
 BED:
-  max_focal_size_bed: 3 #in creations bedfiles
+  max_focal_size_bed: 5 #in creations bedfiles
 
 CGHregions:
-  averror: 0.0075  #0.0075	 # default = 0.01
+  averror: 0.01  #0.0075	 # default = 0.01
   min_freq_focal: 25
   max_focal_size_mb: 15
   cytobands: /net/nfs/PAT/home/matias/data/ref/HG19.cytoBand.txt.gz
 
 ACE:
   ploidies: [2,4]   #required ploidies comma seperated
+  main_ploidy: 2   # only the main ploidy fitpicker file will be used for calling based on cellularity
   imagetype: png      #options are png, pdf
   method: RMSE        #'RMSE' root mean squared error, 'MAE' weighs every error equally, 'SMRE' punish more the long segments that are a little bit off compared to the short segments that are way off
   penalty: 0.5          #sets a penalty for the error calculated at lower cellularity

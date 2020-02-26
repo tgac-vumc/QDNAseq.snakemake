@@ -19,6 +19,7 @@ called <- snakemake@output[["called"]]
 profiles <- snakemake@params[["profiles"]]
 freqplots <- snakemake@output[["freqplot"]]
 failed <- snakemake@params[["failed"]]
+calls<-snakemake@output[["calls"]]
 
 log<-snakemake@log[[1]]
 log<-file(log, open="wt")
@@ -41,10 +42,16 @@ plotQDNAseq(QCN.fcnsdsnc, profiles)
 
 # frequency plot calls
 png(freqplots, res=300, width=14, height=7, unit='in')
-frequencyPlot(QCN.fcnsdsnc, losscol='blue', gaincol='red', delcol="darkblue", apmcol="darkred")
+frequencyPlot(QCN.fcnsdsnc, losscol='blue', gaincol='red', delcol="darkblue", ampcol="darkred")
 dev.off()
 
 #create output for failed samples - for snakemake compatibility.
 failed_samples<-read.table(failed, stringsAsFactors=FALSE, header=TRUE)
 if(length(failed_samples[,1]>0)){for(file in failed_samples[,1]){file.create(paste(profiles, file,".png",sep=""))
 }}
+
+##############################################################################################################
+# Create IGV objects
+##############################################################################################################
+
+exportBins(QCN.fcnsdsnc, calls, format="igv", logTransform=FALSE, type="calls")
