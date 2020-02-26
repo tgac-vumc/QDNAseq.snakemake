@@ -16,6 +16,12 @@ profiles <- snakemake@params[["profiles"]]
 failed<- snakemake@params[["failed"]]
 min_used_reads<-snakemake@params[["minimal_used_reads"]]
 
+copynumbersbed<-snakemake@params[["copynumbersbed"]]
+segmentsbed<-snakemake@params[["segmentsbed"]]
+copynumbers<-snakemake@output[["copynumbers"]]
+segments<-snakemake@output[["segments"]]
+bedfolder <- snakemake@params[["bedfolder"]]
+
 log<-snakemake@log[[1]]
 log<-file(log, open="wt")
 sink(log, append=TRUE , split=FALSE)
@@ -32,12 +38,28 @@ QCN.fcnsd <- readRDS(dewaved)
 
 QCN.fcnsds <- segmentBins(QCN.fcnsd[,QCN.fcnsd$used.reads > min_used_reads ], undo.splits='sdundo', undo.SD=SDundo, alpha=alph, transformFun="sqrt")
 QCN.fcnsdsn <- normalizeSegmentedBins(QCN.fcnsds)
-
 saveRDS(QCN.fcnsdsn, segmented)
+
+##############################################################################################################
+# Create profiles
+##############################################################################################################
+
 plotQDNAseq(QCN.fcnsdsn, profiles)
 
+#create output for failed samples - for snakemake compatibility.
 littledata<-colnames(QCN.fcnsd[,QCN.fcnsd$used.reads <= min_used_reads ])
 if(length(littledata>0)){for(file in littledata){file.create(paste(profiles, file,".png",sep=""))
+file.create(paste(bedfolder, file,"-copynumbers.bed",sep=""))
+file.create(paste(bedfolder, file,"-segments.bed",sep=""))
 }}
 
 write.table(littledata, file=failed )
+
+##############################################################################################################
+# Create IGV objects and bedfiles from readcounts
+##############################################################################################################
+
+exportBins(QCN.fcnsdsn, copynumbers, format="igv", type="copynumber")
+exportBins(QCN.fcnsdsn, segments, format="igv", type="segments")
+exportBins(QCN.fcnsdsn, file=copynumbersbed, format="bed", logTransform=TRUE, type="copynumber")
+exportBins(QCN.fcnsdsn, file=segmentsbed, format="bed", type="segments")

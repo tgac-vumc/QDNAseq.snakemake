@@ -19,6 +19,7 @@ called <- snakemake@output[["called"]]
 profiles <- snakemake@params[["profiles"]]
 freqplots <- snakemake@output[["freqplot"]]
 failed <- snakemake@params[["failed"]]
+calls<-snakemake@output[["calls"]]
 
 log<-snakemake@log[[1]]
 log<-file(log, open="wt")
@@ -48,3 +49,9 @@ dev.off()
 failed_samples<-read.table(failed, stringsAsFactors=FALSE, header=TRUE)
 if(length(failed_samples[,1]>0)){for(file in failed_samples[,1]){file.create(paste(profiles, file,".png",sep=""))
 }}
+
+##############################################################################################################
+# Create IGV objects
+##############################################################################################################
+
+exportBins(QCN.fcnsdsnc, calls, format="igv", logTransform=FALSE, type="calls")

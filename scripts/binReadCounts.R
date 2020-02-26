@@ -19,8 +19,10 @@ binReadCounts <- snakemake@output[["binReadCounts"]]
 ##############################################################################################################
 # Get bin annotations and bin read counts
 ##############################################################################################################
-
+#custom bin annotations for chrX used - did this whole script by hand for 100kbp See creationofblacklist.R
 bins <- getBinAnnotations(bin, genome=genome)
+
+
 QRC <- binReadCounts(bins, bamfiles=bam, cache=TRUE)
 
 sub("(_[ACGT]+)?(_S\\d+)?(_L\\d{3})?_R\\d{1}_\\d{3}(\\.f(ast)?q\\.gz)?$", "", sampleNames(QRC)) -> samples

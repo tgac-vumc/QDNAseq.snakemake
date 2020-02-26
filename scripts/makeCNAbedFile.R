@@ -17,7 +17,7 @@ source("scripts/CGHcallPlus.R")
 recalled <- snakemake@input[["recalled"]]
 beddir <- snakemake@params[["beddir"]]
 cytoband_data<-snakemake@params[["cytobands"]]
-max.focal.size.mb<-snakemake@params[["max_focal_size_mb"]]
+max.focal.size.mb<-snakemake@params[["max_focal_size_bed"]]
 failed <- snakemake@params[["failed"]]
 
 log<-snakemake@log[[1]]
@@ -69,7 +69,8 @@ makeCNAbedFile <- function(CalledQDNAseqReadCounts, max.focal.size.mb=3, beddir,
 
 			# if the unique segment value occurs more often, then for each one create an entry
 			intervals <- seqToIntervals(which(allCNAsPerBin$segment== SEG.val ))
-
+			allCNAsPerBin[allCNAsPerBin$chromosome=="X","chromosome"]<-23
+			allCNAsPerBin[allCNAsPerBin$chromosome=="Y","chromosome"]<-24
 				for (z in 1:nrow(intervals)){
 
 					start.ix 	<- intervals[z,1]
@@ -79,7 +80,7 @@ makeCNAbedFile <- function(CalledQDNAseqReadCounts, max.focal.size.mb=3, beddir,
 					SEG.end 	<- as.numeric( allCNAsPerBin[end.ix,3] )
 					SEG.size 	<- as.numeric( allCNAsPerBin[end.ix,3] - allCNAsPerBin[start.ix,2] )
 
-					SEG.chromo 	<- as.numeric( allCNAsPerBin[end.ix,1] )
+					SEG.chromo 	<- as.numeric(allCNAsPerBin[end.ix,1])
 					SEG.call 	<- as.numeric( allCNAsPerBin[end.ix,4] )
 
 					# check if chromosome is the same; if not the bin spans more chromos and should be separated
@@ -115,6 +116,7 @@ makeCNAbedFile <- function(CalledQDNAseqReadCounts, max.focal.size.mb=3, beddir,
       write.table(CNAbed, fileName, sep='\t', row.names=F, col.names=T, quote=F)
 
 			# make a separate BED file with only focal CNAs (< 3 Mb)
+
 			focal.ix <- which(CNAbed[,4] <= max.focal.size.mb)
 			focalCNAs <- CNAbed[focal.ix, ]
 

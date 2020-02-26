@@ -22,11 +22,14 @@ rule all:
     input:
         expand("../{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES),
         expand("../{binSize}kbp/summary.html", binSize=BINSIZES),
+        expand("../{ACEbinSize}kbp/profiles/call_cellularity_based/index.html" ,ACEbinSize=ACEBINSIZES),
         expand("../{binSize}kbp/BED/{sample}_Cosmic.bed", binSize=BINSIZES ,sample=SAMPLES.keys()),
-        #expand("../{binSize}kbp/ACE/{ploidy}N/summary_files/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
-        expand("../{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
         expand("../qc-fastq/{sample}_fastqc.html", sample=wholenames),
         expand("../qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
+       # expand("../{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
+        expand("../{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
+        expand("../{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds", ACEbinSize=ACEBINSIZES)
+
 
 rule bwa_aln:
     input:
@@ -103,6 +106,7 @@ rule QDNAseq_normalize:
         allprofiles=expand("../{{binSize}}kbp/profiles/corrected/{samples}.png",samples=SAMPLES.keys()),
     params:
         profiles="../{binSize}kbp/profiles/corrected/",
+        chrom_filter=config["QDNAseq"]["chrom_filter"],
     log: "../{binSize}kbp/logs/normalizeBins.log"
     script:
         "{input.script}"
@@ -128,10 +132,17 @@ rule QDNAseq_segment:
     output:
         segmented="../{binSize}kbp/data/{binSize}kbp-segmented.rds",
         allprofiles=expand("../{{binSize}}kbp/profiles/segmented/{samples}.png",samples=SAMPLES.keys()),
+        copynumbers="../{binSize}kbp/data/{binSize}kbp-copynumbers.igv",
+        segments="../{binSize}kbp/data/{binSize}kbp-segments.igv",
+        copynumbersbed=expand("../{{binSize}}kbp/BED/{samples}-copynumbers.bed",samples=SAMPLES.keys()),
+        segmentsbed=expand("../{{binSize}}kbp/BED/{samples}-segments.bed",samples=SAMPLES.keys()),
     params:
         profiles="../{binSize}kbp/profiles/segmented/",
         failed="../{binSize}kbp/logs/failed_samples.txt",
-        minimal_used_reads=config["QDNAseq"]["minimal_used_reads"]
+        minimal_used_reads=config["QDNAseq"]["minimal_used_reads"],
+        copynumbersbed="../{binSize}kbp/BED/%s-copynumbers.bed",
+        segmentsbed="../{binSize}kbp/BED/%s-segments.bed",
+        bedfolder="../{binSize}kbp/BED/",
     log: "../{binSize}kbp/logs/segment.log"
     script:
         "{input.script}"
@@ -144,6 +155,7 @@ rule CNA_call:
         called="../{binSize}kbp/data/{binSize}kbp-called.rds",
         freqplot="../{binSize}kbp/profiles/freqPlot/freqPlot_{binSize}kbp.png",
         allprofiles=expand("../{{binSize}}kbp/profiles/called/{samples}.png",samples=SAMPLES.keys()),
+        calls="../{binSize}kbp/data/{binSize}kbp-calls.igv"
     params:
         profiles="../{binSize}kbp/profiles/called/",
         failed="../{binSize}kbp/logs/failed_samples.txt",
@@ -151,42 +163,40 @@ rule CNA_call:
     script:
         "{input.script}"
 
-rule CNA_recall:
+rule CNA_call_cellularity_based:
     input:
-        called="../{binSize}kbp/data/{binSize}kbp-called.rds",
-        script="scripts/CNA_recall.R",
+        called="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-called.rds",
+        script="scripts/CNA_call_cellularity_based.R",
+        fitpicker=expand("../{{ACEbinSize}}kbp/ACE/{main_ploidy}N/fitpicker_{main_ploidy}N.tsv", main_ploidy=config["ACE"]["main_ploidy"]),
     output:
-        recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
-        copynumbers="../{binSize}kbp/data/{binSize}kbp-copynumbers.igv",
-        segments="../{binSize}kbp/data/{binSize}kbp-segments.igv",
-        calls="../{binSize}kbp/data/{binSize}kbp-calls.igv",
-        allprofiles=expand("../{{binSize}}kbp/profiles/reCalled/{samples}.png",samples=SAMPLES.keys()),
-        copynumbersbed=expand("../{{binSize}}kbp/BED/{samples}-copynumbers.bed",samples=SAMPLES.keys()),
-        segmentsbed=expand("../{{binSize}}kbp/BED/{samples}-segments.bed",samples=SAMPLES.keys()),
+        recalled="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds",
+        calls="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-calls_cellularity_based.igv",
+        allprofiles=expand("../{{ACEbinSize}}kbp/profiles/call_cellularity_based/{samples}.png",samples=SAMPLES.keys()),
+        freqplot="../{ACEbinSize}kbp/profiles/freqPlot/freqPlot_{ACEbinSize}kbp_cellularity.png"
     params:
-        profiles="../{binSize}kbp/profiles/reCalled/",
-        copynumbersbed="../{binSize}kbp/BED/%s-copynumbers.bed",
-        segmentsbed="../{binSize}kbp/BED/%s-segments.bed",
-        bedfolder="../{binSize}kbp/BED/",
-        failed="../{binSize}kbp/logs/failed_samples.txt",
-    log: "../{binSize}kbp/logs/recall.log"
+        profiles="../{ACEbinSize}kbp/profiles/call_cellularity_based/",
+        failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
+        minimum_cellularity=config["QDNAseq"]["minimum_cellularity"],
+    log: "../{ACEbinSize}kbp/logs/CNA_call_cellularity_based.log"
     script:
         "{input.script}"
 
+
 rule CNA_bedfiles:
     input:
-        recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
+        #recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
+        recalled="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds",
         script="scripts/makeCNAbedFile.R",
     output:
-        bedfile=expand('../{{binSize}}kbp/BED/{sample}_allCNAsPerBin.bed', sample=SAMPLES.keys()),
-        focalCNA=expand('../{{binSize}}kbp/BED/{sample}_focalCNAs.bed', sample=SAMPLES.keys()),
-        CNAs=expand('../{{binSize}}kbp/BED/{sample}_CNAs.bed',sample=SAMPLES.keys()),
+        bedfile=expand('../{{ACEbinSize}}kbp/BED/{sample}_allCNAsPerBin.bed', sample=SAMPLES.keys()),
+        focalCNA=expand('../{{ACEbinSize}}kbp/BED/{sample}_focalCNAs.bed', sample=SAMPLES.keys()),
+        CNAs=expand('../{{ACEbinSize}}kbp/BED/{sample}_CNAs.bed',sample=SAMPLES.keys()),
     params:
-        beddir='../{binSize}kbp/BED/',
+        beddir='../{ACEbinSize}kbp/BED/',
         cytobands=config["CGHregions"]["cytobands"],
         max_focal_size_bed=config["BED"]["max_focal_size_bed"],
-        failed="../{binSize}kbp/logs/failed_samples.txt",
-    log: "../{binSize}kbp/logs/bedfiles.log"
+        failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
+    log: "../{ACEbinSize}kbp/logs/bedfiles.log"
     script:
         "{input.script}"
 
@@ -204,16 +214,18 @@ rule annotate_focalCNA:
     shell:
         "{input.script} {input.bedfile} {wildcards.sample} {params.outdir} {output} 2> {log} "
 
+#TODO change reCalled to normal calls or cellularity based
 rule CGHregions:
     input:
-        recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
+        #recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
+        recalled="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds",
         script="scripts/CGHregions.R"
     output:
-        RegionsCGH="../{binSize}kbp/data/{binSize}kbp-RegionsCGH.rds",
-        profiles='../{binSize}kbp/profiles/freqPlot/freqPlotREGIONS_{binSize}kbp.png'
+        RegionsCGH="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-RegionsCGH.rds",
+        profiles='../{ACEbinSize}kbp/profiles/freqPlot/freqPlotREGIONS_{ACEbinSize}kbp.png'
     params:
         averr=config["CGHregions"]["averror"],
-    log: "../{binSize}kbp/logs/CGHregions.log"
+    log: "../{ACEbinSize}kbp/logs/CGHregions.log"
     script:
         "{input.script}"
 
@@ -325,3 +337,26 @@ rule postanalysisloop_ACE:
     log:"../{ACEbinSize}kbp/ACE/post_log.tsv"
     script:
         "{input.script}"
+
+# #TODO change reCalled to normal calls or cellularity based
+# rule CNA_recall:
+#     input:
+#         called="../{binSize}kbp/data/{binSize}kbp-called.rds",
+#         script="scripts/CNA_recall.R",
+#     output:
+#         recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
+#         #copynumbers="../{binSize}kbp/data/{binSize}kbp-copynumbers.igv",
+#         #segments="../{binSize}kbp/data/{binSize}kbp-segments.igv",
+#         calls="../{binSize}kbp/data/{binSize}kbp-calls.igv",
+#         allprofiles=expand("../{{binSize}}kbp/profiles/reCalled/{samples}.png",samples=SAMPLES.keys()),
+#         #copynumbersbed=expand("../{{binSize}}kbp/BED/{samples}-copynumbers.bed",samples=SAMPLES.keys()),
+#         #segmentsbed=expand("../{{binSize}}kbp/BED/{samples}-segments.bed",samples=SAMPLES.keys()),
+#     params:
+#         profiles="../{binSize}kbp/profiles/reCalled/",
+#         #copynumbersbed="../{binSize}kbp/BED/%s-copynumbers.bed",
+#         #segmentsbed="../{binSize}kbp/BED/%s-segments.bed",
+#         #bedfolder="../{binSize}kbp/BED/",
+#         failed="../{binSize}kbp/logs/failed_samples.txt",
+#     log: "../{binSize}kbp/logs/recall.log"
+#     script:
+#         "{input.script}"

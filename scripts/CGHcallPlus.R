@@ -54,7 +54,7 @@ function (x, y, main='Frequency Plot', gaincol='red', losscol='blue', misscol=NA
       abline(v=chrom.ends[j], lty='dashed')
   ax <- (chrom.ends + c(0, chrom.ends[-length(chrom.ends)])) / 2
   axis(side=1,at=ax,labels=uni.chrom,cex=.2,lwd=.5,las=1,cex.axis=1,cex.lab=1)
-  axis(side=2, at=c(-1, -0.5, 0, 0.5, 1), labels=c('100 %', ' 50 %', '0 %', '50 %', '100 %'), las=1)
+  axis(side=2, at=c(-1, -0.5, 0, 0.5, 1), labels=c('100%', ' 50%', '0%', '50%', '100%'), las=1)
   mtext('gains', side=2, line=3, at=0.5)
   mtext('losses', side=2, line=3, at=-0.5)
   ### number of data points
