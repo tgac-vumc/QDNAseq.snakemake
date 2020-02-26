@@ -1,7 +1,7 @@
 all:
   REF: /net/nfs/PAT/data/ref/hg19/ensembl/bwa-0.7.5a/Homo_sapiens.GRCh37.69.dna_sm.primary_assembly.fa
   THREADS: 4
-  profiletypes: ["corrected", "segmented", "called","reCalled",'dewaved']
+  profiletypes: ["corrected", "segmented", "called",'dewaved']
 
 bwa:
   max_edit_distance: 2  #n
