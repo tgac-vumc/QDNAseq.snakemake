@@ -1,0 +1,1 @@
+samtools view -uS ../bam/MPS-409-sample-07.samse.sam 2> ../logs/samtools/MPS-409-sample-07.log| samtools sort - -o ../tmp/MPS-409-sample-07.all.bam 2>> ../logs/samtools/MPS-409-sample-07.log
