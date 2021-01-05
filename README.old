@@ -22,14 +22,15 @@ cd QDNAseq.snakemake
 git checkout Tjitske
 ```
 
-install the environment using mamba:
+install the environment using conda:
 ```
-mamba env create --name  QDNAseq-snakemake --file environment-test-versions.yaml
+conda env create --name  QDNAseq-snakemake --file environment.yaml
+
 ```
 
 activate the environment by:
 ```
-conda activate QDNAseq-snakemake
+source activate QDNAseq-snakemake
 ```
 
 Not all packages required by R can be installed by conda, these need to be installed manually from R. first download CGHtest in a location where you want your files:
@@ -44,14 +45,11 @@ Than open R and install the Packages using the following code:
 
 ```
 R
-
 library(devtools)
+
+install.packages("denstrip")
 options(unzip = 'internal')
-
-devtools::install_version("denstrip", version = '1.5.4')
-devtools::install_version("flexmix", version = '2.3-17')
-
-devtools::install_github("tgac-vumc/WECCA")
+install_github("tgac-vumc/WECCA")
 ```
 
 Installing CGHtest on server:

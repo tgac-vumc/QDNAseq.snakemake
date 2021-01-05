@@ -20,7 +20,5 @@ dependencies:
   - r-survival
   - perl-bioperl
   - perl-dbd-mysql
-  - r-devtools=1.13.2
+  - r-devtools
   - r-ggplot2
-  - r-lattice=0.20.35
-  - r-modeltools=0.2.21
