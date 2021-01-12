@@ -41,6 +41,8 @@ rule bwa_aln:
         ref= config['all']['REF'],
         n=config['bwa']['max_edit_distance'],
         q=config['bwa']['read_trimming_param'],
+    conda:
+        "envs/bwa_aln.yaml"
     threads: config['all']['THREADS']
     log: "../logs/bwa/{sample}.log"
     shell:
@@ -93,6 +95,8 @@ rule QDNAseq_binReadCounts:
         binReadCounts="../{binSize}kbp/data/{binSize}kbp-raw.rds"
     params:
         genome=config["QDNAseq"]["genome"],
+    conda:
+        "envs/QDNAseq_binReadCounts.yaml"
     log: "../{binSize}kbp/logs/binReadCounts.log"
     script:
         "{input.script}"
@@ -107,6 +111,8 @@ rule QDNAseq_normalize:
     params:
         profiles="../{binSize}kbp/profiles/corrected/",
         chrom_filter=config["QDNAseq"]["chrom_filter"],
+    conda:
+        "envs/QDNAseq_normalize.yaml"
     log: "../{binSize}kbp/logs/normalizeBins.log"
     script:
         "{input.script}"
@@ -121,6 +127,8 @@ rule deWave:
     params:
         profiles="../{binSize}kbp/profiles/dewaved/",
         dewave_data=config["QDNAseq"]["dewave_data"],
+    conda:
+        "envs/deWave.yaml"
     log: "../{binSize}kbp/logs/dewave.log"
     script:
         "{input.script}"
@@ -143,6 +151,8 @@ rule QDNAseq_segment:
         copynumbersbed="../{binSize}kbp/BED/%s-copynumbers.bed",
         segmentsbed="../{binSize}kbp/BED/%s-segments.bed",
         bedfolder="../{binSize}kbp/BED/",
+    conda:
+        "envs/QDNAseq_segment.yaml"
     log: "../{binSize}kbp/logs/segment.log"
     script:
         "{input.script}"
@@ -159,6 +169,8 @@ rule CNA_call:
     params:
         profiles="../{binSize}kbp/profiles/called/",
         failed="../{binSize}kbp/logs/failed_samples.txt",
+    conda:
+        "envs/CNA_call.yaml"
     log: "../{binSize}kbp/logs/call.log"
     script:
         "{input.script}"
@@ -177,6 +189,8 @@ rule CNA_call_cellularity_based:
         profiles="../{ACEbinSize}kbp/profiles/call_cellularity_based/",
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
         minimum_cellularity=config["QDNAseq"]["minimum_cellularity"],
+    conda:
+        "envs/CNA_call_cellularity_based.yaml"
     log: "../{ACEbinSize}kbp/logs/CNA_call_cellularity_based.log"
     script:
         "{input.script}"
@@ -196,6 +210,8 @@ rule CNA_bedfiles:
         cytobands=config["CGHregions"]["cytobands"],
         max_focal_size_bed=config["BED"]["max_focal_size_bed"],
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
+    conda:
+        "envs/CNA_bedfiles.yaml"
     log: "../{ACEbinSize}kbp/logs/bedfiles.log"
     script:
         "{input.script}"
@@ -225,6 +241,8 @@ rule CGHregions:
         profiles='../{ACEbinSize}kbp/profiles/freqPlot/freqPlotREGIONS_{ACEbinSize}kbp.png'
     params:
         averr=config["CGHregions"]["averror"],
+    conda:
+        "envs/CGHregions.yaml"
     log: "../{ACEbinSize}kbp/logs/CGHregions.log"
     script:
         "{input.script}"
@@ -240,6 +258,8 @@ rule makeCGHregionsTable:
         min_freq_focal=config["CGHregions"]["min_freq_focal"],
         max_focal_size_mb=config["CGHregions"]["max_focal_size_mb"],
         cytobands=config["CGHregions"]["cytobands"],
+    conda:
+        "envs/makeCGHregionsTable.yaml"
     log: "../{binSize}kbp/logs/CGHregionstable.log"
     script:
         "{input.script}"
@@ -320,6 +340,8 @@ rule ACE:
     params:
         outputdir="../{ACEbinSize}kbp/ACE/",
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
+    conda:
+        "envs/ACE.yaml"
     log:"../{ACEbinSize}kbp/ACE/{ploidy}N/log.tsv"
     script:
         "{input.script}"
@@ -334,6 +356,8 @@ rule postanalysisloop_ACE:
     params:
         outputdir="../{ACEbinSize}kbp/ACE/{ploidy}N/",
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
+    conda:
+        "envs/postanalysisloop_ACE.yaml"
     log:"../{ACEbinSize}kbp/ACE/post_log.tsv"
     script:
         "{input.script}"
@@ -357,6 +381,8 @@ rule postanalysisloop_ACE:
 #         #segmentsbed="../{binSize}kbp/BED/%s-segments.bed",
 #         #bedfolder="../{binSize}kbp/BED/",
 #         failed="../{binSize}kbp/logs/failed_samples.txt",
+#     conda:
+#        "envs/CNA_recall.yaml"
 #     log: "../{binSize}kbp/logs/recall.log"
 #     script:
 #         "{input.script}"

@@ -22,9 +22,14 @@ cd QDNAseq.snakemake
 git checkout Tjitske
 ```
 
+install mamba as drop-in replacement for conda with mamba's improved installation-performance:
+```
+conda install -c conda-forge mamba
+```
+
 install the environment using mamba:
 ```
-mamba env create --name  QDNAseq-snakemake --file environment-test-versions.yaml
+mamba env create --name  QDNAseq-snakemake --file environment.yaml
 ```
 
 activate the environment by:

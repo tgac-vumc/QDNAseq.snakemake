@@ -1,0 +1,20 @@
+channels:
+    - conda-forge
+    - bioconda
+    - r
+    - defaults
+dependencies:
+    - bioconductor-qdnaseq=1.10.0
+# from CNA_call.R
+    - bioconductor-biobase
+# from CNA_call.R
+    - bioconductor-cghcall
+# from CNA_call.R
+#   - CGHtest
+# from CNA_call.R
+    - bioconductor-cghregions
+# from CNA_call.R into source('scripts/CGHcallPlus.R')
+#   - WECCA
+# from CNA_call.R into source('scripts/CGHcallPlus.R') manual install
+    - r-matrixstats
+# from CNA_call.R into source('scripts/CGHcallPlus.R')
