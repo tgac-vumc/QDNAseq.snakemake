@@ -1,0 +1,4 @@
+Building DAG of jobs...
+MissingInputException in line 27 of /net/nfs/PAT/analysis/MPS-407/201223_K00360_0679/QDNAseq.snakemake/Snakefile:
+Missing input files for rule all:
+../100kbp/ACE/2N/003/summary_003.png

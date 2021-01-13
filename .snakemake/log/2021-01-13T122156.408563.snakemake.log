@@ -1,0 +1,3 @@
+WorkflowError in line 3 of /net/nfs/PAT/analysis/MPS-407/201223_K00360_0679/QDNAseq.snakemake/Snakefile:
+Config file is not valid JSON or YAML. In case of YAML, make sure to not mix whitespace and tab indentation.
+  File "/net/nfs/PAT/analysis/MPS-407/201223_K00360_0679/QDNAseq.snakemake/Snakefile", line 3, in <module>

@@ -1,0 +1,2 @@
+SyntaxError in line 312 of /net/nfs/PAT/analysis/MPS-407/201223_K00360_0679/QDNAseq.snakemake/Snakefile:
+EOF in multi-line statement (Snakefile, line 312)
