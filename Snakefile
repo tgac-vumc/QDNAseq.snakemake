@@ -26,7 +26,7 @@ rule all:
         expand("../{binSize}kbp/BED/{sample}_Cosmic.bed", binSize=BINSIZES ,sample=SAMPLES.keys()),
         expand("../qc-fastq/{sample}_fastqc.html", sample=wholenames),
         expand("../qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
-       # expand("../{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
+        #expand("../{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
         expand("../{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
         expand("../{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds", ACEbinSize=ACEBINSIZES)
 
@@ -195,7 +195,6 @@ rule CNA_call_cellularity_based:
     script:
         "{input.script}"
 
-
 rule CNA_bedfiles:
     input:
         #recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
@@ -216,8 +215,8 @@ rule CNA_bedfiles:
     script:
         "{input.script}"
 
-#TODO remove in annotateFocalCNAbed file hardcoded location: /net/nfs/PAT/home/stef/code/ENSEMBL_API/ensembl74/ensembl/modules/
-#TODO remove from addCosmicCencus census location: /net/nfs/PAT/home/matias/data/ref/cosmic/hg19_okt2015/CosmicMutantExport.tsv
+ #TODO remove in annotateFocalCNAbed file hardcoded location: /net/nfs/PAT/home/stef/code/ENSEMBL_API/ensembl74/ensembl/modules/
+ #TODO remove from addCosmicCencus census location: /net/nfs/PAT/home/matias/data/ref/cosmic/hg19_okt2015/CosmicMutantExport.tsv
 rule annotate_focalCNA:
     input:
         bedfile='../{binSize}kbp/BED/{sample}_focalCNAs.bed',
@@ -307,15 +306,18 @@ rule summary:
 rule qcfastq:
     input:
         fastq="../fastq/{sample}.fastq.gz"
+        #fastq=expand("../fastq/{{sample}}.fastq.gz", sample=SAMPLES.keys())
     output:
         qcfastq="../qc-fastq/{sample}_fastqc.html",
         qczip=temp("../qc-fastq/{sample}_fastqc.zip")
+        #qcfastq=expand("../qc-fastq/{{sample}}.fastqc.html", sample=SAMPLES.keys()),
+        #qczip=temp(expand("../qc-fastq/{{sample}}_fastqc.zip", sample=SAMPLES.keys()))
     threads: config['all']['THREADS']
     params:
         qcfastqdir="../qc-fastq/"
-    log: "../logs/fastqc.log"
+    log: "../logs/qc-fastq/{sample}.log"
     shell:
-        "fastqc {input} --outdir {params.qcfastqdir} -t {threads} 2>> {log}"
+        "fastqc {input.fastq} --outdir {params.qcfastqdir} -t {threads} 2>> {log}"
 
 rule qcbam:
     input:
@@ -326,7 +328,7 @@ rule qcbam:
     threads: config['all']['THREADS']
     params:
         qcbamdir="../qc-bam/"
-    log: "../logs/fastqc-bam.log"
+    log: "../logs/qc-bam/{sample}.log"
     shell:
         "fastqc {input.bam} --format bam_mapped --outdir {params.qcbamdir} -t {threads} 2>> {log}"
 
@@ -358,7 +360,7 @@ rule postanalysisloop_ACE:
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
     conda:
         "envs/postanalysisloop_ACE.yaml"
-    log:"../{ACEbinSize}kbp/ACE/post_log.tsv"
+    log:"../{ACEbinSize}kbp/ACE/{ploidy}N_log.tsv"
     script:
         "{input.script}"
 

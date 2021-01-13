@@ -27,7 +27,7 @@ CGHregions:
   cytobands: /net/nfs/PAT/home/matias/data/ref/HG19.cytoBand.txt.gz
 
 ACE:
-  ploidies: [2,4]   #required ploidies comma seperated
+  ploidies: [2] # [2,4]   #required ploidies comma seperated
   main_ploidy: 2   # only the main ploidy fitpicker file will be used for calling based on cellularity
   imagetype: png      #options are png, pdf
   method: RMSE        #'RMSE' root mean squared error, 'MAE' weighs every error equally, 'SMRE' punish more the long segments that are a little bit off compared to the short segments that are way off

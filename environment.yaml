@@ -5,3 +5,4 @@ channels:
   - defaults
 dependencies:
   - snakemake=5.31
+  - r=4.0
