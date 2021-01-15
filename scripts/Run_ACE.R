@@ -7,7 +7,9 @@
 #This script is a small wrapper around ACE to work in the snakemake pipeline
 ##############################################################################
 
-suppressMessages(library(QDNAseq))
+#suppressMessages(library(QDNAseq))
+library(QDNAseq)
+
 source('scripts/ACE.R')
 
 ploidies<-as.integer(snakemake@wildcards[["ploidy"]])

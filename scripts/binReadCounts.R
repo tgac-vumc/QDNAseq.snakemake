@@ -6,9 +6,14 @@
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
 
-suppressMessages(library(QDNAseq))
-suppressMessages(library(Biobase))
-suppressMessages(library(R.cache))
+#suppressMessages(library(QDNAseq))
+#suppressMessages(library(Biobase))
+#suppressMessages(library(R.cache))
+
+library(QDNAseq)
+library(Biobase)
+library(R.cache)
+
 setCacheRootPath(path="../.Rcache")
 
 bam <- snakemake@input[["bams"]]

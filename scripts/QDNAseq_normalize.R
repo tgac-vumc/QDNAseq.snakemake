@@ -5,8 +5,10 @@
 # date: December 2017
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
-suppressMessages(library(QDNAseq))
-suppressMessages(library(Biobase))
+#suppressMessages(library(QDNAseq))
+#suppressMessages(library(Biobase))
+library(QDNAseq)
+library(Biobase)
 
 source("scripts/functions.R")
 source("scripts/plotQDNAseq.R")

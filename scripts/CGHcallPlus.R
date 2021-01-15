@@ -1,11 +1,15 @@
 #this script contain the functions: make_cghRawPlus, frequencyPlot, segmentDataWeighted,  CGHregionsPlus,
 #regioningPlus, repdata , WECCA.heatmapPlus, mark.genes , mark.bed,  add.cytobands , add.genes, plot.profiles
-
-suppressMessages(library(CGHcall))
-suppressMessages(library(CGHregions))
-suppressMessages(library(WECCA))
-suppressMessages(library(matrixStats))
-suppressMessages(library(QDNAseq))
+library(CGHcall)
+library(CGHregions)
+library(WECCA)
+library(matrixStats)
+library(QDNAseq)
+#suppressMessages(library(CGHcall))
+#suppressMessages(library(CGHregions))
+#suppressMessages(library(WECCA))
+#suppressMessages(library(matrixStats))
+#suppressMessages(library(QDNAseq))
 
 # originally: QDNAseqReadCounts instead of QDNAseqSignals
 setMethod('plot', signature(x='cghRaw', y='missing'),

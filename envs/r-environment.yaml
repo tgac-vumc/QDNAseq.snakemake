@@ -1,0 +1,44 @@
+name: r-environment
+channels:
+    - conda-forge
+    - bioconda
+    - r
+    - defaults
+dependencies:
+    - bioconductor-qdnaseq
+# from CGHregions.R
+    - bioconductor-biobase
+# from CGHregions.R
+    - bioconductor-cghcall
+# from CGHregions.R
+    - bioconductor-cghregions
+# from CGHregions.R
+    - bioconductor-limma
+# from deWave.R
+    - bioconductor-impute
+# from deWave.R
+    - r-matrixstats
+# from CGHregions.R into source('scripts/CGHcallPlus.R')
+    - r-r.cache
+# from binReadCounts.R
+    - r-denstrip
+# from makeCNAbedFile.R
+
+#    - r-flexmix
+## from makeCNAbedFile.R
+
+    - r-gtools
+# from deWave.R
+    - r-MASS
+# from deWave.R
+    - r-devtools
+# from r-dependencies.R
+    - r-ggplot2
+# from Run_ACE.R into source('scripts/ACE.R')
+    - grid
+# from Run_ACE.R into source('scripts/ACE.R')
+
+#   - CGHtest
+# from CGHregions.R into source('scripts/CGHcallPlus.R') manual install
+#   - WECCA
+# from CGHregions.R into source('scripts/CGHcallPlus.R') manual install

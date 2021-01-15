@@ -6,9 +6,12 @@
 # Author: Matias Mendeville
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
-suppressMessages(library(QDNAseq))
-suppressMessages(library(denstrip))
-suppressMessages(library(CGHcall))
+#suppressMessages(library(QDNAseq))
+#suppressMessages(library(denstrip))
+#suppressMessages(library(CGHcall))
+library(QDNAseq)
+library(denstrip)
+library(CGHcall)
 
 source("scripts/functions.R")
 source("scripts/addCytobands.R")

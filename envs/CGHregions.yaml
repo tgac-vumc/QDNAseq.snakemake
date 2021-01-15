@@ -1,3 +1,4 @@
+name: CGHregions
 channels:
     - conda-forge
     - bioconda

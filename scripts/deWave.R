@@ -5,15 +5,20 @@
 # date: December 2017
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
-suppressMessages(library(QDNAseq))
-suppressMessages(library(Biobase))
+#suppressMessages(library(QDNAseq))
+#suppressMessages(library(Biobase))
+library(QDNAseq)
+library(Biobase)
 
 # for dewaving:
-suppressMessages(library(limma))
-suppressMessages(library(gtools))
-suppressMessages(library(impute))
-suppressMessages(library(MASS))
-
+#suppressMessages(library(limma))
+#suppressMessages(library(gtools))
+#suppressMessages(library(impute))
+#suppressMessages(library(MASS))
+library(limma)
+library(gtools)
+library(impute)
+library(MASS)
 
 source("scripts/functions.R")
 source("scripts/plotQDNAseq.R")

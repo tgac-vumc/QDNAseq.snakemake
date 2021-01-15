@@ -1,3 +1,4 @@
+name: QDNAseq_normalize
 channels:
     - conda-forge
     - bioconda

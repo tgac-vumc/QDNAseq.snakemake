@@ -5,10 +5,14 @@
 # Tjitske Los
 ##############################################################################################################
 #open required libraries.
-suppressMessages(library(QDNAseq))
-suppressMessages(library(Biobase))
-suppressMessages(library(CGHcall))
-suppressMessages(library(CGHtest))
+library(QDNAseq)
+library(Biobase)
+library(CGHcall)
+library(CGHtest)
+#suppressMessages(library(QDNAseq))
+#suppressMessages(library(Biobase))
+#suppressMessages(library(CGHcall))
+#suppressMessages(library(CGHtest))
 #suppressMessages(library(denstrip))
 
 source('scripts/CGHcallPlus.R')

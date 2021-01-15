@@ -1,7 +1,9 @@
+name: bwa_aln
 channels:
     - conda-forge
     - bioconda
     - r
     - defaults
 dependencies:
-    - bwa=0.7.12
+    - bwa
+    - samtools

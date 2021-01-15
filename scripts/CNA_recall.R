@@ -5,11 +5,16 @@
 # date: December 2017
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
-suppressMessages(library(QDNAseq))
-suppressMessages(library(Biobase))
-suppressMessages(library(CGHcall))
-suppressMessages(library(CGHtest))
-suppressMessages(library(denstrip))
+# suppressMessages(library(QDNAseq))
+# suppressMessages(library(Biobase))
+# suppressMessages(library(CGHcall))
+# suppressMessages(library(CGHtest))
+# suppressMessages(library(denstrip))
+library(QDNAseq)
+library(Biobase)
+library(CGHcall)
+library(CGHtest)
+library(denstrip)
 
 source('scripts/CGHcallPlus.R')
 source('scripts/reCall5levelCNAs.R')

@@ -1,3 +1,4 @@
+name: CNA_bedfiles
 channels:
     - conda-forge
     - bioconda

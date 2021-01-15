@@ -45,6 +45,11 @@ cd </path/to/files/dir/>
 wget http://www.few.vu.nl/~mavdwiel/CGHtest/CGHtest_1.1.tar.gz
 ```
 
+# Than let snakemake create the r environment by running
+# ```
+# snakemake --use-conda --cores=1 -U create_r_environment --rerun-incomplete
+# ```
+
 Than open R and install the Packages using the following code:
 
 ```
