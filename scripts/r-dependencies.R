@@ -12,8 +12,11 @@ library(devtools)
 options(unzip = 'internal')
 #devtools::install_version("denstrip", version = '1.5.4')
 #devtools::install_version("flexmix", version = '2.3-17')
+#devtools::install_version("flexmix"')
+#install.packages("flexmix")
 
 devtools::install_github("tgac-vumc/WECCA")
 
-install.packages(file.path(getwd(),"CGHtest_1.1.tar.gz"))
+#install.packages(file.path(getwd(),"CGHtest_1.1.tar.gz"))
+install.packages("CGHtest_1.1.tar.gz", source=NULL, depenencies=TRUE)
 

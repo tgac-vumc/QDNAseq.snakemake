@@ -4,5 +4,50 @@ channels:
   - r
   - defaults
 dependencies:
+  - python=3.8.5
+  - bwa #=0.7.12
+  - samtools #=1.3.1
   - snakemake=5.31
-  - r=4.0
+  - pyyaml #=3.11
+  - picard #=2.15.0
+  - fastqc #=0.11.5
+  - perl-bioperl
+# from annotateFocalCNAbed
+  - perl-dbd-mysql
+# from annotateFocalCNAbed
+  - bioconductor-qdnaseq.hg19 #=1.10.0
+# from CGHregions.R
+  - bioconductor-biobase
+# from CGHregions.R
+  - bioconductor-cghcall
+# from CGHregions.R
+  - bioconductor-cghregions
+# from CGHregions.R
+  - bioconductor-limma
+# from deWave.R
+  - bioconductor-impute
+# from deWave.R
+  - r-matrixstats
+# from CGHregions.R into source('scripts/CGHcallPlus.R')
+  - r-r.cache
+# from binReadCounts.R
+  - r-denstrip
+# from makeCNAbedFile.R
+  - r-flexmix
+# from makeCNAbedFile.R
+  - r-gtools
+# from deWave.R
+  - r-mass
+# from deWave.R
+  - r-devtools
+# from r-dependencies.R
+  - r-ggplot2
+# from Run_ACE.R into source('scripts/ACE.R')
+  - r-survival
+# dependency from manual install CGHtest
+#  - grid
+# from Run_ACE.R into source('scripts/ACE.R')
+#   - CGHtest
+# from CGHregions.R into source('scripts/CGHcallPlus.R') manual install
+#   - WECCA
+# from CGHregions.R into source('scripts/CGHcallPlus.R') manual install

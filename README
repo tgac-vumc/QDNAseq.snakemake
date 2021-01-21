@@ -37,43 +37,18 @@ activate the environment by:
 conda activate QDNAseq-snakemake
 ```
 
-Not all packages required by R can be installed by conda, these need to be installed manually from R. first download CGHtest in a location where you want your files:
+Not all packages required by R can be installed by conda, these need to be installed manually from R. first download CGHtest in the QDNAseq.snakemake directory:
 # source code at: http://www.few.vu.nl/~mavdwiel/CGHtest.html
 
 ```
-cd </path/to/files/dir/>
+cd QDNAseq.snakemake
 wget http://www.few.vu.nl/~mavdwiel/CGHtest/CGHtest_1.1.tar.gz
 ```
 
-# Than let snakemake create the r environment by running
-# ```
-# snakemake --use-conda --cores=1 -U create_r_environment --rerun-incomplete
-# ```
-
-Than open R and install the Packages using the following code:
+Then run the following R-script in the terminal to install the non-conda r-dependencies:
 
 ```
-R
-
-library(devtools)
-options(unzip = 'internal')
-
-devtools::install_version("denstrip", version = '1.5.4')
-devtools::install_version("flexmix", version = '2.3-17')
-
-devtools::install_github("tgac-vumc/WECCA")
-```
-
-Installing CGHtest on server:
-
-```
-install.packages("</path/to/>CGHtest_1.1.tar.gz")
-```
-
-exit R:
-
-```
-q()
+Rscript scripts/r-dependencies.R
 ```
 
 go to analysis dir and prepare analysis by copy or create links to fastq.gz files:

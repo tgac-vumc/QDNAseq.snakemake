@@ -15,11 +15,10 @@ def getnames():
         fastqfile="../fastq/"+wholename+".fastq.gz"
         SAMPLES[sample]=fastqfile
     return(SAMPLES)
-
 SAMPLES=getnames()
 
-rule all:
-    input:
+setting = config["all"]["setting"]
+InputListService = [
         expand("../{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES),
         expand("../{binSize}kbp/summary.html", binSize=BINSIZES),
         expand("../{ACEbinSize}kbp/profiles/call_cellularity_based/index.html" ,ACEbinSize=ACEBINSIZES),
@@ -29,7 +28,14 @@ rule all:
         #expand("../{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
         expand("../{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
         expand("../{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds", ACEbinSize=ACEBINSIZES)
+        ]
+InputListResearch = [
+        InputListService
+        ]
 
+rule all:
+    input:
+        InputListService if setting=="service" else InputListResearch 
 
 rule bwa_aln:
     input:
@@ -41,13 +47,11 @@ rule bwa_aln:
         ref= config['all']['REF'],
         n=config['bwa']['max_edit_distance'],
         q=config['bwa']['read_trimming_param'],
-    conda:
-        "envs/bwa_aln.yaml"
     threads: config['all']['THREADS']
     log: "../logs/bwa/{sample}.log"
     shell:
-        "bwa aln -n {params.n} -t {threads} -q {params.q} {params.ref} {input} > {output.sai} 2> {log};"
-        "bwa samse -r '@RG\tID:{wildcards.sample}\tSM:{wildcards.sample}' -f {output.samse}"
+        "bwa aln -n {params.n} -t {threads} -q {params.q} {params.ref} {input} > {output.sai} 2> {log}; "
+        "bwa samse -f {output.samse} -r '@RG\\tID:{wildcards.sample}\\tSM:{wildcards.sample}'" 
         " {params.ref} {output.sai} {input} 2>> {log}"
 
 rule samtools_sort:
@@ -72,8 +76,8 @@ rule mark_duplicates:
         metrics_file="../stats/{sample}.md.metrics"
     log: "../logs/mark_duplicates/{sample}.log"
     shell:
-        "picard MarkDuplicates I={input} O={output.bam} M={output.metrics_file} "
-        "ASSUME_SORTED=true CREATE_INDEX=true VALIDATION_STRINGENCY=LENIENT &> {log} ;"
+        "picard MarkDuplicates I={input} O={output.bam} M={output.metrics_file}"
+        " ASSUME_SORTED=true CREATE_INDEX=true VALIDATION_STRINGENCY=LENIENT USE_JDK_DEFLATER=true USE_JDK_INFLATER=true &> {log}; "
         "ln -s {output.bai} {output.bambai}"
 
 rule generate_stats:
@@ -90,53 +94,50 @@ rule generate_stats:
 rule QDNAseq_binReadCounts:
     input:
         bams=expand("../bam/{sample}.bam", sample=SAMPLES.keys()),
-        script="scripts/binReadCounts.R"
+        #script="scripts/binReadCounts.R"
     output:
         binReadCounts="../{binSize}kbp/data/{binSize}kbp-raw.rds"
     params:
         genome=config["QDNAseq"]["genome"],
-    conda:
-        "envs/QDNAseq_binReadCounts.yaml"
     log: "../{binSize}kbp/logs/binReadCounts.log"
     script:
-        "{input.script}"
+        "scripts/binReadCounts.R"
+        #"{input.script}"
 
 rule QDNAseq_normalize:
     input:
         binReadCounts="../{binSize}kbp/data/{binSize}kbp-raw.rds",
-        script="scripts/QDNAseq_normalize.R",
+        #script="scripts/QDNAseq_normalize.R",
     output:
         corrected="../{binSize}kbp/data/{binSize}kbp-corrected.rds",
         allprofiles=expand("../{{binSize}}kbp/profiles/corrected/{samples}.png",samples=SAMPLES.keys()),
     params:
         profiles="../{binSize}kbp/profiles/corrected/",
         chrom_filter=config["QDNAseq"]["chrom_filter"],
-    conda:
-        "envs/QDNAseq_normalize.yaml"
     log: "../{binSize}kbp/logs/normalizeBins.log"
     script:
-        "{input.script}"
+        "scripts/QDNAseq_normalize.R"
+        #"{input.script}"
 
 rule deWave:
     input:
         corrected="../{binSize}kbp/data/{binSize}kbp-corrected.rds",
-        script="scripts/deWave.R",
+        #script="scripts/deWave.R",
     output:
         dewaved="../{binSize}kbp/data/{binSize}kbp-dewaved.rds",
         allprofiles=expand("../{{binSize}}kbp/profiles/dewaved/{samples}.png",samples=SAMPLES.keys()),
     params:
         profiles="../{binSize}kbp/profiles/dewaved/",
         dewave_data=config["QDNAseq"]["dewave_data"],
-    conda:
-        "envs/deWave.yaml"
     log: "../{binSize}kbp/logs/dewave.log"
     script:
-        "{input.script}"
+        "scripts/deWave.R"
+        #"{input.script}"
 
 rule QDNAseq_segment:
     input:
         dewaved="../{binSize}kbp/data/{binSize}kbp-dewaved.rds" if config['QDNAseq']['dewave'] else "../{binSize}kbp/data/{binSize}kbp-corrected.rds",
-        script="scripts/QDNAseq_segment.R",
+        #script="scripts/QDNAseq_segment.R",
     output:
         segmented="../{binSize}kbp/data/{binSize}kbp-segmented.rds",
         allprofiles=expand("../{{binSize}}kbp/profiles/segmented/{samples}.png",samples=SAMPLES.keys()),
@@ -151,16 +152,15 @@ rule QDNAseq_segment:
         copynumbersbed="../{binSize}kbp/BED/%s-copynumbers.bed",
         segmentsbed="../{binSize}kbp/BED/%s-segments.bed",
         bedfolder="../{binSize}kbp/BED/",
-    conda:
-        "envs/QDNAseq_segment.yaml"
     log: "../{binSize}kbp/logs/segment.log"
     script:
-        "{input.script}"
+        "scripts/QDNAseq_segment.R"
+        #"{input.script}"
 
 rule CNA_call:
     input:
         segmented="../{binSize}kbp/data/{binSize}kbp-segmented.rds",
-        script="scripts/CNA_call.R",
+        #script="scripts/CNA_call.R",
     output:
         called="../{binSize}kbp/data/{binSize}kbp-called.rds",
         freqplot="../{binSize}kbp/profiles/freqPlot/freqPlot_{binSize}kbp.png",
@@ -169,17 +169,16 @@ rule CNA_call:
     params:
         profiles="../{binSize}kbp/profiles/called/",
         failed="../{binSize}kbp/logs/failed_samples.txt",
-    conda:
-        "envs/CNA_call.yaml"
     log: "../{binSize}kbp/logs/call.log"
     script:
-        "{input.script}"
+        "scripts/CNA_call.R"
+        #"{input.script}"
 
 rule CNA_call_cellularity_based:
     input:
         called="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-called.rds",
-        script="scripts/CNA_call_cellularity_based.R",
         fitpicker=expand("../{{ACEbinSize}}kbp/ACE/{main_ploidy}N/fitpicker_{main_ploidy}N.tsv", main_ploidy=config["ACE"]["main_ploidy"]),
+        #script="scripts/CNA_call_cellularity_based.R",
     output:
         recalled="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds",
         calls="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-calls_cellularity_based.igv",
@@ -189,17 +188,16 @@ rule CNA_call_cellularity_based:
         profiles="../{ACEbinSize}kbp/profiles/call_cellularity_based/",
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
         minimum_cellularity=config["QDNAseq"]["minimum_cellularity"],
-    conda:
-        "envs/CNA_call_cellularity_based.yaml"
     log: "../{ACEbinSize}kbp/logs/CNA_call_cellularity_based.log"
     script:
-        "{input.script}"
+        "scripts/CNA_call_cellularity_based.R"
+        #"{input.script}"
 
 rule CNA_bedfiles:
     input:
         #recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
         recalled="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds",
-        script="scripts/makeCNAbedFile.R",
+        #script="scripts/makeCNAbedFile.R",
     output:
         bedfile=expand('../{{ACEbinSize}}kbp/BED/{sample}_allCNAsPerBin.bed', sample=SAMPLES.keys()),
         focalCNA=expand('../{{ACEbinSize}}kbp/BED/{sample}_focalCNAs.bed', sample=SAMPLES.keys()),
@@ -209,15 +207,14 @@ rule CNA_bedfiles:
         cytobands=config["CGHregions"]["cytobands"],
         max_focal_size_bed=config["BED"]["max_focal_size_bed"],
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
-    conda:
-        "envs/CNA_bedfiles.yaml"
     log: "../{ACEbinSize}kbp/logs/bedfiles.log"
     script:
-        "{input.script}"
+        "scripts/makeCNAbedFile.R"
+        #"{input.script}"
 
+rule annotate_focalCNA:
  #TODO remove in annotateFocalCNAbed file hardcoded location: /net/nfs/PAT/home/stef/code/ENSEMBL_API/ensembl74/ensembl/modules/
  #TODO remove from addCosmicCencus census location: /net/nfs/PAT/home/matias/data/ref/cosmic/hg19_okt2015/CosmicMutantExport.tsv
-rule annotate_focalCNA:
     input:
         bedfile='../{binSize}kbp/BED/{sample}_focalCNAs.bed',
         script="scripts/annotateFocalCNAbed.sh"
@@ -229,27 +226,26 @@ rule annotate_focalCNA:
     shell:
         "{input.script} {input.bedfile} {wildcards.sample} {params.outdir} {output} 2> {log} "
 
-#TODO change reCalled to normal calls or cellularity based
 rule CGHregions:
+#TODO change reCalled to normal calls or cellularity based
     input:
         #recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
         recalled="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds",
-        script="scripts/CGHregions.R"
+        #script="scripts/CGHregions.R"
     output:
         RegionsCGH="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-RegionsCGH.rds",
         profiles='../{ACEbinSize}kbp/profiles/freqPlot/freqPlotREGIONS_{ACEbinSize}kbp.png'
     params:
         averr=config["CGHregions"]["averror"],
-    conda:
-        "envs/CGHregions.yaml"
     log: "../{ACEbinSize}kbp/logs/CGHregions.log"
     script:
-        "{input.script}"
+        "scripts/CGHregions.R"
+        #"{input.script}"
 
 rule makeCGHregionsTable:
     input:
         RegionsCGH="../{binSize}kbp/data/{binSize}kbp-RegionsCGH.rds",
-        script="scripts/makeCGHregionstable.R",
+        #script="scripts/makeCGHregionstable.R",
     output:
         allRegions="../{binSize}kbp/profiles/freqPlot/allRegions.txt",
         allFocalRegions="../{binSize}kbp/profiles/freqPlot/allFocalRegions.bed"
@@ -257,11 +253,10 @@ rule makeCGHregionsTable:
         min_freq_focal=config["CGHregions"]["min_freq_focal"],
         max_focal_size_mb=config["CGHregions"]["max_focal_size_mb"],
         cytobands=config["CGHregions"]["cytobands"],
-    conda:
-        "envs/makeCGHregionsTable.yaml"
     log: "../{binSize}kbp/logs/CGHregionstable.log"
     script:
-        "{input.script}"
+        "scripts/makeCGHregionstable.R"
+        #"{input.script}"
 
 rule annotate_RegionsFocalCNAbed:
     input:
@@ -288,8 +283,8 @@ rule lightBox:
     shell:
         "{input.script} {params.profiles} {params.lb2dir} > {output.index}"
 
-#TODO script lane-summary does contain relative links to files - maybe better to change
 rule summary:
+#TODO script lane-summary does contain relative links to files - maybe better to change
     input:
         stats=expand("../stats/{sample}.reads.all", sample=SAMPLES.keys()),
         index=expand("../{{binSize}}kbp/profiles/{profiletype}/index.html", profiletype=profiletypes),
@@ -335,40 +330,38 @@ rule qcbam:
 rule ACE:
     input:
         segmented="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-segmented.rds",
-        script="scripts/Run_ACE.R"
+        #script="scripts/Run_ACE.R"
     output:
         #ACE=expand("../{{ACEbinSize}}kbp/ACE/{{ploidy}}N/summary_files/summary_{sample}.{{imagetype}}", sample=SAMPLES.keys()),
         fitpicker="../{ACEbinSize}kbp/ACE/{ploidy}N/fitpicker_{ploidy}N.tsv",
     params:
         outputdir="../{ACEbinSize}kbp/ACE/",
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
-    conda:
-        "envs/ACE.yaml"
     log:"../{ACEbinSize}kbp/ACE/{ploidy}N/log.tsv"
     script:
-        "{input.script}"
+        "scripts/Run_ACE.R"
+        #"{input.script}"
 
 rule postanalysisloop_ACE:
     input:
         segmented="../{ACEbinSize}kbp/data/{ACEbinSize}kbp-segmented.rds",
         fitpicker="../{ACEbinSize}kbp/ACE/{ploidy}N/fitpicker_{ploidy}N.tsv",
-        script="scripts/Run_postanalysisloop_ACE.R",
+        #script="scripts/Run_postanalysisloop_ACE.R",
     output:
         ACE_post=expand("../{{ACEbinSize}}kbp/ACE/{{ploidy}}N/segmentfiles/{sample}_segments.tsv", sample=SAMPLES.keys()),
     params:
         outputdir="../{ACEbinSize}kbp/ACE/{ploidy}N/",
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
-    conda:
-        "envs/postanalysisloop_ACE.yaml"
     log:"../{ACEbinSize}kbp/ACE/{ploidy}N_log.tsv"
     script:
-        "{input.script}"
+        "scripts/Run_postanalysisloop_ACE.R"
+        #"{input.script}"
 
 # #TODO change reCalled to normal calls or cellularity based
 # rule CNA_recall:
 #     input:
 #         called="../{binSize}kbp/data/{binSize}kbp-called.rds",
-#         script="scripts/CNA_recall.R",
+#         #script="scripts/CNA_recall.R",
 #     output:
 #         recalled="../{binSize}kbp/data/{binSize}kbp-reCalled.rds",
 #         #copynumbers="../{binSize}kbp/data/{binSize}kbp-copynumbers.igv",
@@ -383,8 +376,7 @@ rule postanalysisloop_ACE:
 #         #segmentsbed="../{binSize}kbp/BED/%s-segments.bed",
 #         #bedfolder="../{binSize}kbp/BED/",
 #         failed="../{binSize}kbp/logs/failed_samples.txt",
-#     conda:
-#        "envs/CNA_recall.yaml"
 #     log: "../{binSize}kbp/logs/recall.log"
 #     script:
-#         "{input.script}"
+#         "scripts/CNA_recall.R"
+#         #"{input.script}"
