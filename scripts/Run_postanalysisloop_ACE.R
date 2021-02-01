@@ -6,10 +6,12 @@
 
 #This script is a small wrapper around ACE to perform the postanalysisloop in the snakemake pipeline
 ##############################################################################
-#suppressMessages(library(QDNAseq))
-library(QDNAseq)
+suppressMessages(library(QDNAseq))
+source('scripts/ACE.R', echo = FALSE)
 
-source('scripts/ACE.R')
+## Erik
+#copyNumbersSegmented <- snakemake@output[["ACE_post"]]
+##
 
 inputfile <-snakemake@input[["segmented"]]
 outputdir<-snakemake@params[["outputdir"]]

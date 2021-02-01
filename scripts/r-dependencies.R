@@ -5,7 +5,6 @@
 #date: Jan 20221
 
 #This script is for installing remote packages to be used in the R-environment for snakemake
-# snakemake --use-conda --cores=1 -U create_r_environment --rerun-incomplete
 ##############################################################################
 
 library(devtools)

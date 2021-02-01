@@ -713,8 +713,8 @@ getadjustedsegments <- function(template,cellularity = 1, ploidy = 2, standard, 
 # In case of "append": note that R messes up column names if they have "special" characters or start with numbers
 # outputdir can be specified, so you don't have to save in the same directory (especially handy in loops)
 linkmutationdata <- function(filename, segmentdf, cellularity = 1,chrindex=1,posindex=2,freqindex=3, append=TRUE, outputdir){
-  inputvcf <- try(read.table(filename, header = TRUE, comment.char = "", sep = "\t"))
-  if(class(segmentdf)=="character") {segmentdf <- try(read.table(segmentdf, header = TRUE, comment.char = "", sep = "\t"))}
+  inputvcf <- try(read.table(filename, header = TRUE, comment.char = "", sep = "\t",colClasses = "character"))
+  if(class(segmentdf)=="character") {segmentdf <- try(read.table(segmentdf, header = TRUE, comment.char = "", sep = "\t",colClasses = "character"))}
   if (!inherits(inputvcf, "try-error")) {
     Chromosome <- as.vector(inputvcf[,chrindex])
     Chromosome <- gsub("chr","",Chromosome,ignore.case = TRUE)
@@ -792,8 +792,8 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
       if(length(files)>1){print(paste0("multiple rds-files detected, using first file: ",files[1]))}
       copyNumbersSegmented <- readRDS(file.path(inputdir,files[1]))
     }
-    if(missing(modelsfile)){models <- try(read.table(file.path(inputdir,"models.txt"), header = TRUE, comment.char = "", sep = "\t"))
-    } else {models <- read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t")}
+    if(missing(modelsfile)){models <- try(read.table(file.path(inputdir,"models.txt"), header = TRUE, comment.char = "", sep = "\t",colClasses = "character")) # dont convert sample "026" to sample 26 Erik Bosch 28-01-2021 
+    } else {models <- read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t",colClasses = "character")} # dont convert sample "026" to sample 26 Erik Bosch 28-01-2021 }
     if(inherits(models, "try-error")) {print("failed to read modelsfile")}
     if(missing(mutationdata)) {
       if (dir.exists(file.path(inputdir,"mutationdata"))) {
@@ -805,7 +805,7 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
   if(class(copyNumbersSegmented)=="character") {copyNumbersSegmented <- try(readRDS(copyNumbersSegmented))}
   if(inherits(copyNumbersSegmented, "try-error")) {print("failed to read RDS-file")}
   if(missing(modelsfile)&&inputdir==FALSE){print("this function requires a tab-delimited file with model information per sample")}
-  if(!missing(modelsfile)&&class(modelsfile)=="character") {models <- try(read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t"))}
+  if(!missing(modelsfile)&&class(modelsfile)=="character") {models <- try(read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t", sep = "\t",colClasses = "character"))} # dont convert sample "026" to sample 26 Erik Bosch 28-01-2021 
   if(inherits(models, "try-error")) {print("failed to read modelsfile")}
   if(missing(mutationdata)){print("not linking mutation data")}
   if(!missing(mutationdata)) {

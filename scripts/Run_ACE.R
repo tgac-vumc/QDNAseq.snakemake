@@ -7,16 +7,17 @@
 #This script is a small wrapper around ACE to work in the snakemake pipeline
 ##############################################################################
 
-#suppressMessages(library(QDNAseq))
-library(QDNAseq)
+suppressMessages(library(QDNAseq))
+suppressMessages(library(stringr))
 
-source('scripts/ACE.R')
+source('scripts/ACE.R', echo = FALSE)
 
 ploidies<-as.integer(snakemake@wildcards[["ploidy"]])
 inputfile <-snakemake@input[["segmented"]]
 outputdir<-snakemake@params[["outputdir"]]
 failed <- snakemake@params[["failed"]]
 log<-snakemake@log[[1]]
+fitpicker <- snakemake@output[["fitpicker"]] # Insert by Erik 2021-01-27
 
 imagetype <- snakemake@config[["ACE"]][["imagetype"]]
 method<-snakemake@config[["ACE"]][["method"]]
@@ -30,9 +31,16 @@ copyNumbersSegmented <- readRDS(inputfile)
 parameters <- data.frame(options = c("ploidies","imagetype","method","penalty","cap","trncname","printsummaries"),
                          values = c(paste0(ploidies,collapse=", "),imagetype,method,penalty,cap,trncname,printsummaries))
 
-write.table(parameters, file=log, quote = FALSE, sep = "\t", na = "", row.names = FALSE)
+#write.table(parameters, file=log, quote = FALSE, sep = "\t", na = "", row.names = FALSE)
+write.table(parameters, file=log, quote = FALSE, sep = "\t", na = "", col.names = NA)
 
 ploidyplotloop(copyNumbersSegmented ,outputdir , ploidies,imagetype,method,penalty,cap,trncname,printsummaries)
+
+fitpickertable <- read.table(fitpicker,header = TRUE, comment.char = "", quote = "", sep = "\t")
+if (any(is.integer(fitpickertable$sample))){
+        fitpickertable$sample <- str_pad(fitpickertable$sample,3, pad = "0")
+        print('pad 0s on sample integer in Run_ACE.R-fitpickertable')
+        write.table(fitpickertable, file=fitpicker, quote = FALSE, sep = "\t", na = "", col.names = TRUE)} # Erik Bosch 2021-01-29
 
 #create output for failed samples - for snakemake compatibility.
 failed_samples<-read.table(failed, stringsAsFactors=FALSE, header=TRUE)
