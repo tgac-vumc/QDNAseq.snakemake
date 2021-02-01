@@ -5,6 +5,8 @@
 # date: December 2017
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
+msg <- snakemake@params[["suppressMessages"]]
+if (msg){
 suppressMessages(library(QDNAseq))
 suppressMessages(library(Biobase))
 
@@ -13,11 +15,22 @@ suppressMessages(library(limma))
 suppressMessages(library(gtools))
 suppressMessages(library(impute))
 suppressMessages(library(MASS))
+} else{
+library(QDNAseq)
+library(Biobase)
 
-source("scripts/functions.R", echo = FALSE)
-source("scripts/plotQDNAseq.R", echo = FALSE)
-sourceDir(snakemake@config[["QDNAseq"]][["dewave_dir"]], echo = FALSE)
-load(snakemake@params[["dewave_data"]], verbose = FALSE)
+# for dewaving:
+library(limma)
+library(gtools)
+library(impute)
+library(MASS)
+}
+
+
+source("scripts/functions.R", echo = !msg)
+source("scripts/plotQDNAseq.R", echo = !msg)
+sourceDir(snakemake@config[["QDNAseq"]][["dewave_dir"]], echo = !msg)
+load(snakemake@params[["dewave_data"]], verbose = !msg)
 
 bin <- as.integer(snakemake@wildcards[["binSize"]])
 corrected <- snakemake@input[["corrected"]]

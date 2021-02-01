@@ -64,7 +64,7 @@
 
 ACE <- function(inputdir = "./", outputdir, filetype = 'rds', binsizes, ploidies = 2, imagetype = 'pdf', method = 'RMSE', penalty = 0, cap = 12, trncname = FALSE, printsummaries = TRUE) {
 	imagefunction <- get(imagetype)
-  library(QDNAseq)
+    suppressMessages(library(QDNAseq))
 	if(substr(inputdir,nchar(inputdir),nchar(inputdir)) != "/") {inputdir <- paste0(inputdir,"/")}
 	if(missing(outputdir)) { outputdir <- substr(inputdir,0,nchar(inputdir)-1) }
 	if(!dir.exists(outputdir)) {dir.create(outputdir)}
@@ -109,9 +109,9 @@ ACE <- function(inputdir = "./", outputdir, filetype = 'rds', binsizes, ploidies
 }
 
 ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype='pdf',method='RMSE',penalty=0,cap=12,trncname=FALSE,printsummaries=TRUE) {
-  imagefunction <- get(imagetype)
-  library(ggplot2)
-  library(Biobase)
+    imagefunction <- get(imagetype)
+    suppressMessages(library(ggplot2))
+    suppressMessages(library(Biobase))
 	fd <- fData(copyNumbersSegmented)
 	pd <- pData(copyNumbersSegmented)
 	if(trncname==TRUE) {pd$name <- gsub("_.*","",pd$name)}
@@ -372,8 +372,8 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
 # this code makes the generic input template dataframe for singlemodel and singleplot
 # those function can take QDNAseq objects when specified, so it is not necessary to run this separately
 ObjectsampleToTemplate <- function(copyNumbersSegmented, index = 1) {
-  library(Biobase)
-  library(QDNAseq)
+  suppressMessages(library(Biobase))
+  suppressMessages(library(QDNAseq))
   fd <- fData(copyNumbersSegmented)
 	segments <- as.vector(copyNumbersSegmented@assayData$segmented[,index])
 	copynumbers <- as.vector(copyNumbersSegmented@assayData$copynumber[,index])
@@ -390,7 +390,7 @@ ObjectsampleToTemplate <- function(copyNumbersSegmented, index = 1) {
 # you can use a QDNAseq object as "template", then specify QDNAseqobjectsample by the sample number!
 # e.g. model <- singlemodel(copyNumbersSegmented, QDNAseqobjectsample = 3)
 singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FALSE, method = 'RMSE', penalty = 0, highlightminima = TRUE) {
-  library(ggplot2)
+  suppressMessages(library(ggplot2))
   if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
 	segmentdata <- rle(as.vector(na.exclude(template$segments)))
 	if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
@@ -481,8 +481,8 @@ singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FAL
 # To make the minima pop out, the color code is the inverse of the relative error
 # Minima are found by checking each value for neighboring values, and will only return true if its the lowest error
 squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5, pbottom=1, method = 'RMSE', penalty = 0, penploidy = 0, highlightminima = TRUE) {
-  library(ggplot2)
-  library(Biobase)
+  suppressMessages(library(ggplot2))
+  suppressMessages(library(Biobase))
   if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
   segmentdata <- rle(as.vector(na.exclude(template$segments)))
 
@@ -567,8 +567,8 @@ squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5
 # don't forget to specify cellularity, error, ploidy, and standard; you can find these in the model output
 singleplot <- function(template,cellularity = 1, error, ploidy = 2, standard, title,
                        QDNAseqobjectsample = FALSE, trncname = FALSE, cap = 12, chrsubset) {
-  library(ggplot2)
-  library(Biobase)
+  suppressMessages(library(ggplot2))
+  suppressMessages(library(Biobase))
   if(QDNAseqobjectsample) {
     if(missing(title)) {
       pd<-pData(template)
@@ -805,7 +805,7 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
   if(class(copyNumbersSegmented)=="character") {copyNumbersSegmented <- try(readRDS(copyNumbersSegmented))}
   if(inherits(copyNumbersSegmented, "try-error")) {print("failed to read RDS-file")}
   if(missing(modelsfile)&&inputdir==FALSE){print("this function requires a tab-delimited file with model information per sample")}
-  if(!missing(modelsfile)&&class(modelsfile)=="character") {models <- try(read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t", sep = "\t",colClasses = "character"))} # dont convert sample "026" to sample 26 Erik Bosch 28-01-2021 
+  if(!missing(modelsfile)&&class(modelsfile)=="character") {models <- try(read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t",colClasses = "character"))} # dont convert sample "026" to sample 26 Erik Bosch 28-01-2021 
   if(inherits(models, "try-error")) {print("failed to read modelsfile")}
   if(missing(mutationdata)){print("not linking mutation data")}
   if(!missing(mutationdata)) {
@@ -815,7 +815,7 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
   } else if (length(list.files(mutationdata, pattern = "\\.xls$"))>0) {mutext<-".xls"
   } else {print("file extension of mutation files not supported: use .csv, .txt, .tsv, or .xls")}
   }
-  library(Biobase)
+  suppressMessages(library(Biobase))
   fd <- fData(copyNumbersSegmented)
   pd <- pData(copyNumbersSegmented)
   if(trncname==TRUE) {pd$name <- gsub("_.*","",pd$name)}

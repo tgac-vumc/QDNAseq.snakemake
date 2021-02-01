@@ -5,18 +5,24 @@
 # Tjitske Los
 ##############################################################################################################
 #open required libraries.
+msg <- snakemake@params[["suppressMessages"]]
+if (msg){
+suppressMessages(library(QDNAseq))
+suppressMessages(library(Biobase))
+suppressMessages(library(CGHcall))
+suppressMessages(library(CGHtest))
+suppressMessages(library(denstrip))
+} else{
 library(QDNAseq)
 library(Biobase)
 library(CGHcall)
 library(CGHtest)
-#suppressMessages(library(QDNAseq))
-#suppressMessages(library(Biobase))
-#suppressMessages(library(CGHcall))
-#suppressMessages(library(CGHtest))
-#suppressMessages(library(denstrip))
+library(denstrip)
+}
 
-source('scripts/CGHcallPlus.R')
-source('scripts/plotQDNAseq.R')
+
+source('scripts/CGHcallPlus.R', echo = !msg)
+source('scripts/plotQDNAseq.R', echo = !msg)
 
 called <- snakemake@input[["called"]]
 fitpickertable<- snakemake@input[["fitpicker"]]
@@ -81,3 +87,8 @@ if(length(failed_samples[,1]>0)){for(file in failed_samples[,1]){file.create(pas
 #file.create(paste(bedfolder, file,"-copynumbers.bed",sep=""))
 #file.create(paste(bedfolder, file,"-segments.bed",sep=""))
 }}
+
+##############################################################################################################
+# print warnings for debug - dev
+##############################################################################################################
+if(!msg){summary(warnings())}

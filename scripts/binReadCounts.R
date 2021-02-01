@@ -5,14 +5,17 @@
 # date: December 2017
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
-
-#suppressMessages(library(QDNAseq))
-#suppressMessages(library(Biobase))
-#suppressMessages(library(R.cache))
-
+msg <- snakemake@params[["suppressMessages"]]
+if (msg){
+suppressMessages(library(QDNAseq))
+suppressMessages(library(Biobase))
+suppressMessages(library(R.cache))
+} else{
 library(QDNAseq)
 library(Biobase)
 library(R.cache)
+}
+
 
 setCacheRootPath(path="../.Rcache")
 

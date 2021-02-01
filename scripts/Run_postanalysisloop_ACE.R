@@ -6,8 +6,14 @@
 
 #This script is a small wrapper around ACE to perform the postanalysisloop in the snakemake pipeline
 ##############################################################################
+msg <- snakemake@params[["suppressMessages"]]
+if (msg){
 suppressMessages(library(QDNAseq))
-source('scripts/ACE.R', echo = FALSE)
+} else{
+library(QDNAseq)
+}
+
+source('scripts/ACE.R', echo = !msg)
 
 ## Erik
 #copyNumbersSegmented <- snakemake@output[["ACE_post"]]

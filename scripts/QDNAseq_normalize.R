@@ -5,13 +5,17 @@
 # date: December 2017
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
-#suppressMessages(library(QDNAseq))
-#suppressMessages(library(Biobase))
+msg <- snakemake@params[["suppressMessages"]]
+if (msg){
+suppressMessages(library(QDNAseq))
+suppressMessages(library(Biobase))
+} else{
 library(QDNAseq)
 library(Biobase)
+}
 
-source("scripts/functions.R")
-source("scripts/plotQDNAseq.R")
+source("scripts/functions.R", echo = !msg)
+source("scripts/plotQDNAseq.R", echo = !msg)
 
 binReadCounts <- snakemake@input[["binReadCounts"]]
 bin <- as.integer(snakemake@wildcards[["binSize"]])

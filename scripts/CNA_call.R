@@ -5,16 +5,22 @@
 # date: December 2017
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
-# suppressMessages(library(QDNAseq))
-# suppressMessages(library(Biobase))
-# suppressMessages(library(CGHcall))
-# suppressMessages(library(CGHtest))
+msg <- snakemake@params[["suppressMessages"]]
+if (msg){
+suppressMessages(library(QDNAseq))
+suppressMessages(library(Biobase))
+suppressMessages(library(CGHcall))
+suppressMessages(library(CGHtest))
+} else{
 library(QDNAseq)
 library(Biobase)
 library(CGHcall)
 library(CGHtest)
-source('scripts/CGHcallPlus.R')
-source('scripts/plotQDNAseq.R')
+}
+
+
+source('scripts/CGHcallPlus.R', echo = !msg)
+source('scripts/plotQDNAseq.R', echo = !msg)
 
 segmented <- snakemake@input[["segmented"]]
 bin <- as.integer(snakemake@wildcards[["binSize"]])
@@ -58,3 +64,8 @@ if(length(failed_samples[,1]>0)){for(file in failed_samples[,1]){file.create(pas
 ##############################################################################################################
 
 exportBins(QCN.fcnsdsnc, calls, format="igv", logTransform=FALSE, type="calls")
+
+##############################################################################################################
+# print warnings for debug - dev
+##############################################################################################################
+if(!msg){print(summary(warnings()))}

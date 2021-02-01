@@ -6,11 +6,16 @@
 
 #This script is a small wrapper around ACE to work in the snakemake pipeline
 ##############################################################################
-
+msg <- snakemake@params[["suppressMessages"]]
+if (msg){
 suppressMessages(library(QDNAseq))
 suppressMessages(library(stringr))
+} else{
+library(QDNAseq)
+library(stringr)
+}
 
-source('scripts/ACE.R', echo = FALSE)
+source('scripts/ACE.R', echo = !msg)
 
 ploidies<-as.integer(snakemake@wildcards[["ploidy"]])
 inputfile <-snakemake@input[["segmented"]]
@@ -47,3 +52,8 @@ failed_samples<-read.table(failed, stringsAsFactors=FALSE, header=TRUE)
 if(length(failed_samples[,1]>0)){for(file in failed_samples[,1]){
     file.create(paste(outputdir, ploidies,"N/", file,"/summary_",file,".",imagetype,sep=""))
 }}
+
+##############################################################################################################
+# print warnings for debug - dev
+##############################################################################################################
+if(!msg){summary(warnings())}

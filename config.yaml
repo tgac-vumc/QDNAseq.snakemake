@@ -3,6 +3,7 @@ all:
   THREADS: 4
   setting: service #options: 'service' or 'research'. Select 'service' with minimal rules for providing services. Select 'research' with all rules for research purposes.
   profiletypes: ["corrected", "segmented", "called",'dewaved']
+  suppressMessages: FALSE #options TRUE or FALSE, TRUE for suppressed library messages and warnings of R-packages
 
 bwa:
   max_edit_distance: 2  #n

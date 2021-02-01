@@ -6,13 +6,17 @@
 # Author: Matias Mendeville
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
-#suppressMessages(library(QDNAseq))
-#suppressMessages(library(CGHregions))
+msg <- snakemake@params[["suppressMessages"]]
+if (msg){
+suppressMessages(library(QDNAseq))
+suppressMessages(library(CGHregions))
+} else{
 library(QDNAseq)
 library(CGHregions)
+}
 
-source("scripts/addCytobands.R")
-source("scripts/CGHcallPlus.R")
+source("scripts/addCytobands.R", echo = !msg)
+source("scripts/CGHcallPlus.R", echo = !msg)
 
 RegionsCGH<-snakemake@input[["RegionsCGH"]]
 max.focal.size.mb<-snakemake@params[["max_focal_size_mb"]]

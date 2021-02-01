@@ -99,6 +99,7 @@ rule QDNAseq_binReadCounts:
         binReadCounts="../{binSize}kbp/data/{binSize}kbp-raw.rds"
     params:
         genome=config["QDNAseq"]["genome"],
+        suppressMessages=config["all"]["suppressMessages"]
     log: "../{binSize}kbp/logs/binReadCounts.log"
     script:
         "scripts/binReadCounts.R"
@@ -114,6 +115,7 @@ rule QDNAseq_normalize:
     params:
         profiles="../{binSize}kbp/profiles/corrected/",
         chrom_filter=config["QDNAseq"]["chrom_filter"],
+        suppressMessages=config["all"]["suppressMessages"]
     log: "../{binSize}kbp/logs/normalizeBins.log"
     script:
         "scripts/QDNAseq_normalize.R"
@@ -129,6 +131,7 @@ rule deWave:
     params:
         profiles="../{binSize}kbp/profiles/dewaved/",
         dewave_data=config["QDNAseq"]["dewave_data"],
+        suppressMessages=config["all"]["suppressMessages"]
     log: "../{binSize}kbp/logs/dewave.log"
     script:
         "scripts/deWave.R"
@@ -152,6 +155,7 @@ rule QDNAseq_segment:
         copynumbersbed="../{binSize}kbp/BED/%s-copynumbers.bed",
         segmentsbed="../{binSize}kbp/BED/%s-segments.bed",
         bedfolder="../{binSize}kbp/BED/",
+        suppressMessages=config["all"]["suppressMessages"]
     log: "../{binSize}kbp/logs/segment.log"
     script:
         "scripts/QDNAseq_segment.R"
@@ -169,6 +173,7 @@ rule CNA_call:
     params:
         profiles="../{binSize}kbp/profiles/called/",
         failed="../{binSize}kbp/logs/failed_samples.txt",
+        suppressMessages=config["all"]["suppressMessages"]
     log: "../{binSize}kbp/logs/call.log"
     script:
         "scripts/CNA_call.R"
@@ -188,6 +193,7 @@ rule CNA_call_cellularity_based:
         profiles="../{ACEbinSize}kbp/profiles/call_cellularity_based/",
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
         minimum_cellularity=config["QDNAseq"]["minimum_cellularity"],
+        suppressMessages=config["all"]["suppressMessages"]
     log: "../{ACEbinSize}kbp/logs/CNA_call_cellularity_based.log"
     script:
         "scripts/CNA_call_cellularity_based.R"
@@ -207,6 +213,7 @@ rule CNA_bedfiles:
         cytobands=config["CGHregions"]["cytobands"],
         max_focal_size_bed=config["BED"]["max_focal_size_bed"],
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
+        suppressMessages=config["all"]["suppressMessages"]
     log: "../{ACEbinSize}kbp/logs/bedfiles.log"
     script:
         "scripts/makeCNAbedFile.R"
@@ -237,6 +244,7 @@ rule CGHregions:
         profiles='../{ACEbinSize}kbp/profiles/freqPlot/freqPlotREGIONS_{ACEbinSize}kbp.png'
     params:
         averr=config["CGHregions"]["averror"],
+        suppressMessages=config["all"]["suppressMessages"]
     log: "../{ACEbinSize}kbp/logs/CGHregions.log"
     script:
         "scripts/CGHregions.R"
@@ -253,6 +261,7 @@ rule makeCGHregionsTable:
         min_freq_focal=config["CGHregions"]["min_freq_focal"],
         max_focal_size_mb=config["CGHregions"]["max_focal_size_mb"],
         cytobands=config["CGHregions"]["cytobands"],
+        suppressMessages=config["all"]["suppressMessages"]
     log: "../{binSize}kbp/logs/CGHregionstable.log"
     script:
         "scripts/makeCGHregionstable.R"
@@ -337,6 +346,7 @@ rule ACE:
     params:
         outputdir="../{ACEbinSize}kbp/ACE/",
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
+        suppressMessages=config["all"]["suppressMessages"]
     log:"../{ACEbinSize}kbp/ACE/{ploidy}N/log.tsv"
     script:
         "scripts/Run_ACE.R"
@@ -352,6 +362,7 @@ rule postanalysisloop_ACE:
     params:
         outputdir="../{ACEbinSize}kbp/ACE/{ploidy}N/",
         failed="../{ACEbinSize}kbp/logs/failed_samples.txt",
+        suppressMessages=config["all"]["suppressMessages"]
     log:"../{ACEbinSize}kbp/ACE/{ploidy}N_log.tsv"
     script:
         "scripts/Run_postanalysisloop_ACE.R"

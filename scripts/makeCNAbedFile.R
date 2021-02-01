@@ -6,16 +6,20 @@
 # Author: Matias Mendeville
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
-#suppressMessages(library(QDNAseq))
-#suppressMessages(library(denstrip))
-#suppressMessages(library(CGHcall))
+msg <- snakemake@params[["suppressMessages"]]
+if (msg){
+suppressMessages(library(QDNAseq))
+suppressMessages(library(denstrip))
+suppressMessages(library(CGHcall))
+} else{
 library(QDNAseq)
 library(denstrip)
 library(CGHcall)
+}
 
-source("scripts/functions.R")
-source("scripts/addCytobands.R")
-source("scripts/CGHcallPlus.R")
+source("scripts/functions.R", echo = !msg)
+source("scripts/addCytobands.R", echo = !msg)
+source("scripts/CGHcallPlus.R", echo = !msg)
 
 recalled <- snakemake@input[["recalled"]]
 beddir <- snakemake@params[["beddir"]]

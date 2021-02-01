@@ -5,18 +5,14 @@
 # date: December 2017
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
-library(QDNAseq)
-library(Biobase)
-library(CGHcall)
-library(CGHregions)
-library(CGHtest)
-#suppressMessages(library(QDNAseq))
-#suppressMessages(library(Biobase))
-#suppressMessages(library(CGHcall))
-#suppressMessages(library(CGHregions))
-#suppressMessages(library(CGHtest))
 
-source('scripts/CGHcallPlus.R')
+suppressMessages(library(QDNAseq))
+suppressMessages(library(Biobase))
+suppressMessages(library(CGHcall))
+suppressMessages(library(CGHregions))
+suppressMessages(library(CGHtest))
+
+source('scripts/CGHcallPlus.R', echo = FALSE)
 
 recalled <- snakemake@input[["recalled"]]
 RegionsCGH<-snakemake@output[["RegionsCGH"]]

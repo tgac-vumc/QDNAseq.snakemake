@@ -12,18 +12,21 @@
 #R
 
 #open required libraries.
-
-#suppressMessages(library(QDNAseq))
-#suppressMessages(library(Biobase))
-#suppressMessages(library(CGHcall))
-#suppressMessages(library(CGHtest))
+msg <- snakemake@params[["suppressMessages"]]
+if (msg){
+suppressMessages(library(QDNAseq))
+suppressMessages(library(Biobase))
+suppressMessages(library(CGHcall))
+suppressMessages(library(CGHtest))
+} else{
 library(QDNAseq)
 library(Biobase)
 library(CGHcall)
 library(CGHtest)
+}
 
-source('scripts/CGHcallPlus.R')
-source('scripts/plotQDNAseq.R')
+source('scripts/CGHcallPlus.R', echo = !msg)
+source('scripts/plotQDNAseq.R', echo = !msg)
 
 segmented <- "../100kbp/data/100kbp-segmented.rds"
 bin<-100
