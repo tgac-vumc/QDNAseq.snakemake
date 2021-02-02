@@ -3,7 +3,14 @@ all:
   THREADS: 4
   setting: service #options: 'service' or 'research'. Select 'service' with minimal rules for providing services. Select 'research' with all rules for research purposes.
   profiletypes: ["corrected", "segmented", "called",'dewaved']
-  suppressMessages: FALSE #options TRUE or FALSE, TRUE for suppressed library messages and warnings of R-packages
+  suppressMessages: TRUE #options TRUE or FALSE, TRUE for suppressed library messages and warnings of R-packages
+
+path:
+  dir_fastq: "/home/e.bosch1/QDNAseq/fastq/" #['/home/y.kim1/Projects/RNAseq_Virus/data/'] directory that contains the fastq-files
+  #  log: 'log/'
+  #  qc: 'data/RNA_seq/qc/'
+  #  bam: 'data/RNA_seq/bams/'
+  dir_out: "/home/e.bosch1/QDNAseq/fastq_output/" #'data/RNA_seq/output/' directory where the output should be created
 
 bwa:
   max_edit_distance: 2  #n
