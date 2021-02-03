@@ -7,10 +7,11 @@ all:
 
 path:
   dir_fastq: "/home/e.bosch1/QDNAseq/fastq/" #['/home/y.kim1/Projects/RNAseq_Virus/data/'] directory that contains the fastq-files
-  #  log: 'log/'
-  #  qc: 'data/RNA_seq/qc/'
-  #  bam: 'data/RNA_seq/bams/'
-  dir_out: "/home/e.bosch1/QDNAseq/fastq_output/" #'data/RNA_seq/output/' directory where the output should be created
+  dir_out: "/home/e.bosch1/QDNAseq/fastq_output/" #'data/RNA_seq/output/' directory where the output should be created, all other directories are branches of this directory
+  dir_qc: "qc/"
+  dir_bam: "bam/"
+  dir_stats: "stats/"
+  dir_log: "log/"
 
 bwa:
   max_edit_distance: 2  #n
@@ -20,7 +21,7 @@ QDNAseq:
   BINSIZES: [100]   #required binsizes comma seperated  1 5 10 15 30 100 1000
   genome: hg19
   chrom_filter: ["Y", "X"] # comma separated quoted to specify which chromosomes to filter out. "X","Y"
-  dewave: True #dewaving is an optional setting, if Treu samples will be dewaved before segmentation, if False dewaving will be skipped.
+  dewave: True #dewaving is an optional setting, if True samples will be dewaved before segmentation, if False dewaving will be skipped.
   dewave_dir: scripts/QDNAseq.dev-dewave/R
   dewave_data: scripts/QDNAseq.dev-dewave/data/NormalCalibrationSet_{binSize}kb.rda
   minimal_used_reads: 100000
