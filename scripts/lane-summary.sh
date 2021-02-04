@@ -11,8 +11,6 @@ statsfolder=$3
 qcFastqfolder=$4
 qcBamfolder=$5
 
-
-
 echo -e '<?xml version="1.0" encoding="UTF-8"?>'
 echo -e '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"'
 echo -e '\t"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
@@ -25,7 +23,7 @@ echo -e '\t\t\tth {border: 1px solid gray; padding: 5px;}'
 echo -e '\t\t\ttd {border: 1px solid gray; padding: 5px; text-align: right;}'
 echo -e '\t\t</style>'
 #echo -e '\t\t<link rel="stylesheet" href="http://ccagc-gen01.vumc.nl/js/lightbox2-master/dist/css/lightbox.css">'
-echo -e '\t\t<link rel="stylesheet" href="../QDNAseq.snakemake/lb2/css/lightbox.css">' # relative path to be replaced with absolute path
+echo -e '\t\t<link rel="stylesheet" href="lb2/css/lightbox.css">' # previous: "../QDNAseq.snakemake/lb2/etc
 echo -e '\t</head>'
 echo -e '\t<body>'
 echo -e "\t\t<h1>$title</h1>"
@@ -53,11 +51,14 @@ sumq1=0
 sumq37=0
 n=0
 
+#dir=$PWD
+#echo `$dir | bc -l`
+
 for sample in $samples
 do
   n=`echo $n + 1 | bc -l`
   sample=`basename $sample .bam`
-  sample3=`echo $qcFastqfolder/${sample}*_fastqc.html`
+  sample3=`echo $qcFastqfolder${sample}*_fastqc.html`
   sample2=`echo $sample | sed -r 's/^[0-9]{6}_[A-Z0-9]{9}_L[1-8]{1}_//'`   #TOTO - remove line and remove sample lines
   #total=`cat "../stats/${sample}.reads.all"`
   #aligned=`cat "../stats/${sample}.reads.aligned"`
@@ -135,6 +136,7 @@ echo -e '\t\t\t</tr>'
 
 echo -e '\t\t</table>'
 #echo -e '\t<script src="http://ccagc-gen01.vumc.nl/js/lightbox2-master/dist/js/lightbox-plus-jquery.min.js"></script>'
-echo -e '\t<script src=""../QDNAseq.snakemake/lb2/js/lightbox-plus-jquery.min.js"></script>' # relative path to be replaced with absolute path
+echo -e '\t<script src=""lb2/js/lightbox-plus-jquery.min.js"></script>' # previous: "../QDNAseq.snakemake/lb2/etc
+#echo -e '\t<script src=""../QDNAseq.snakemake/lb2/js/lightbox-plus-jquery.min.js"></script>'
 echo -e '\t</body>'
 echo -e '</html>'

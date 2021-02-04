@@ -30,7 +30,7 @@ SAMPLES=getnames()
 
 setting = config["all"]["setting"]
 SettingService = [
-        expand(DIR_OUT + "{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES),
+        #temporarily commened for debug: expand(DIR_OUT + "{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES),
         expand(DIR_OUT + "{binSize}kbp/summary.html", binSize=BINSIZES),
         expand(DIR_OUT + "{binSize}kbp/BED/{sample}_annotate_focalCNA.bed", binSize=BINSIZES ,sample=SAMPLES.keys()),
         #expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),

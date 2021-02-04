@@ -43,7 +43,7 @@ if (bin==1000) {SDundo=0.10; alph=1e-20}
 # load data
 QCN.fcnsd <- readRDS(dewaved)
 
-QCN.fcnsds <- segmentBins(QCN.fcnsd[,QCN.fcnsd$used.reads > min_used_reads ], undo.splits='sdundo', undo.SD=SDundo, alpha=alph, transformFun="sqrt")
+QCN.fcnsds <- segmentBins(QCN.fcnsd[,QCN.fcnsd$used.reads > min_used_reads ], undo.splits='sdundo', undo.SD=SDundo, alpha=alph, transformFun="sqrt") # gives 'Performing segmentation: NA
 QCN.fcnsdsn <- normalizeSegmentedBins(QCN.fcnsds)
 saveRDS(QCN.fcnsdsn, segmented)
 
