@@ -296,9 +296,12 @@ rule summary:
     output:
         DIR_OUT + "{binSize}kbp/summary.html"
     params:
-        bamfolder=DIR_OUT + DIR_BAM + "",
+        bamfolder=DIR_OUT + DIR_BAM,
+        statsfolder = DIR_OUT + DIR_STATS,
+        qcFastqfolder= DIR_OUT + DIR_QC + "qc-fastq/",
+        qcBamfolder= DIR_OUT + DIR_QC + "qc-bam/"
     shell:
-        "{input.script} {wildcards.binSize}kpb {params.bamfolder} > {output}"
+        "{input.script} {wildcards.binSize}kpb {params.bamfolder} {params.statsfolder} {params.qcFastqfolder} {params.qcBamfolder}> {output}"
 
 rule qcfastq:
     input:

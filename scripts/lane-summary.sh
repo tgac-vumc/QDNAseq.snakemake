@@ -7,6 +7,9 @@ export LANGUAGE=en_US.UTF-8
 title=$1
 bamfolder=$2
 samples=$bamfolder*.bam
+statsfolder=$3
+qcFastqfolder=$4
+qcBamfolder=$5
 
 
 
@@ -22,7 +25,7 @@ echo -e '\t\t\tth {border: 1px solid gray; padding: 5px;}'
 echo -e '\t\t\ttd {border: 1px solid gray; padding: 5px; text-align: right;}'
 echo -e '\t\t</style>'
 #echo -e '\t\t<link rel="stylesheet" href="http://ccagc-gen01.vumc.nl/js/lightbox2-master/dist/css/lightbox.css">'
-echo -e '\t\t<link rel="stylesheet" href="../QDNAseq.snakemake/lb2/css/lightbox.css">'
+echo -e '\t\t<link rel="stylesheet" href="../QDNAseq.snakemake/lb2/css/lightbox.css">' # relative path to be replaced with absolute path
 echo -e '\t</head>'
 echo -e '\t<body>'
 echo -e "\t\t<h1>$title</h1>"
@@ -36,11 +39,11 @@ echo -e '\t\t\t\t<th colspan="2">unique</th>'
 echo -e '\t\t\t\t<th colspan="2">q1</th>'
 echo -e '\t\t\t\t<th colspan="2">q37</th>'
 echo -e '\t\t\t\t<th>qc</th>'
-echo -e '\t\t\t\t<th><a href="profiles/corrected/index.html">corrected</a></th>'
-echo -e '\t\t\t\t<th><a href="profiles/dewaved/index.html">dewaved</a></th>'
-echo -e '\t\t\t\t<th><a href="profiles/segmented/index.html">segmented</a></th>'
-echo -e '\t\t\t\t<th><a href="profiles/called/index.html">called</a></th>'
-echo -e '\t\t\t\t<th><a href="profiles/reCalled/index.html">reCalled</a></th>'
+echo -e '\t\t\t\t<th><a href="profiles/corrected/index.html">corrected</a></th>' # relative path to be replaced with absolute path
+echo -e '\t\t\t\t<th><a href="profiles/dewaved/index.html">dewaved</a></th>' # relative path to be replaced with absolute path
+echo -e '\t\t\t\t<th><a href="profiles/segmented/index.html">segmented</a></th>' # relative path to be replaced with absolute path
+echo -e '\t\t\t\t<th><a href="profiles/called/index.html">called</a></th>' # relative path to be replaced with absolute path
+echo -e '\t\t\t\t<th><a href="profiles/reCalled/index.html">reCalled</a></th>' # relative path to be replaced with absolute path
 echo -e '\t\t\t</tr>'
 
 sumtotal=0
@@ -54,13 +57,19 @@ for sample in $samples
 do
   n=`echo $n + 1 | bc -l`
   sample=`basename $sample .bam`
-  sample3=`echo ../qc-fastq/${sample}*_fastqc.html`
+  sample3=`echo $qcFastqfolder/${sample}*_fastqc.html`
   sample2=`echo $sample | sed -r 's/^[0-9]{6}_[A-Z0-9]{9}_L[1-8]{1}_//'`   #TOTO - remove line and remove sample lines
-  total=`cat "../stats/${sample}.reads.all"`
-  aligned=`cat "../stats/${sample}.reads.aligned"`
-  unique=`cat "../stats/${sample}.reads.unique"`
-  q1=`cat "../stats/${sample}.reads.q1"`
-  q37=`cat "../stats/${sample}.reads.q37"`
+  #total=`cat "../stats/${sample}.reads.all"`
+  #aligned=`cat "../stats/${sample}.reads.aligned"`
+  #unique=`cat "../stats/${sample}.reads.unique"`
+  #q1=`cat "../stats/${sample}.reads.q1"`
+  #q37=`cat "../stats/${sample}.reads.q37"`
+  #totalfile="$statsfolder${sample}.reads.all"
+  total=`cat "$statsfolder${sample}.reads.all"`
+  aligned=`cat "$statsfolder${sample}.reads.aligned"`
+  unique=`cat "$statsfolder${sample}.reads.unique"`
+  q1=`cat "$statsfolder${sample}.reads.q1"`
+  q37=`cat "$statsfolder${sample}.reads.q37"`
   sumtotal=`echo $sumtotal + $total | bc -l`
   sumaligned=`echo $sumaligned + $aligned | bc -l`
   sumunique=`echo $sumunique + $unique | bc -l`
@@ -78,12 +87,13 @@ do
   printf "\t\t\t\t<td>%'i</td>\n" $q37
   printf "\t\t\t\t<td>%.2f%%</td>\n" `echo $q37/$unique*100 | bc -l`
   echo -en '\t\t\t\t<td><a href='$sample3'>fastq</a>, '
-  echo -e '<a href="../qc-bam/'$sample'_fastqc.html">bam</a></td>'
-  echo -e '\t\t\t\t<td><a href="profiles/corrected/'$sample'.png">corrected</a></td>'
-  echo -e '\t\t\t\t<td><a href="profiles/dewaved/'$sample'.png">dewaved</a></td>'
-  echo -e '\t\t\t\t<td><a href="profiles/segmented/'$sample'.png">segmented</a></td>'
-  echo -e '\t\t\t\t<td><a href="profiles/called/'$sample'.png">called</a></td>'
-  echo -e '\t\t\t\t<td><a href="profiles/reCalled/'$sample'.png">reCalled</a></td>'  
+  echo -e '<a href="'$qcBamfolder$sample'_fastqc.html">bam</a></td>'
+  #echo -e '<a href="../qc-bam/'$sample'_fastqc.html">bam</a></td>'
+  echo -e '\t\t\t\t<td><a href="profiles/corrected/'$sample'.png">corrected</a></td>' # relative path to be replaced with absolute path
+  echo -e '\t\t\t\t<td><a href="profiles/dewaved/'$sample'.png">dewaved</a></td>' # relative path to be replaced with absolute path
+  echo -e '\t\t\t\t<td><a href="profiles/segmented/'$sample'.png">segmented</a></td>' # relative path to be replaced with absolute path
+  echo -e '\t\t\t\t<td><a href="profiles/called/'$sample'.png">called</a></td>' # relative path to be replaced with absolute path
+  echo -e '\t\t\t\t<td><a href="profiles/reCalled/'$sample'.png">reCalled</a></td>'  # relative path to be replaced with absolute path
   echo -e '\t\t\t</tr>'
 done
 echo -e '\t\t\t<tr style="border-top: double;">'
@@ -125,6 +135,6 @@ echo -e '\t\t\t</tr>'
 
 echo -e '\t\t</table>'
 #echo -e '\t<script src="http://ccagc-gen01.vumc.nl/js/lightbox2-master/dist/js/lightbox-plus-jquery.min.js"></script>'
-echo -e '\t<script src=""../QDNAseq.snakemake/lb2/js/lightbox-plus-jquery.min.js"></script>'
+echo -e '\t<script src=""../QDNAseq.snakemake/lb2/js/lightbox-plus-jquery.min.js"></script>' # relative path to be replaced with absolute path
 echo -e '\t</body>'
 echo -e '</html>'
