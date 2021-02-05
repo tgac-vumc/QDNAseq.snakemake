@@ -23,7 +23,8 @@ QDNAseq:
   chrom_filter: ["Y", "X"] # comma separated quoted to specify which chromosomes to filter out. "X","Y"
   dewave: True #dewaving is an optional setting, if True samples will be dewaved before segmentation, if False dewaving will be skipped.
   dewave_dir: scripts/QDNAseq.dev-dewave/R
-  dewave_data: scripts/QDNAseq.dev-dewave/data/NormalCalibrationSet_{binSize}kb.rda
+  # dewave_data: scripts/QDNAseq.dev-dewave/data/NormalCalibrationSet_{binSize}kb.rda
+  dewave_data: data/NormalCalibrationSet_{binSize}kb.rda
   minimal_used_reads: 100000
   minimum_cellularity: 0.2  # minimum cellularity used for calling, a to low cellularity cause over calling.
 
@@ -37,7 +38,7 @@ CGHregions:
   cytobands: /net/nfs/PAT/home/matias/data/ref/HG19.cytoBand.txt.gz
 
 ACE:
-  formatSamples: 3 # trail zeros ("0") to sample names, standard is 3 so format samplename is from "001" to possibly "999", used in ACE 
+    # formatSamples: 3 # trail zeros ("0") to sample names, standard is 3 so format samplename is from "001" to possibly "999", used in ACE 
   ploidies: [2] # [2,4]   #required ploidies comma seperated
   main_ploidy: 2   # only the main ploidy fitpicker file will be used for calling based on cellularity
   imagetype: png      #options are png, pdf

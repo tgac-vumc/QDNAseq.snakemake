@@ -20,7 +20,7 @@ source('scripts/ACE.R', echo = !msg)
 ploidies<-as.integer(snakemake@wildcards[["ploidy"]])
 inputfile <-snakemake@input[["segmented"]]
 outputdir<-snakemake@params[["outputdir"]]
-formatSamples<-snakemake@params[["formatSamples"]]
+# formatSamples<-snakemake@params[["formatSamples"]]
 failed <- snakemake@params[["failed"]]
 log<-snakemake@log[[1]]
 fitpicker <- snakemake@output[["fitpicker"]] # Insert by Erik 2021-01-27
@@ -42,11 +42,11 @@ write.table(parameters, file=log, quote = FALSE, sep = "\t", na = "", col.names 
 
 ploidyplotloop(copyNumbersSegmented ,outputdir , ploidies,imagetype,method,penalty,cap,trncname,printsummaries) # 1 to 3 dir.create warnings and 4 to 15  removed rows warnings, output gives NULL
 
-fitpickertable <- read.table(fitpicker,header = TRUE, comment.char = "", quote = "", sep = "\t")
-if (any(is.integer(fitpickertable$sample))){
-        fitpickertable$sample <- str_pad(fitpickertable$sample, formatSamples, pad = "0")
-        print('pad 0s on according to syntaxSamples')
-        write.table(fitpickertable, file=fitpicker, quote = FALSE, sep = "\t", na = "", col.names = TRUE)} # Erik Bosch 2021-01-29
+#fitpickertable <- read.table(fitpicker,header = TRUE, comment.char = "", quote = "", sep = "\t")
+#if (any(is.integer(fitpickertable$sample))){
+#        fitpickertable$sample <- str_pad(fitpickertable$sample, formatSamples, pad = "0")
+#        print('pad 0s on according to syntaxSamples')
+#        write.table(fitpickertable, file=fitpicker, quote = FALSE, sep = "\t", na = "", col.names = TRUE)} # Erik Bosch 2021-01-29
 
 #create output for failed samples - for snakemake compatibility.
 failed_samples<-read.table(failed, stringsAsFactors=FALSE, header=TRUE)
