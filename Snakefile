@@ -341,6 +341,7 @@ rule ACE:
     params:
         outputdir=DIR_OUT + "{ACEbinSize}kbp/ACE/",
         failed=DIR_OUT + "{ACEbinSize}kbp/failed_samples.txt",
+        formatSamples=config[["ACE"]][["formatSamples"]]
         suppressMessages=config["all"]["suppressMessages"]
     log:DIR_OUT + DIR_LOG + "ACE/{ACEbinSize}kbp/{ploidy}N/log.tsv"
     script:
