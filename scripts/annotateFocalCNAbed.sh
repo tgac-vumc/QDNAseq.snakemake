@@ -16,6 +16,7 @@ input=$1
 sname=$2
 outdir=$3
 output=$4
+outlog=$5
 
 tmp_all_genes=$outdir$sname
 tmp_geneAnn=$tmp_all_genes".geneAnn.bed"
@@ -23,7 +24,7 @@ tmp_cosmic_file=$tmp_all_genes".geneAnn_CosmicCensus.bed"
 
 
 	# Add 'normal' genes on the selected regions (input bed file):
-	perl scripts/regions2genes_loc.pl -o $tmp_all_genes -bed $input -p
+	perl scripts/regions2genes_loc.pl -o $tmp_all_genes -bed $input -log $outlog -p
 
 	# Get number of columns in file (the column where the genes are listed)
 	genecol=`awk '{print NF}' $tmp_geneAnn | sort -nu | tail -n 1`

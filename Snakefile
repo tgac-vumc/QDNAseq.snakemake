@@ -228,7 +228,7 @@ rule annotate_focalCNA:
         outdir=DIR_OUT + "{binSize}kbp/BED/"
     log: DIR_OUT + DIR_LOG + "CNA/{binSize}kbp/{sample}_annotate_focalCNA.log"
     shell:
-        "{input.script} {input.bedfile} {wildcards.sample} {params.outdir} {output} 2> {log} "
+        "{input.script} {input.bedfile} {wildcards.sample} {params.outdir} {output} {log} 2> {log}"
 
 rule CGHregions:
 #TODO change reCalled to normal calls or cellularity based
@@ -343,7 +343,7 @@ rule ACE:
         failed=DIR_OUT + "{ACEbinSize}kbp/failed_samples.txt",
         # formatSamples=config["ACE"]["formatSamples"],
         suppressMessages=config["all"]["suppressMessages"]
-    log:DIR_OUT + DIR_LOG + "ACE/{ACEbinSize}kbp/{ploidy}N/log.tsv"
+    log:DIR_OUT + DIR_LOG + "ACE/{ACEbinSize}kbp/{ploidy}N/ACE_log.tsv"
     script:
         "scripts/Run_ACE.R"
 
@@ -357,7 +357,7 @@ rule postanalysisloop_ACE:
         outputdir=DIR_OUT + "{ACEbinSize}kbp/ACE/{ploidy}N/",
         failed=DIR_OUT + "{ACEbinSize}kbp/failed_samples.txt",
         suppressMessages=config["all"]["suppressMessages"]
-    log:DIR_OUT + DIR_LOG + "{ACEbinSize}kbp/ACE/{ploidy}N_log.tsv"
+    log:DIR_OUT + DIR_LOG + "ACE/{ACEbinSize}kbp/{ploidy}N/ACE_post_log.tsv"
     script:
         "scripts/Run_postanalysisloop_ACE.R"
 

@@ -71,6 +71,7 @@ GetOptions (
   'h|help'   => \$opt{help},
   'bed|b=s@' => \$opt{bed},
   'out|o=s'  => \$opt{out},
+  'log|l=s'  => \$opt{log},
   'debug'    => \$opt{debug},
   'prot|p'   => \$opt{ prot_coding },
   'serv=s'   => \$opt{ web_serv },
@@ -79,6 +80,7 @@ or die $usage;
 die $usage if $opt{help};
 die "[ERROR] Missing input: pls provide output base (-o)\n" unless $opt{ out };
 die "[ERROR] Missing input: pls provide bed file (-bed)\n" unless $opt{ bed };
+die "[ERROR] Missing input: pls provide log file (-log)\n" unless $opt{ log };
 
 my $registry = 'Bio::EnsEMBL::Registry';
 ## create slice-adaptor and gene-adaptor
@@ -97,7 +99,7 @@ die "[ERROR] (some) ensembl adaptors not loaded...\n" unless $sa and $ga;
 ## start analysis
 # ======================================================
 my $out_file = $opt{out}.'.geneAnn.bed';
-my $log_file = $opt{out}.'.geneAnn.log';
+my $log_file = $opt{log}; # $opt{out}.'geneAnn.log'
 open my $fh_out, ">$out_file" or die "$!: @_\n";
 open my $fh_log, ">$log_file" or die "$!: @_\n";
 
