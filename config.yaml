@@ -7,7 +7,7 @@ all:
 
 path:
   dir_fastq: "/home/e.bosch1/QDNAseq/fastq/" 
-  dir_out: "/home/e.bosch1/path/to/output/" # "/home/e.bosch1/QDNAseq/fastq_output/" # directory where the output should be created, all other directories are branches of this directory
+  dir_out: "/home/e.bosch1/pls/" # "/home/e.bosch1/QDNAseq/fastq_output/" # directory where the output should be created, all other directories are branches of this directory
   dir_qc: "qc/"
   dir_bam: "bam/"
   dir_stats: "stats/"

@@ -10,12 +10,12 @@ if (msg){
 suppressMessages(library(QDNAseq))
 suppressMessages(library(Biobase))
 suppressMessages(library(CGHcall))
-suppressMessages(library(CGHtest))
+#suppressMessages(library(CGHtest))
 } else{
 library(QDNAseq)
 library(Biobase)
 library(CGHcall)
-library(CGHtest)
+#library(CGHtest)
 }
 
 

@@ -28,21 +28,22 @@ def getnames():
     return(SAMPLES)
 SAMPLES=getnames()
 
+
 setting = config["all"]["setting"]
 SettingService = [
-        #temporarily commened for debug: expand(DIR_OUT + "{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES),
-        expand(DIR_OUT + "{binSize}kbp/summary.html", binSize=BINSIZES),
-        expand(DIR_OUT + "{binSize}kbp/BED/{sample}_annotate_focalCNA.bed", binSize=BINSIZES ,sample=SAMPLES.keys()),
-        #expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
-        expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
-        expand(DIR_OUT + "{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds", ACEbinSize=ACEBINSIZES),
-        expand(DIR_OUT + "{ACEbinSize}kbp/profiles/call_cellularity_based/index.html",ACEbinSize=ACEBINSIZES),
-        expand(DIR_OUT + DIR_QC + "qc-fastq/{sample}_fastqc.html", sample=wholenames),
-        expand(DIR_OUT + DIR_QC + "qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
-        ]
+    expand(DIR_OUT + "{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES),
+    #expand(DIR_OUT + "{binSize}kbp/summary.html", binSize=BINSIZES),
+    #expand(DIR_OUT + "{binSize}kbp/BED/{sample}_annotate_focalCNA.bed", binSize=BINSIZES ,sample=SAMPLES.keys()),
+    ##expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
+    #expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
+    #expand(DIR_OUT + "{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds", ACEbinSize=ACEBINSIZES),
+    #expand(DIR_OUT + "{ACEbinSize}kbp/profiles/call_cellularity_based/index.html",ACEbinSize=ACEBINSIZES),
+    #expand(DIR_OUT + DIR_QC + "qc-fastq/{sample}_fastqc.html", sample=wholenames),
+    #expand(DIR_OUT + DIR_QC + "qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
+]
 SettingResearch = [
-        SettingService
-        ]
+    SettingService
+]
 
 rule all:
     input:

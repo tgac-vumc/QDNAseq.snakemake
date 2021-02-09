@@ -16,6 +16,6 @@ options(unzip = 'internal')
 
 devtools::install_github("tgac-vumc/WECCA")
 
-#install.packages(file.path(getwd(),"CGHtest_1.1.tar.gz"))
-install.packages("CGHtest_1.1.tar.gz", source=NULL, depenencies=TRUE)
+##install.packages(file.path(getwd(),"CGHtest_1.1.tar.gz"))
+#install.packages("CGHtest_1.1.tar.gz", source=NULL, depenencies=TRUE)
 

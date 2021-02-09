@@ -17,11 +17,11 @@ dependencies:
 # from annotateFocalCNAbed
   - bioconductor-qdnaseq.hg19 #=1.10.0
 # from CGHregions.R
-  - bioconductor-biobase
+  - bioconductor-biobase #=2.50.0
 # from CGHregions.R
   - bioconductor-cghcall
 # from CGHregions.R
-  - bioconductor-cghregions
+  - bioconductor-cghregions #=1.48.0 # 1.44.0
 # from CGHregions.R
   - bioconductor-limma
 # from deWave.R

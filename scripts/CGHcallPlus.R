@@ -1,15 +1,23 @@
 #this script contain the functions: make_cghRawPlus, frequencyPlot, segmentDataWeighted,  CGHregionsPlus,
 #regioningPlus, repdata , WECCA.heatmapPlus, mark.genes , mark.bed,  add.cytobands , add.genes, plot.profiles
-#library(CGHcall)
-#library(CGHregions)
-#library(WECCA)
-#library(matrixStats)
-#library(QDNAseq)
+
+msg <- snakemake@params[["suppressMessages"]]
+if (msg){
 suppressMessages(library(CGHcall))
 suppressMessages(library(CGHregions))
 suppressMessages(library(WECCA))
 suppressMessages(library(matrixStats))
 suppressMessages(library(QDNAseq))
+} else{
+library(CGHcall)
+library(CGHregions)
+library(WECCA)
+library(matrixStats)
+library(QDNAseq)
+}
+
+
+
 
 # originally: QDNAseqReadCounts instead of QDNAseqSignals
 setMethod('plot', signature(x='cghRaw', y='missing'),

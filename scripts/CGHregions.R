@@ -5,12 +5,21 @@
 # date: December 2017
 # Changed to work in snakemake pipeline by Tjitske Los
 ##############################################################################################################
-
+msg <- snakemake@params[["suppressMessages"]]
+if (msg){
 suppressMessages(library(QDNAseq))
 suppressMessages(library(Biobase))
 suppressMessages(library(CGHcall))
 suppressMessages(library(CGHregions))
-suppressMessages(library(CGHtest))
+#suppressMessages(library(CGHtest))
+} else{
+library(QDNAseq)
+library(Biobase)
+library(CGHcall)
+library(CGHregions)
+#library(CGHtest)
+}
+
 
 source('scripts/CGHcallPlus.R', echo = FALSE)
 
@@ -43,3 +52,7 @@ saveRDS(reCalledRegionsCGH, RegionsCGH)
 png(profiles, res=300, width=14, height=7, unit='in')
 frequencyPlot(reCalledRegionsCGH)
 dev.off()
+
+
+
+
