@@ -87,8 +87,3 @@ if(length(failed_samples[,1]>0)){for(file in failed_samples[,1]){file.create(pas
 #file.create(paste(bedfolder, file,"-copynumbers.bed",sep=""))
 #file.create(paste(bedfolder, file,"-segments.bed",sep=""))
 }}
-
-##############################################################################################################
-# print warnings for debug - dev
-##############################################################################################################
-if(!msg){summary(warnings())}
