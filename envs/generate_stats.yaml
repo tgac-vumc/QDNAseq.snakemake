@@ -1,0 +1,8 @@
+name: generate_stats
+channels:
+    - conda-forge
+    - bioconda
+    - r
+    - defaults
+dependencies:
+    - samtools=1.3.1

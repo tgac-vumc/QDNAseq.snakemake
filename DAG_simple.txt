@@ -1,0 +1,18 @@
+Commandline: snakemake --use-conda --forceall --rulegraph | dot -Tsvg > DAG_simple.svg
+
+connection not present in DAG_190710-rulegraph.svg, but present in DAG_simple.svg
+qcfastq -> all
+
+Snakefile settings
+
+rule all:
+    input:
+        expand("../{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES),
+        expand("../{binSize}kbp/summary.html", binSize=BINSIZES),
+        expand("../{ACEbinSize}kbp/profiles/call_cellularity_based/index.html" ,ACEbinSize=ACEBINSIZES),
+        expand("../{binSize}kbp/BED/{sample}_Cosmic.bed", binSize=BINSIZES ,sample=SAMPLES.keys()),
+        expand("../qc-fastq/{sample}_fastqc.html", sample=wholenames),
+        expand("../qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
+        #expand("../{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
+        expand("../{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
+        expand("../{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds", ACEbinSize=ACEBINSIZES)

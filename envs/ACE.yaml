@@ -1,0 +1,15 @@
+name: ACE
+channels:
+    - conda-forge
+    - bioconda
+    - r
+    - defaults
+dependencies:
+    - bioconductor-qdnaseq=1.10.0
+# from Run_ACE.R
+    - r-ggplot2
+# from Run_ACE.R into source('scripts/ACE.R')
+    - bioconductor-biobase
+# from Run_ACE.R into source('scripts/ACE.R')
+    - grid
+# from Run_ACE.R into source('scripts/ACE.R')

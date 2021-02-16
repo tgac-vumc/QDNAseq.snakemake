@@ -1,0 +1,21 @@
+name: CGHregions
+channels:
+    - conda-forge
+    - bioconda
+    - r
+    - defaults
+dependencies:
+    - bioconductor-qdnaseq=1.10.0
+# from CGHregions.R
+    - bioconductor-biobase
+# from CGHregions.R
+    - bioconductor-cghcall
+# from CGHregions.R
+    - bioconductor-cghregions
+# from CGHregions.R
+#   - CGHtest
+# from CGHregions.R into source('scripts/CGHcallPlus.R')
+#   - WECCA
+# from CGHregions.R into source('scripts/CGHcallPlus.R') manual install
+    - r-matrixstats
+# from CGHregions.R into source('scripts/CGHcallPlus.R')

@@ -1,0 +1,15 @@
+name: makeCGHregionsTable
+channels:
+    - conda-forge
+    - bioconda
+    - r
+    - defaults
+dependencies:
+    - bioconductor-qdnaseq=1.10.0
+# from makeCGHregionsTable.R
+    - bioconductor-cghregions
+# from makeCGHregionsTable.R
+#   - WECCA
+# from makeCNAbedFile.R into source('scripts/CGHcallPlus.R') manual install
+    - r-matrixstats
+# from makeCNAbedFile.R into source('scripts/CGHcallPlus.R')

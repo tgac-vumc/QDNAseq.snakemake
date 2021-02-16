@@ -1,0 +1,19 @@
+name: CNA_bedfiles
+channels:
+    - conda-forge
+    - bioconda
+    - r
+    - defaults
+dependencies:
+    - bioconductor-qdnaseq=1.10.0
+# from makeCNAbedFile.R
+    - r-denstrip
+# from makeCNAbedFile.R
+    - bioconductor-cghcall
+# from makeCNAbedFile.R
+    - bioconductor-cghregions
+# from makeCNAbedFile.R into source('scripts/CGHcallPlus.R')
+#   - WECCA
+# from makeCNAbedFile.R into source('scripts/CGHcallPlus.R') manual install
+    - r-matrixstats
+# from makeCNAbedFile.R into source('scripts/CGHcallPlus.R')

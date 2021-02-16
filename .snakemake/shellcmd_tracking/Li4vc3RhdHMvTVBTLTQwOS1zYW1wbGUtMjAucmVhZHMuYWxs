@@ -1,0 +1,1 @@
+scripts/stats.sh ../bam/MPS-409-sample-20.bam MPS-409-sample-20 ../stats ../stats/MPS-409-sample-20.reads.all

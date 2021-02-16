@@ -1,0 +1,11 @@
+name: QDNAseq_normalize
+channels:
+    - conda-forge
+    - bioconda
+    - r
+    - defaults
+dependencies:
+    - bioconductor-qdnaseq=1.10.0
+# from QDNAseq_normalize.R
+    - bioconductor-biobase
+# from QDNAseq_normalize.R

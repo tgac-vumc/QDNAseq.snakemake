@@ -1,0 +1,1 @@
+picard MarkDuplicates I=../tmp/MPS-409-sample-20.all.bam O=../bam/MPS-409-sample-20.bam M=../stats/MPS-409-sample-20.md.metrics ASSUME_SORTED=true CREATE_INDEX=true VALIDATION_STRINGENCY=LENIENT &> ../logs/mark_duplicates/MPS-409-sample-20.log ;ln -s ../bam/MPS-409-sample-20.bai ../bam/MPS-409-sample-20.bam.bai

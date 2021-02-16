@@ -1,0 +1,19 @@
+name: deWave
+channels:
+    - conda-forge
+    - bioconda
+    - r
+    - defaults
+dependencies:
+    - bioconductor-qdnaseq=1.10.0
+# from deWave.R
+    - bioconductor-biobase
+# from deWave.R
+    - r-limma
+# from deWave.R
+    - r-gtools
+# from deWave.R
+    - r-impute
+# from deWave.R
+    - r-MASS
+# from deWave.R
