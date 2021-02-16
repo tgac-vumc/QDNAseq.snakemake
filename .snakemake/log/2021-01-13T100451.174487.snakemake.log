@@ -1,3 +1,0 @@
-SyntaxError:
-Not all output, log and benchmark files of rule qcfastq contain the same wildcards. This is crucial though, in order to avoid that two or more jobs write to the same file.
-  File "/net/nfs/PAT/analysis/MPS-407/201223_K00360_0679/QDNAseq.snakemake/Snakefile", line 319, in <module>

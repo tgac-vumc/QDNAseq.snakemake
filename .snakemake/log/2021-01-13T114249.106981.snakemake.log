@@ -1,3 +1,0 @@
-NameError in line 20 of /net/nfs/PAT/analysis/MPS-407/201223_K00360_0679/QDNAseq.snakemake/Snakefile:
-name 'sample' is not defined
-  File "/net/nfs/PAT/analysis/MPS-407/201223_K00360_0679/QDNAseq.snakemake/Snakefile", line 20, in <module>
