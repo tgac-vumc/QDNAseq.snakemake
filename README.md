@@ -1,10 +1,12 @@
 <p align="center">
-  <img width="254" height="281" src="https://github.com/tgac-vumc/QDNAseq.snakemake/blob/Tjitske/DAG_simple.svg">
+  <img width="100%" height="100%" src="https://github.com/tgac-vumc/QDNAseq.snakemake/blob/Tjitske/DAG_simple.svg">
 </p>
 
 ## Installation
 
-For the installation of this pipeline Python required.
+For the installation of this pipeline any Python install compatable with Singularity or Conda is required.
+
+The pipline itself will run on Python 3.8.5 and R 3.6.3. For exact dependencies view `environment.yaml` and `r-dependencies.R`.
 
 ### Using Singularity
 
@@ -118,10 +120,17 @@ snakemake
 Useful snakemake options
 
 `-j , --cores, --jobs` : Use at most N cores in parallel (default: 1). If N is omitted, the limit is set to the number of available cores.
+
 `-n , --dryrun` : Do not execute anything. but show rules which are planned to be performed.
+
 `-k , --keep-going` : Go on with independent jobs if a job fails.
+
 `-f , --force` : Force the execution of the selected target or the first rule regardless of already created output.
+
+`-R , --forcerun` : Force the re-execution or creation of the given rules or files. Use this option if you changed a rule and want to have all its output in your workflow updated.
+
 `-U , --until` : Runs the pipeline until it reaches the specified rules or files. Only runs jobs that are dependencies of the specified rule or files, does not run sibling DAGs.
+
 `-T , --timestamp` : Add a timestamp to all logging output
 
 for all options go to http://snakemake.readthedocs.io/en/stable/executable.html#all-options
