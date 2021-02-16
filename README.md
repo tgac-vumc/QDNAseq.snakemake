@@ -52,13 +52,16 @@ activate the environment by:
 ```
 conda activate QDNAseq-snakemake
 ```
-%Not all packages required by R can be installed by conda, these need to be installed manually from R. first download CGHtest in the QDNAseq.snakemake directory:
-%source code at: http://www.few.vu.nl/~mavdwiel/CGHtest.html
-%
-%```
-%cd QDNAseq.snakemake
-%wget http://www.few.vu.nl/~mavdwiel/CGHtest/CGHtest_1.1.tar.gz
-%```
+
+<!---
+Not all packages required by R can be installed by conda, these need to be installed manually from R. first download CGHtest in the QDNAseq.snakemake directory:
+source code at: http://www.few.vu.nl/~mavdwiel/CGHtest.html
+
+```
+cd QDNAseq.snakemake
+wget http://www.few.vu.nl/~mavdwiel/CGHtest/CGHtest_1.1.tar.gz
+```
+-->
 
 Then run the R script r-dependencies.R in the terminal to install the non-conda R dependencies in the environment:
 
