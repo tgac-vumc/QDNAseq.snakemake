@@ -11,13 +11,12 @@ DIR_BAM = os.path.join(config["path"]["dir_bam"],"")
 DIR_STATS = os.path.join(config["path"]["dir_stats"],"")
 DIR_LOG = os.path.join(config["path"]["dir_log"],"")
 
-#(wholenames,) = glob_wildcards("../fastq/{wholename}.fastq.gz")
 (wholenames,) = glob_wildcards(DIR_FASTQ+"{wholename}.fastq.gz")
 profiletypes = config["all"]["profiletypes"]
 BINSIZES=config["QDNAseq"]["BINSIZES"]
 imagetype=config["ACE"]["imagetype"]
 ACEBINSIZES=config["ACE"]["ACEBINSIZES"]
-
+setting = config["all"]["setting"]
 def getnames():
     SAMPLES=dict()
     for wholename in wholenames:
@@ -28,26 +27,34 @@ def getnames():
     return(SAMPLES)
 SAMPLES=getnames()
 
-
-setting = config["all"]["setting"]
-SettingService = [
-    expand(DIR_OUT + "{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES), # CGH branch
-    expand(DIR_OUT + "{binSize}kbp/summary.html", binSize=BINSIZES),
-    expand(DIR_OUT + "{binSize}kbp/BED/{sample}_annotate_focalCNA.bed", binSize=BINSIZES ,sample=SAMPLES.keys()),
-    expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
-    expand(DIR_OUT + "{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds", ACEbinSize=ACEBINSIZES),
-    expand(DIR_OUT + "{ACEbinSize}kbp/profiles/call_cellularity_based/index.html",ACEbinSize=ACEBINSIZES),
-    expand(DIR_OUT + DIR_QC + "qc-fastq/{sample}_fastqc.html", sample=wholenames),
-    expand(DIR_OUT + DIR_QC + "qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
-]
-SettingResearch = [
-    SettingService,
-    ####expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
-]
-
-rule all:
-    input:
-        SettingService if setting=="service" else SettingResearch 
+print("selected setting:", setting)
+if setting == "service": #rule service
+    rule service:
+        input:
+            expand(DIR_OUT + "{binSize}kbp/summary.html", binSize=BINSIZES), # summary
+elif setting == "research": #rule research
+    rule research:    
+        input:
+            expand(DIR_OUT + "{binSize}kbp/summary.html", binSize=BINSIZES), # summary
+            #expand(DIR_OUT + "{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES), # CGH branch
+            expand(DIR_OUT + "{binSize}kbp/BED/{sample}_annotate_focalCNA.bed", binSize=BINSIZES ,sample=SAMPLES.keys()), # annotate_focalCNA
+            expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()), # postanalysisloop_ACE
+            expand(DIR_OUT + "{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds", ACEbinSize=ACEBINSIZES), # CNA_call_cellularity_based
+            expand(DIR_OUT + "{ACEbinSize}kbp/profiles/call_cellularity_based/index.html",ACEbinSize=ACEBINSIZES), # lightBox
+            expand(DIR_OUT + DIR_QC + "qc-fastq/{sample}_fastqc.html", sample=wholenames), # qcfastq
+            expand(DIR_OUT + DIR_QC + "qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()), # qcbam
+else: #rule all
+    rule all:
+        input: 
+            expand(DIR_OUT + "{binSize}kbp/summary.html", binSize=BINSIZES), # summary
+            expand(DIR_OUT + "{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES), # CGH branch
+            expand(DIR_OUT + "{binSize}kbp/BED/{sample}_annotate_focalCNA.bed", binSize=BINSIZES ,sample=SAMPLES.keys()), # annotate_focalCNA
+            expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()), # postanalysisloop_ACE
+            expand(DIR_OUT + "{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds", ACEbinSize=ACEBINSIZES), # CNA_call_cellularity_based
+            expand(DIR_OUT + "{ACEbinSize}kbp/profiles/call_cellularity_based/index.html",ACEbinSize=ACEBINSIZES), # lightBox
+            expand(DIR_OUT + DIR_QC + "qc-fastq/{sample}_fastqc.html", sample=wholenames), # qcfastq
+            expand(DIR_OUT + DIR_QC + "qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()), # qcbam
+            ##expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
 
 rule bwa_aln:
     input:

@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="100%" height="100%" src="https://github.com/tgac-vumc/QDNAseq.snakemake/blob/Tjitske/DAG_simple.svg">
+  <img width="100%" height="100%" src="https://github.com/tgac-vumc/QDNAseq.snakemake/blob/master/DAG_simple.svg">
 </p>
 
 ## Installation
@@ -11,6 +11,11 @@ The pipline itself will run on Python 3.8.5 and R 3.6.3. For exact dependencies 
 ### Using Singularity
 
 Under development
+If you have Singularity, you can simply pull the singularity container with all dependency resolved (in few minutes, depends on the network speed).
+
+```
+singularity pull shub://tgac-vumc/QDNAseq-snakemake
+```
 
 ### Using Conda/Mamba
 
@@ -32,7 +37,6 @@ go to the directory where the analysis need to be performed
 cd </path/to/analysis/dir>
 git clone https://github.com/tgac-vumc/QDNAseq.snakemake/
 cd QDNAseq.snakemake
-git checkout Tjitske
 ```
 
 install Mamba as drop-in replacement for Conda with Mamba's improved installation-performance:
