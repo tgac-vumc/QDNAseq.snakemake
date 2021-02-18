@@ -17,6 +17,7 @@ BINSIZES=config["QDNAseq"]["BINSIZES"]
 imagetype=config["ACE"]["imagetype"]
 ACEBINSIZES=config["ACE"]["ACEBINSIZES"]
 setting = config["all"]["setting"]
+
 def getnames():
     SAMPLES=dict()
     for wholename in wholenames:
@@ -25,9 +26,10 @@ def getnames():
         fastqfile=DIR_FASTQ+wholename+".fastq.gz"
         SAMPLES[sample]=fastqfile
     return(SAMPLES)
+
 SAMPLES=getnames()
 
-print("selected setting:", setting)
+
 if setting == "service": #rule service
     rule service:
         input:

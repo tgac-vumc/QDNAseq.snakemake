@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="100%" height="100%" src="https://github.com/tgac-vumc/QDNAseq.snakemake/blob/master/DAG_simple.svg">
+  <img width="100%" height="100%" src="https://github.com/tgac-vumc/QDNAseq.snakemake/blob/master/DAG_all.svg">
 </p>
 
 ## Installation
@@ -48,7 +48,7 @@ conda install -c conda-forge mamba
 create  the environment using Mamba:
 
 ```
-mamba env create --name  QDNAseq-snakemake --file environment.yaml
+mamba env create --name QDNAseq-snakemake --file environment.yaml
 ```
 
 activate the environment by:
@@ -117,6 +117,12 @@ snakemake -n
 ```
 
 Check the rules that are planned to be performed
+
+An visualization of the order of rules to be performed can be viewed by running the following command and opening the DAG-file
+
+```
+snakemake --forceall --rulegraph | dot -Tsvg > DAG.svg
+```
 
 When ready, run the analysis
 
