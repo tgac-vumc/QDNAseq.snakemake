@@ -132,7 +132,7 @@ An visualization of the order of rules to be performed can be viewed by running 
 snakemake --forceall --rulegraph | dot -Tsvg > DAG.svg
 ```
 
-Rulegraphs for the intial settings `'service'`, `reearch'` and `'all'` are commited to this repro in the files `DAG_<setting>.svg`.
+Rulegraphs for the intial settings `'service'`, `'research'` and `'all'` are commited to this repro in the files `DAG_<setting>.svg`.
 
 
 When ready, run the analysis
@@ -155,6 +155,4 @@ Useful snakemake options
 
 `-U , --until` : Runs the pipeline until it reaches the specified rules or files. Only runs jobs that are dependencies of the specified rule or files, does not run sibling DAGs.
 
-`-T , --timestamp` : Add a timestamp to all logging output
-
-for all options go to http://snakemake.readthedocs.io/en/stable/executable.html#all-options
+for all options go to https://snakemake.readthedocs.io/en/v5.31.1/executing/cli.html#all-options
