@@ -106,11 +106,13 @@ done
 ### Prepare the snakemake settings
 
 Open the configuration file `config.yaml` to check the settings that snakemake will use and change according to your needs.
-For providing service-analysis, set `setting` to `service`. For research purposes, set `setting` to `research`.
+For providing service-analysis, set `setting` to `'service'`. For research purposes, set `setting` to `'research'`. For all settings set `setting` to `'all'`.
 
 One of the options in the configfile is dewaving, if set to true QNDAseq objects will be dewaved before segmentation. 
 
 These options change the rules performed in the pipeline, see the rule-graph in the next section.
+
+
 
 
 ## Running analysis
@@ -129,6 +131,9 @@ An visualization of the order of rules to be performed can be viewed by running 
 ```
 snakemake --forceall --rulegraph | dot -Tsvg > DAG.svg
 ```
+
+Rulegraphs for the intial settings `'service'`, `reearch'` and `'all'` are commited to this repro in the files `DAG_<setting>.svg`.
+
 
 When ready, run the analysis
 
