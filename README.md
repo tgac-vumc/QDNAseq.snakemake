@@ -4,18 +4,9 @@
 
 ## Installation
 
-For the installation of this pipeline any Python install compatable with Singularity or Conda is required.
+For the installation of this pipeline any Python install compatable Conda is required.
 
-The pipline itself will run on Python 3.8.5 and R 3.6.3. For exact dependencies view `environment.yaml` and `r-dependencies.R`.
-
-### Using Singularity
-
-Under development
-If you have Singularity, you can simply pull the singularity container with all dependency resolved (in few minutes, depends on the network speed).
-
-```
-singularity pull shub://tgac-vumc/QDNAseq-snakemake
-```
+The pipeline itself will run on Python 3.8.5 and R 3.6.3. For exact dependencies view `environment.yaml` and `r-dependencies.R`.
 
 ### Using Conda/Mamba
 
@@ -67,12 +58,24 @@ wget http://www.few.vu.nl/~mavdwiel/CGHtest/CGHtest_1.1.tar.gz
 ```
 -->
 
-Then run the R script r-dependencies.R in the terminal to install the non-conda R dependencies in the environment:
+Then run the R-script r-dependencies.R in the terminal to install the non-conda R dependencies in the environment:
 
 ```
 Rscript r-dependencies.R
 ```
 
+
+### Using Singularity
+
+Under development
+
+<!---
+If you have Singularity, you can simply pull the singularity container with all dependency resolved (in few minutes, depends on the network speed).
+
+```
+singularity pull shub://tgac-vumc/QDNAseq-snakemake
+```
+-->
 ## Preparing analysis
 
 ### Prepare the data
@@ -107,6 +110,9 @@ For providing service-analysis, set `setting` to `service`. For research purpose
 
 One of the options in the configfile is dewaving, if set to true QNDAseq objects will be dewaved before segmentation. 
 
+These options change the rules performed in the pipeline, see the rule-graph in the next section.
+
+
 ## Running analysis
 
 Make sure that snakemake is able to find the excecutive file Snakefile by performing a dry-run:
@@ -116,7 +122,7 @@ cd ../QDNAseq.snakemake
 snakemake -n
 ```
 
-Check the rules that are planned to be performed
+Check the rules that are planned to be performed, conform the rule-graph.
 
 An visualization of the order of rules to be performed can be viewed by running the following command and opening the DAG-file
 
