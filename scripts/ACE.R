@@ -74,7 +74,7 @@ ACE <- function(inputdir = "./", outputdir, filetype = 'rds', binsizes, ploidies
 	                           values = c(inputdir,outputdir,filetype,paste0(binsizes,collapse=", "),paste0(ploidies,collapse=", "),imagetype,method,penalty,cap,trncname,printsummaries))
 	  for (b in binsizes) {
 		  currentdir <- file.path(outputdir,paste0(b,"kbp"))
-		  dir.create(currentdir)
+          if(!dir.exists(currentdir)) {dir.create(currentdir)}# dir.create(currentdir)
 		  bins <- getBinAnnotations(binSize = b)
 		  readCounts <- binReadCounts(bins, path = inputdir)
 		  readCountsFiltered <- applyFilters(readCounts, residual = TRUE, blacklist = TRUE)
@@ -97,7 +97,7 @@ ACE <- function(inputdir = "./", outputdir, filetype = 'rds', binsizes, ploidies
 	  files <- list.files(inputdir, pattern = "\\.rds$")
 	  for (f in 1:length(files)) {
 			currentdir <- file.path(outputdir,paste0(substr(files[f],0,nchar(files[f])-4)))
-			dir.create(currentdir)
+            if(!dir.exists(currentdir)) {dir.create(currentdir)}# dir.create(currentdir)
 			copyNumbersSegmented <- readRDS(file.path(inputdir,files[f]))
 			ploidyplotloop(copyNumbersSegmented,currentdir,ploidies,imagetype,method,penalty,cap,trncname,printsummaries)
 		}
@@ -123,13 +123,13 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
 
 	for (q in ploidies) {
 	  qdir <- file.path(currentdir,paste0(q,"N"))
-	  dir.create(qdir)
+	  if(!dir.exists(qdir)) {dir.create(qdir)}# dir.create(qdir)
 
   	likelyplots <- vector(mode = 'list', length = 3*length(pd$name))
   	listerrorplots <- vector(mode = 'list', length = length(pd$name))
   	fitpicker <- matrix(ncol = 16, nrow = length(pd$name))
   	colnames(fitpicker) <- c("sample","likely_fit","ploidy","standard","fit_1","fit_2","fit_3","fit_4","fit_5","fit_6","fit_7","fit_8","fit_9","fit_10","fit_11","fit_12")
-  	dir.create(file.path(qdir,"likelyfits"))
+  	if(!dir.exists(file.path(qdir,"likelyfits"))){dir.create(file.path(qdir,"likelyfits"))}
 
   	for (a in 1:length(pd$name)) {
   		segmentdata <- rle(as.vector(na.exclude(copyNumbersSegmented@assayData$segmented[,a])))
@@ -207,7 +207,7 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		  dir.create(summary_dir)
   		}
 
-  		dir.create(file.path(fp,"graphs"))
+  		if(dir.exists(file.path(fp,"graphs"))){dir.create(file.path(fp,"graphs"))}
 
   		cellularity <- 5:100
   		tempdf <- data.frame(cellularity,errorlist=errorlist/max(errorlist))
