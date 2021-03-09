@@ -20,7 +20,6 @@ source('scripts/ACE.R', echo = !msg)
 ploidies<-as.integer(snakemake@wildcards[["ploidy"]])
 inputfile <-snakemake@input[["segmented"]]
 outputdir<-snakemake@params[["outputdir"]]
-# formatSamples<-snakemake@params[["formatSamples"]]
 failed <- snakemake@params[["failed"]]
 log<-snakemake@log[[1]]
 fitpicker <- snakemake@output[["fitpicker"]] # Insert by Erik 2021-01-27
@@ -44,7 +43,7 @@ ploidyplotloop(copyNumbersSegmented ,outputdir , ploidies,imagetype,method,penal
 
 #create output for failed samples - for snakemake compatibility.
 failed_samples<-read.table(failed, stringsAsFactors=FALSE, header=TRUE)
-if(length(failed_samples[,1]>0)){for(file in failed_samples[,1]){
-    file.create(paste(outputdir, ploidies,"N/", file,"/summary_",file,".",imagetype,sep=""))
-}}
+if(length(failed_samples[,1]>0)){
+  for(file in failed_samples[,1]){file.create(paste(outputdir, ploidies,"N/", file,"/summary_",file,".",imagetype,sep=""))}
+}
 

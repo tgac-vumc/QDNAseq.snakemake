@@ -30,9 +30,15 @@ trncname<- snakemake@config[["ACE"]][["trncname"]]
 
 copyNumbersSegmented <- readRDS(inputfile)
 
-postanalysisloop(copyNumbersSegmented , modelsfile=fitpickertable, imagetype=imagetype, outputdir=outputdir, trncname=trncname)
+postanalysisloop(copyNumbersSegmented, modelsfile=fitpickertable, imagetype=imagetype, outputdir=outputdir, trncname=trncname)
+
+# copy file to outputdir and remove from QDNAseq-snakemake directory
+if (file.exists("./Rplots.pdf")){
+    file.copy("./Rplots.pdf", paste0(outputdir,"all_samples.pdf"))
+    file.remove("./Rplots.pdf")
+}
 
 failed_samples<-read.table(failed, stringsAsFactors=FALSE, header=TRUE)
-if(length(failed_samples[,1]>0)){for(file in failed_samples[,1]){
-    file.create(paste(outputdir,"segmentfiles/",file,"_segments.tsv",sep=""))
-}}
+if(length(failed_samples[,1]>0)){
+  for(file in failed_samples[,1]){file.create(paste(outputdir,"segmentfiles/",file,"_segments.tsv",sep=""))}
+}

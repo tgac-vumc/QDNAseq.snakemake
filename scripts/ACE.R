@@ -69,42 +69,42 @@ ACE <- function(inputdir = "./", outputdir, filetype = 'rds', binsizes, ploidies
 	if(missing(outputdir)) { outputdir <- substr(inputdir,0,nchar(inputdir)-1) }
 	if(!dir.exists(outputdir)) {dir.create(outputdir)}
 	if(filetype=='bam'){
-		if(missing(binsizes)) { binsizes <- c(30,100,500,1000) }
-	  parameters <- data.frame(options = c("inputdir","outputdir","filetype","binsizes","ploidies","imagetype","method","penalty","cap","trncname","printsummaries"),
+	    if(missing(binsizes)) { binsizes <- c(30,100,500,1000) }
+	    parameters <- data.frame(options = c("inputdir","outputdir","filetype","binsizes","ploidies","imagetype","method","penalty","cap","trncname","printsummaries"),
 	                           values = c(inputdir,outputdir,filetype,paste0(binsizes,collapse=", "),paste0(ploidies,collapse=", "),imagetype,method,penalty,cap,trncname,printsummaries))
-	  for (b in binsizes) {
-		  currentdir <- file.path(outputdir,paste0(b,"kbp"))
-          if(!dir.exists(currentdir)) {dir.create(currentdir)}# dir.create(currentdir)
-		  bins <- getBinAnnotations(binSize = b)
-		  readCounts <- binReadCounts(bins, path = inputdir)
-		  readCountsFiltered <- applyFilters(readCounts, residual = TRUE, blacklist = TRUE)
-		  readCountsFiltered <- estimateCorrection(readCountsFiltered)
-		  # the default correctBins will output a ratio; using method = 'median' will return a corrected readcount
-		  copyNumbers <- correctBins(readCountsFiltered)
-		  copyNumbers <- normalizeBins(copyNumbers)
-		  copyNumbers <- smoothOutlierBins(copyNumbers)
-		  copyNumbersSegmented <- segmentBins(copyNumbers, transformFun = 'sqrt') # the transformFun is not available in older versions of QDNAseq!
-		  copyNumbersSegmented <- normalizeSegmentedBins(copyNumbersSegmented)
-		  saveRDS(copyNumbersSegmented, file = file.path(outputdir,paste0(b,"kbp.rds")))
-
-		  ploidyplotloop(copyNumbersSegmented,currentdir,ploidies,imagetype,method,penalty,cap,trncname,printsummaries)
-
-		}
-	}
-	else if(filetype=='rds'){
-	  parameters <- data.frame(options = c("inputdir","outputdir","filetype","ploidies","imagetype","method","penalty","cap","trncname","printsummaries"),
-	                           values = c(inputdir,outputdir,filetype,paste0(ploidies,collapse=", "),imagetype,method,penalty,cap,trncname,printsummaries))
-	  files <- list.files(inputdir, pattern = "\\.rds$")
-	  for (f in 1:length(files)) {
-			currentdir <- file.path(outputdir,paste0(substr(files[f],0,nchar(files[f])-4)))
+	    for (b in binsizes) {
+		    currentdir <- file.path(outputdir,paste0(b,"kbp"))
             if(!dir.exists(currentdir)) {dir.create(currentdir)}# dir.create(currentdir)
-			copyNumbersSegmented <- readRDS(file.path(inputdir,files[f]))
-			ploidyplotloop(copyNumbersSegmented,currentdir,ploidies,imagetype,method,penalty,cap,trncname,printsummaries)
+		  
+            bins <- getBinAnnotations(binSize = b)
+            readCounts <- binReadCounts(bins, path = inputdir)
+		    readCountsFiltered <- applyFilters(readCounts, residual = TRUE, blacklist = TRUE)
+		    readCountsFiltered <- estimateCorrection(readCountsFiltered)
+		    # the default correctBins will output a ratio; using method = 'median' will return a corrected readcount
+		    copyNumbers <- correctBins(readCountsFiltered)
+		    copyNumbers <- normalizeBins(copyNumbers)
+		    copyNumbers <- smoothOutlierBins(copyNumbers)
+		    copyNumbersSegmented <- segmentBins(copyNumbers, transformFun = 'sqrt') # the transformFun is not available in older versions of QDNAseq!
+		    copyNumbersSegmented <- normalizeSegmentedBins(copyNumbersSegmented)
+		    saveRDS(copyNumbersSegmented, file = file.path(outputdir,paste0(b,"kbp.rds")))
+
+		    ploidyplotloop(copyNumbersSegmented,currentdir,ploidies,imagetype,method,penalty,cap,trncname,printsummaries)
 		}
+	} else if(filetype=='rds'){
+	    parameters <- data.frame(options = c("inputdir","outputdir","filetype","ploidies","imagetype","method","penalty","cap","trncname","printsummaries"),
+	                           values = c(inputdir,outputdir,filetype,paste0(ploidies,collapse=", "),imagetype,method,penalty,cap,trncname,printsummaries))
+	    files <- list.files(inputdir, pattern = "\\.rds$")
+	    for (f in 1:length(files)) {
+            currentdir <- file.path(outputdir,paste0(substr(files[f],0,nchar(files[f])-4)))
+            if(!dir.exists(currentdir)) {dir.create(currentdir)}# dir.create(currentdir)
+            copyNumbersSegmented <- readRDS(file.path(inputdir,files[f]))
+
+            ploidyplotloop(copyNumbersSegmented,currentdir,ploidies,imagetype,method,penalty,cap,trncname,printsummaries)
+        }
+	} else {
+	    print("not a valid filetype")
 	}
-	else {
-	print("not a valid filetype")
-	}
+
 	write.table(parameters, file=file.path(outputdir,"log.tsv"), quote = FALSE, sep = "\t", na = "", row.names = FALSE)
 }
 
@@ -120,14 +120,19 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
 # I have commented out the best fit and last minimum plots, they are all in likely fits anyway
 #	bfplots <- vector(mode = 'list', length = 4*length(pd$name))
 #	lmplots <- vector(mode = 'list', length = 4*length(pd$name))
+    
+    # currentdir might end on '/' so delete if so for later file.path-ing
+    currentdir = gsub("/$", "", currentdir)
 
 	for (q in ploidies) {
-	  qdir <- file.path(currentdir,paste0(q,"N"))
-	  if(!dir.exists(qdir)) {dir.create(qdir)}# dir.create(qdir)
+
+    qdir <- file.path(currentdir,paste0(q,"N"))
+	if(!dir.exists(qdir)) {dir.create(qdir)}# dir.create(qdir)
 
   	likelyplots <- vector(mode = 'list', length = 3*length(pd$name))
   	listerrorplots <- vector(mode = 'list', length = length(pd$name))
-  	fitpicker <- matrix(ncol = 16, nrow = length(pd$name))
+  	
+    fitpicker <- matrix(ncol = 16, nrow = length(pd$name))
   	colnames(fitpicker) <- c("sample","likely_fit","ploidy","standard","fit_1","fit_2","fit_3","fit_4","fit_5","fit_6","fit_7","fit_8","fit_9","fit_10","fit_11","fit_12")
   	if(!dir.exists(file.path(qdir,"likelyfits"))){dir.create(file.path(qdir,"likelyfits"))}
 
@@ -141,44 +146,43 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		errorlist <- c()
 
   		for (i in 5:100) {
-  		  fraction[i-4] <- i/100
-  		  for (p in 1:12) {
-  		    expected[p] <- standard*(1+(p-q)*fraction[i-4]/(fraction[i-4]*(q-2)+2))
-  		  }
-  		  # the maximum error 0.5 was added to make sure hyperamplifications (p>12) don't get ridiculous errors
-  		  for (j in 1:length(segmentdata$values)) {
-  		    if(method=='RMSE') {temp[j] <- (min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty))^2}
-  		    else if(method=='SMRE') {temp[j] <- sqrt(min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty))}
-  		    else if(method=='MAE') {temp[j] <- min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty)}
-  		    else {print("Not a valid method")}
-  		  }
-  		  if(method=='RMSE') {errorlist[i-4] <- sqrt(sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths))}
-  		  else if(method=='SMRE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)^2}
-  		  else if(method=='MAE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)}
-
+  		    fraction[i-4] <- i/100
+  		    for (p in 1:12) {
+  		        expected[p] <- standard*(1+(p-q)*fraction[i-4]/(fraction[i-4]*(q-2)+2))
+  		    }
+  		    # the maximum error 0.5 was added to make sure hyperamplifications (p>12) don't get ridiculous errors
+  		    for (j in 1:length(segmentdata$values)) {
+  		        if(method=='RMSE') {temp[j] <- (min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty))^2}
+  		        else if(method=='SMRE') {temp[j] <- sqrt(min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty))}
+  		        else if(method=='MAE') {temp[j] <- min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty)}
+  		        else {print("Not a valid method")}
+  		    }
+  		    if(method=='RMSE') {errorlist[i-4] <- sqrt(sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths))}
+  		    else if(method=='SMRE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)^2}
+  		    else if(method=='MAE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)}
   		}
 
   		minima <- c()
   		rerror <- c()
 
   		if (round(errorlist[1], digits = 10) < round(errorlist[2], digits = 10)) {
-  		  lastminimum <- fraction[1]
-  		  minima[1] <- fraction[1]
-  		  rerror[1] <- errorlist[1]/max(errorlist)
+  		    lastminimum <- fraction[1]
+  		    minima[1] <- fraction[1]
+  		    rerror[1] <- errorlist[1]/max(errorlist)
   		}
 
   		for (l in 6:99) {
-  		  if (round(errorlist[l-4], digits = 10) < round(errorlist[l-5], digits = 10) & round(errorlist[l-4], digits = 10) < round(errorlist[l-3], digits = 10)) {
-  			lastminimum <- fraction[l-4]
-  			minima <- append(minima,fraction[l-4])
-  			rerror <- append(rerror,(errorlist[l-4]/max(errorlist)))
-  		  }
+  		    if (round(errorlist[l-4], digits = 10) < round(errorlist[l-5], digits = 10) & round(errorlist[l-4], digits = 10) < round(errorlist[l-3], digits = 10)) {
+  			    lastminimum <- fraction[l-4]
+  			    minima <- append(minima,fraction[l-4])
+  			    rerror <- append(rerror,(errorlist[l-4]/max(errorlist)))
+  		    }
   		}
 
   		if (errorlist[100-4] <= errorlist[100-5]) {
-  		  lastminimum <- fraction[100-4]
-  		  minima <- append(minima, fraction[100-4])
-  		  rerror <- append(rerror, errorlist[100-4]/max(errorlist))
+  		    lastminimum <- fraction[100-4]
+  		    minima <- append(minima, fraction[100-4])
+  		    rerror <- append(rerror, errorlist[100-4]/max(errorlist))
   		}
 
   		expsd <- sqrt(pd$expected.variance[a])
@@ -190,36 +194,32 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		currentbin <- 0
   		binchrmdl <- c()
   		for (i in 1:length(rlechr$values)) {
-  		  currentmiddle <- currentbin+rlechr$lengths[i]/2
-  		  currentbin <- currentbin+rlechr$lengths[i]
-  		  binchrend <- append(binchrend, currentbin)
-  		  binchrmdl <- append(binchrmdl, currentmiddle)
+  		    currentmiddle <- currentbin+rlechr$lengths[i]/2
+  		    currentbin <- currentbin+rlechr$lengths[i]
+  		    binchrend <- append(binchrend, currentbin)
+  		    binchrmdl <- append(binchrmdl, currentmiddle)
   		}
 
   		# create a subdirectory for your sample
   		fp <- file.path(qdir,pd$name[a])
-  		if(!dir.exists(fp)) {
-  		  dir.create(fp)
-  		}
+  		if(!dir.exists(fp)) {dir.create(fp)}
 
 		summary_dir <- file.path(qdir,"summary_files")  #TL added summary dir
-		if(!dir.exists(summary_dir)) {
-  		  dir.create(summary_dir)
-  		}
+		if(!dir.exists(summary_dir)) {dir.create(summary_dir)}
 
-  		if(dir.exists(file.path(fp,"graphs"))){dir.create(file.path(fp,"graphs"))}
+  		if(!dir.exists(file.path(fp,"graphs"))){dir.create(file.path(fp,"graphs"))}
 
   		cellularity <- 5:100
   		tempdf <- data.frame(cellularity,errorlist=errorlist/max(errorlist))
   		tempplot <- ggplot() +
-  		  scale_y_continuous(name = "relative error", limits = c(0,1.05), expand=c(0,0)) +
-  		  scale_x_continuous(name = "cellularity (%)") +
-  		  geom_vline(xintercept = seq(from = 10, to = 100, by = 10), color = "#666666", linetype = "dashed") +
-  		  geom_point(aes(y=errorlist, x=cellularity), data=tempdf) +
-  		  theme_classic() + theme(
-  		    axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
-  		  ggtitle(paste0(pd$name[a], " - errorlist")) +
-  		  theme(plot.title = element_text(hjust = 0.5))
+  		    scale_y_continuous(name = "relative error", limits = c(0,1.05), expand=c(0,0)) +
+  		    scale_x_continuous(name = "cellularity (%)") +
+  		    geom_vline(xintercept = seq(from = 10, to = 100, by = 10), color = "#666666", linetype = "dashed") +
+  		    geom_point(aes(y=errorlist, x=cellularity), data=tempdf) +
+  		    theme_classic() + 
+            theme(axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
+  		    ggtitle(paste0(pd$name[a], " - errorlist")) +
+  		    theme(plot.title = element_text(hjust = 0.5))
 
   #		bfplots[[(4*(a-1)+2)]] <- tempplot
   #		lmplots[[(4*(a-1)+2)]] <- tempplot
@@ -240,130 +240,127 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		fitpicker[a,4] <- standard
 
   		for (m in 1:length(minima)) {
-  		  fitpicker[a,m+4] <- minima[m]
-  		  adjustedcopynumbers <- q + ((copyNumbersSegmented@assayData$copynumber[,a]-standard)*(minima[m]*(q-2)+2))/(minima[m]*standard)
-  		  adjustedsegments <- q + ((copyNumbersSegmented@assayData$segmented[,a]-standard)*(minima[m]*(q-2)+2))/(minima[m]*standard)
-  		  df <- as.data.frame(cbind(bin,adjustedcopynumbers,adjustedsegments))
-  		  colnames(df)[2] <- "copynumbers"
-  		  colnames(df)[3] <- "segments"
-  		  dfna <- na.exclude(df)
-  		  cappedcopynumbers <- dfna[which(dfna$copynumbers > cap),]
-  		  if(length(cappedcopynumbers$copynumbers)>0) {cappedcopynumbers$copynumbers <- cap-0.1}
-  		  cappedsegments <- dfna[which(dfna$segments > cap),]
-  		  if(length(cappedsegments$segments)>0) {cappedsegments$segments <- cap-0.1}
-  		  toppedcopynumbers <- dfna[which(dfna$copynumbers <= 0),]
-  		  if(length(toppedcopynumbers$copynumbers)>0) {toppedcopynumbers$copynumbers <- 0.1}
-  		  toppedsegments <- dfna[which(dfna$segments <= 0),]
-  		  if(length(toppedsegments$segments)>0) {toppedsegments$segments <- 0.1}
-  		  line1 <- paste0("Cellularity: ", minima[m])
-  		  line2 <- paste0("Relative error: ", round(rerror[m], digits = 3))
-  		  line3 <- paste0("Expected Noise: ", round(expsd,digits = 4))
-  		  line4 <- paste0("Observed Noise: ", round(obssd,digits = 4))
-  		  fn <- file.path(fp,"graphs",paste0(pd$name[a], " - ",q,"N fit ", m, ".",imagetype))
+  		    fitpicker[a,m+4] <- minima[m]
+  		    adjustedcopynumbers <- q + ((copyNumbersSegmented@assayData$copynumber[,a]-standard)*(minima[m]*(q-2)+2))/(minima[m]*standard)
+  		    adjustedsegments <- q + ((copyNumbersSegmented@assayData$segmented[,a]-standard)*(minima[m]*(q-2)+2))/(minima[m]*standard)
+  		    df <- as.data.frame(cbind(bin,adjustedcopynumbers,adjustedsegments))
+  		    colnames(df)[2] <- "copynumbers"
+  		    colnames(df)[3] <- "segments"
+  		    dfna <- na.exclude(df)
+  		    cappedcopynumbers <- dfna[which(dfna$copynumbers > cap),]
+  		    if(length(cappedcopynumbers$copynumbers)>0) {cappedcopynumbers$copynumbers <- cap-0.1}
+  		    cappedsegments <- dfna[which(dfna$segments > cap),]
+  		    if(length(cappedsegments$segments)>0) {cappedsegments$segments <- cap-0.1}
+  		    toppedcopynumbers <- dfna[which(dfna$copynumbers <= 0),]
+  		    if(length(toppedcopynumbers$copynumbers)>0) {toppedcopynumbers$copynumbers <- 0.1}
+  		    toppedsegments <- dfna[which(dfna$segments <= 0),]
+  		    if(length(toppedsegments$segments)>0) {toppedsegments$segments <- 0.1}
+  		    line1 <- paste0("Cellularity: ", minima[m])
+  		    line2 <- paste0("Relative error: ", round(rerror[m], digits = 3))
+  		    line3 <- paste0("Expected Noise: ", round(expsd,digits = 4))
+  		    line4 <- paste0("Observed Noise: ", round(obssd,digits = 4))
+  		    fn <- file.path(fp,"graphs",paste0(pd$name[a], " - ",q,"N fit ", m, ".",imagetype))
 
-  		  tempplot <- ggplot() +
-    			scale_y_continuous(name = "copies", limits = c(0,12), breaks = c(0:12), expand=c(0,0)) +
+  		    tempplot <- ggplot() +
+    		    scale_y_continuous(name = "copies", limits = c(0,12), breaks = c(0:12), expand=c(0,0)) +
     			scale_x_continuous(name = "chromosome", limits = c(0,binchrend[22]), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
     			geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
     			geom_hline(yintercept = c(5:cap-1), color = 'lightgray', size = 0.5) +
     			geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
     			geom_point(aes(x = bin,y = copynumbers),data=df, size = 0.1, color = 'black') +
-  		    geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.4, color = 'black', shape = 24) + #TL changes size from 0.5 to 0.4
-  		    geom_point(aes(x = bin,y = copynumbers),data=toppedcopynumbers, size = 0.4, color = 'black', shape = 25) + #TL changes size from 0.5 to 0.4
+  		        geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.4, color = 'black', shape = 24) + #TL changes size from 0.5 to 0.4
+  		        geom_point(aes(x = bin,y = copynumbers),data=toppedcopynumbers, size = 0.4, color = 'black', shape = 25) + #TL changes size from 0.5 to 0.4
     			geom_point(aes(x = bin,y = segments),data=df, size = 0.5, color = 'darkorange') + #changes size  from 1 to 0.5
-  		    geom_point(aes(x = bin,y = segments),data=cappedsegments, size = 0.5, color = 'darkorange', shape = 24) +  #changes size  from 1 to 0.5
-  		    geom_point(aes(x = bin,y = segments),data=toppedsegments, size = 0.5, color = 'darkorange', shape = 25) + #changes size  from 1 to 0.5
-  		    theme_classic() + theme(
-  		      axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
-  		    ggtitle(paste0(pd$name[a], " - binsize ", binsize, " kbp - ", pd$used.reads[a], " reads - ",q,"N fit ", m)) +
+  		        geom_point(aes(x = bin,y = segments),data=cappedsegments, size = 0.5, color = 'darkorange', shape = 24) +  #changes size  from 1 to 0.5
+  		        geom_point(aes(x = bin,y = segments),data=toppedsegments, size = 0.5, color = 'darkorange', shape = 25) + #changes size  from 1 to 0.5
+  		        theme_classic() +
+                theme(axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
+  		        ggtitle(paste0(pd$name[a], " - binsize ", binsize, " kbp - ", pd$used.reads[a], " reads - ",q,"N fit ", m)) +
     			geom_rect(aes(xmin=binchrmdl[1]/10, xmax = binchrmdl[4], ymin = cap-0.9, ymax = cap), fill = 'white') +
     			annotate("text", x = binchrmdl[2], y = cap-0.3, label = line1) +
     			annotate("text", x = binchrmdl[2], y = cap-0.7, label = line2) +
     			geom_rect(aes(xmin=binchrmdl[12], xmax = binchrmdl[22], ymin = cap-0.9, ymax = cap), fill = 'white') +
     			annotate("text", x = binchrmdl[16], y = cap-0.3, label = line3) +
     			annotate("text", x = binchrmdl[16], y = cap-0.7, label = line4) +
-  		    theme(plot.title = element_text(hjust = 0.5))
-  		  plots[[m]] <- tempplot
-  		  if(bfi==m) {
-  		    likelyplots[[(3*(a-1)+1)]] <- tempplot
+  		        theme(plot.title = element_text(hjust = 0.5))
+  		    plots[[m]] <- tempplot
+  		    
+            if(bfi==m) {
+  		        likelyplots[[(3*(a-1)+1)]] <- tempplot
+  		        if(imagetype %in% c('pdf','svg')) {
+  		            imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_bestfit_",q,"N.",imagetype)),width=10.5)
+  		        } else {
+  		            imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_bestfit_",q,"N.",imagetype)),width=720)
+  		        }
+  		        print(tempplot)
+  		        dev.off()
+  		    }
+  		    if(m==length(minima)) {
+  		        likelyplots[[(3*(a-1)+2)]] <- tempplot
+  		        if(imagetype %in% c('pdf','svg')) {
+  		            imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_lastminimum_",q,"N.",imagetype)),width=10.5)
+  		        } else {
+  		            imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_lastminimum_",q,"N.",imagetype)),width=720)
+  		        }
+  		        print(tempplot)
+  		        dev.off()
+  		    }
   		    if(imagetype %in% c('pdf','svg')) {
-  		      imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_bestfit_",q,"N.",imagetype)),width=10.5)
+  		        imagefunction(fn,width=10.5)
   		    } else {
-  		      imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_bestfit_",q,"N.",imagetype)),width=720)
+  		        imagefunction(fn,width=720)
   		    }
   		    print(tempplot)
   		    dev.off()
-  		  }
-  		  if(m==length(minima)) {
-  		    likelyplots[[(3*(a-1)+2)]] <- tempplot
-  		    if(imagetype %in% c('pdf','svg')) {
-  		      imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_lastminimum_",q,"N.",imagetype)),width=10.5)
-  		    } else {
-  		      imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_lastminimum_",q,"N.",imagetype)),width=720)
-  		    }
-  		    print(tempplot)
-  		    dev.off()
-  		  }
-  		  if(imagetype %in% c('pdf','svg')) {
-  		    imagefunction(fn,width=10.5)
-  		  } else {
-  		    imagefunction(fn,width=720)
-  		  }
-  		  print(tempplot)
-  		  dev.off()
   		}
 		plots[[(m+1)]] <- listerrorplots[[a]] #TL added errorplot to all plots
 
   		if(imagetype %in% c('pdf','svg')) {
-  		  pdf(file.path(summary_dir,paste0("summary_",pd$name[a],".pdf")),width=10.5)  #TL changed place of summary files
-  		  print(plots)
-  		  dev.off()
-  		} else {
-  		  if (length(plots)==1) {
-  		    imagefunction(file.path(summary_dir,paste0("summary_",pd$name[a],".",imagetype)), width = 720)  #TL changed place of summary files
+  		    pdf(file.path(summary_dir,paste0("summary_",pd$name[a],".pdf")),width=10.5)  #TL changed place of summary files
   		    print(plots)
   		    dev.off()
-  		  } else {
-    		  imagefunction(file.path(summary_dir,paste0("summary_",pd$name[a],".",imagetype)), width = 2160, height = 480*ceiling(length(plots)/3))  #TL changed place of summary files
-    		  print(multiplot(plotlist = plots, cols=3))
-    		  dev.off()
+  		} else {
+  		    if (length(plots)==1) {
+  		        imagefunction(file.path(summary_dir,paste0("summary_",pd$name[a],".",imagetype)), width = 720)  #TL changed place of summary files
+  		        print(plots)
+  		        dev.off()
+  		    } else {
+    		    imagefunction(file.path(summary_dir,paste0("summary_",pd$name[a],".",imagetype)), width = 2160, height = 480*ceiling(length(plots)/3))  #TL changed place of summary files
+    		    print(multiplot(plotlist = plots, cols=3))
+    		    dev.off()
     		}
-
   		}
-
   	}
-
-
 
   	if(printsummaries == TRUE) {
-    	if(imagetype %in% c('pdf','svg')) {
-    	  pdf(file.path(qdir,"summary_likelyfits.pdf"),width=10.5)
-      	  print(likelyplots)
-      	  dev.off()
-      	pdf(file.path(qdir,"summary_errors.pdf"))
-      	  print(listerrorplots)
-      	  dev.off()
+        if(imagetype %in% c('pdf','svg')) {
+            pdf(file.path(qdir,"summary_likelyfits.pdf"),width=10.5)
+      	    print(likelyplots)
+      	    dev.off()
+      	    pdf(file.path(qdir,"summary_errors.pdf"))
+      	    print(listerrorplots)
+      	    dev.off()
       	} else {
-    	  imagefunction(file.path(qdir,paste0("summary_likelyfits.",imagetype)), width = 2160, height = 480*length(pd$name))
-      	  print(multiplot(plotlist = likelyplots, cols=3))
-      	  dev.off()
-      	imagefunction(file.path(qdir,paste0("summary_errors.",imagetype)), width = 1920, height = 480*ceiling(length(pd$name)/4))
-      	if (length(listerrorplots)==1){print(listerrorplots)} else {print(multiplot(plotlist = listerrorplots, cols=4))}
-      	  dev.off()
+            imagefunction(file.path(qdir,paste0("summary_likelyfits.",imagetype)), width = 2160, height = 480*length(pd$name))
+      	    print(multiplot(plotlist = likelyplots, cols=3))
+      	    dev.off()
+      	    imagefunction(file.path(qdir,paste0("summary_errors.",imagetype)), width = 1920, height = 480*ceiling(length(pd$name)/4))
+      	    if (length(listerrorplots)==1){print(listerrorplots)} else {print(multiplot(plotlist = listerrorplots, cols=4))}
+      	    dev.off()
       	}
   	} else if(printsummaries == 2) {
-  	  if(imagetype %in% c('pdf','svg')) {
-  	    pdf(file.path(qdir,"summary_errors.pdf"))
-  	    print(listerrorplots)
-  	    dev.off()
+  	    if(imagetype %in% c('pdf','svg')) {
+  	        pdf(file.path(qdir,"summary_errors.pdf"))
+  	        print(listerrorplots)
+  	        dev.off()
   	    } else {
-  	    imagefunction(file.path(qdir,paste0("summary_errors.",imagetype)), width = 1920, height = 480*ceiling(length(pd$name)/4))
-  	    if (length(listerrorplots)==1){print(listerrorplots)} else {print(multiplot(plotlist = listerrorplots, cols=4))}
-  	      dev.off()
-  	   }
+  	        imagefunction(file.path(qdir,paste0("summary_errors.",imagetype)), width = 1920, height = 480*ceiling(length(pd$name)/4))
+  	        if (length(listerrorplots)==1){print(listerrorplots)} else {print(multiplot(plotlist = listerrorplots, cols=4))}
+  	        dev.off()
+  	    }
   	}
 
-  	write.table(fitpicker, file=file.path(qdir,paste0("fitpicker_",q,"N.tsv")), quote = FALSE, sep = "\t", na = "", row.names = FALSE)
+    write.table(fitpicker, file=file.path(qdir,paste0("fitpicker_",q,"N.tsv")), quote = FALSE, sep = "\t", na = "", row.names = FALSE)
 
 	}
 }
@@ -372,17 +369,18 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
 # this code makes the generic input template dataframe for singlemodel and singleplot
 # those function can take QDNAseq objects when specified, so it is not necessary to run this separately
 ObjectsampleToTemplate <- function(copyNumbersSegmented, index = 1) {
-  suppressMessages(library(Biobase))
-  suppressMessages(library(QDNAseq))
-  fd <- fData(copyNumbersSegmented)
-	segments <- as.vector(copyNumbersSegmented@assayData$segmented[,index])
-	copynumbers <- as.vector(copyNumbersSegmented@assayData$copynumber[,index])
-	chr <- as.vector(fd$chromosome)
-	start <- as.vector(fd$start)
-	end <- as.vector(fd$end)
-	bin <- 1:length(chr)
-	template <- data.frame(bin,chr,start,end,copynumbers,segments)
-	return(template)
+    suppressMessages(library(Biobase))
+    suppressMessages(library(QDNAseq))
+    
+    fd <- fData(copyNumbersSegmented)
+    segments <- as.vector(copyNumbersSegmented@assayData$segmented[,index])
+    copynumbers <- as.vector(copyNumbersSegmented@assayData$copynumber[,index])
+    chr <- as.vector(fd$chromosome)
+    start <- as.vector(fd$start)
+    end <- as.vector(fd$end)
+    bin <- 1:length(chr)
+    template <- data.frame(bin,chr,start,end,copynumbers,segments)
+    return(template)
 }
 
 
@@ -390,8 +388,9 @@ ObjectsampleToTemplate <- function(copyNumbersSegmented, index = 1) {
 # you can use a QDNAseq object as "template", then specify QDNAseqobjectsample by the sample number!
 # e.g. model <- singlemodel(copyNumbersSegmented, QDNAseqobjectsample = 3)
 singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FALSE, method = 'RMSE', penalty = 0, highlightminima = TRUE) {
-  suppressMessages(library(ggplot2))
-  if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
+    suppressMessages(library(ggplot2))
+    
+    if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
 	segmentdata <- rle(as.vector(na.exclude(template$segments)))
 	if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
 
@@ -400,39 +399,38 @@ singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FAL
 	temp <- c()
 	errorlist <- c()
 	for (i in 5:100) {
-		fraction[i-4] <- i/100
+	    fraction[i-4] <- i/100
 		for (p in 1:12) {
-		  expected[p] <- standard*(1+(p-ploidy)*fraction[i-4]/(fraction[i-4]*(ploidy-2)+2))
+		    expected[p] <- standard*(1+(p-ploidy)*fraction[i-4]/(fraction[i-4]*(ploidy-2)+2))
 		}
 		for (j in 1:length(segmentdata$values)) {
-		  if(method=='RMSE') {temp[j] <- (min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty))^2}
-		  else if(method=='SMRE') {temp[j] <- sqrt(min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty))}
-		  else if(method=='MAE') {temp[j] <- min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty)}
-		  else {print("Not a valid method")}
+		    if(method=='RMSE') {temp[j] <- (min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty))^2}
+		    else if(method=='SMRE') {temp[j] <- sqrt(min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty))}
+		    else if(method=='MAE') {temp[j] <- min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty)}
+		    else {print("Not a valid method")}
 		}
 		if(method=='RMSE') {errorlist[i-4] <- sqrt(sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths))}
 		else if(method=='SMRE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)^2}
 		else if(method=='MAE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)}
-
 	}
 
 	minima <- c()
 	rerror <- c()
 
 	if (round(errorlist[1], digits = 10) < round(errorlist[2], digits = 10)) {
-		lastminimum <- fraction[1]
-		minima[1] <- fraction[1]
-		rerror[1] <- errorlist[1]/max(errorlist)
+	    lastminimum <- fraction[1]
+	    minima[1] <- fraction[1]
+	    rerror[1] <- errorlist[1]/max(errorlist)
 	}
 	for (l in 6:99) {
-		if (round(errorlist[l-4], digits = 10) < round(errorlist[l-5], digits = 10) & round(errorlist[l-4], digits = 10) < round(errorlist[l-3], digits =10)) {
-			lastminimum <- fraction[l-4]
+	    if (round(errorlist[l-4], digits = 10) < round(errorlist[l-5], digits = 10) & round(errorlist[l-4], digits = 10) < round(errorlist[l-3], digits =10)) {
+	        lastminimum <- fraction[l-4]
 			minima <- append(minima,fraction[l-4])
 			rerror <- append(rerror,(errorlist[l-4]/max(errorlist)))
 		}
 	}
 	if (errorlist[100-4] <= errorlist[100-5]) {
-		lastminimum <- fraction[100-4]
+	    lastminimum <- fraction[100-4]
 		minima <- append(minima, fraction[100-4])
 		rerror <- append(rerror, errorlist[100-4]/max(errorlist))
 	}
@@ -441,30 +439,29 @@ singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FAL
 	tempdf <- data.frame(cellularity,errorlist=errorlist/max(errorlist))
 	minimadf <- data.frame(minima=minima*100,rerror)
 	if(highlightminima==TRUE) {
-  	tempplot <- ggplot() +
-  	  scale_y_continuous(name = "relative error", limits = c(0,1.05), expand=c(0,0)) +
-  	  scale_x_continuous(name = "cellularity (%)") +
-  	  geom_vline(xintercept = seq(from = 10, to = 100, by = 10), color = "#666666", linetype = "dashed") +
-  	  geom_point(aes(y=errorlist, x=cellularity), data=tempdf) +
-  	  geom_point(aes(y=rerror, x=minima), data=minimadf, color = 'red') +
-  	  theme_classic() + theme(
-  	    axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
-  	  ggtitle("errorlist") +
-  	  theme(plot.title = element_text(hjust = 0.5))
+  	    tempplot <- ggplot() +
+  	        scale_y_continuous(name = "relative error", limits = c(0,1.05), expand=c(0,0)) +
+  	        scale_x_continuous(name = "cellularity (%)") +
+  	        geom_vline(xintercept = seq(from = 10, to = 100, by = 10), color = "#666666", linetype = "dashed") +
+  	        geom_point(aes(y=errorlist, x=cellularity), data=tempdf) +
+  	        geom_point(aes(y=rerror, x=minima), data=minimadf, color = 'red') +
+  	        theme_classic() +
+            theme(axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
+  	        ggtitle("errorlist") +
+  	        theme(plot.title = element_text(hjust = 0.5))
 	} else {
-	  tempplot <- ggplot() +
-	    scale_y_continuous(name = "relative error", limits = c(0,1.05), expand=c(0,0)) +
-	    scale_x_continuous(name = "cellularity (%)") +
-	    geom_vline(xintercept = seq(from = 10, to = 100, by = 10), color = "#666666", linetype = "dashed") +
-	    geom_point(aes(y=errorlist, x=cellularity), data=tempdf) +
-	    theme_classic() + theme(
-	      axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
-	    ggtitle("errorlist") +
-	    theme(plot.title = element_text(hjust = 0.5))
+	    tempplot <- ggplot() +
+	        scale_y_continuous(name = "relative error", limits = c(0,1.05), expand=c(0,0)) +
+	        scale_x_continuous(name = "cellularity (%)") +
+	        geom_vline(xintercept = seq(from = 10, to = 100, by = 10), color = "#666666", linetype = "dashed") +
+	        geom_point(aes(y=errorlist, x=cellularity), data=tempdf) +
+	        theme_classic() +
+            theme(axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
+	        ggtitle("errorlist") +
+	        theme(plot.title = element_text(hjust = 0.5))
 	}
 
 	return(list(ploidy=ploidy,standard=standard,method=method,penalty=penalty,minima=minima,rerror=rerror,errorlist=errorlist,errorplot=tempplot))
-
 }
 
 
@@ -515,8 +512,8 @@ squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5
     listofcellularity <- append(listofcellularity, fraction)
     listoferrors <- append(listoferrors, errorlist)
     errormatrix[t+1,] <- errorlist
-
   }
+
   minimat <- matrix(nrow=(prows+1),ncol=96)
   for (i in 1:(prows+1)) {
     for (j in 1:96) {
@@ -567,22 +564,22 @@ squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5
 # don't forget to specify cellularity, error, ploidy, and standard; you can find these in the model output
 singleplot <- function(template,cellularity = 1, error, ploidy = 2, standard, title,
                        QDNAseqobjectsample = FALSE, trncname = FALSE, cap = 12, chrsubset) {
-  suppressMessages(library(ggplot2))
-  suppressMessages(library(Biobase))
-  if(QDNAseqobjectsample) {
-    if(missing(title)) {
-      pd<-pData(template)
-      if(trncname==TRUE) {pd$name <- gsub("_.*","",pd$name)}
-      if(trncname!=FALSE&&trncname!=TRUE) {pd$name <- gsub(trncname,"",pd$name)}
-      title <- pd$name[QDNAseqobjectsample]
+    suppressMessages(library(ggplot2))
+    suppressMessages(library(Biobase))
+    if(QDNAseqobjectsample) {
+        if(missing(title)) {
+           pd<-pData(template)
+           if(trncname==TRUE) {pd$name <- gsub("_.*","",pd$name)}
+           if(trncname!=FALSE&&trncname!=TRUE) {pd$name <- gsub(trncname,"",pd$name)}
+           title <- pd$name[QDNAseqobjectsample]
+        }
+        template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)
     }
-    template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)
-  }
-  if(missing(title)) {title <- "Plot"}
-  segmentdata <- rle(as.vector(na.exclude(template$segments)))
-  if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
-  adjustedcopynumbers <- ploidy + ((template$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
-	adjustedsegments <- ploidy + ((template$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
+    if(missing(title)) {title <- "Plot"}
+    segmentdata <- rle(as.vector(na.exclude(template$segments)))
+    if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
+    adjustedcopynumbers <- ploidy + ((template$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
+    adjustedsegments <- ploidy + ((template$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
 	df <- data.frame(bin=template$bin,adjustedcopynumbers,adjustedsegments)
 
 	rlechr <- rle(as.vector(template$chr))
@@ -590,7 +587,7 @@ singleplot <- function(template,cellularity = 1, error, ploidy = 2, standard, ti
 	currentbin <- 0
 	binchrmdl <- c()
 	for (i in 1:length(rlechr$values)) {
-		currentmiddle <- currentbin+rlechr$lengths[i]/2
+	    currentmiddle <- currentbin+rlechr$lengths[i]/2
 		currentbin <- currentbin+rlechr$lengths[i]
 		binchrend <- append(binchrend, currentbin)
 		binchrmdl <- append(binchrmdl, currentmiddle)
@@ -611,49 +608,49 @@ singleplot <- function(template,cellularity = 1, error, ploidy = 2, standard, ti
 	line1 <- paste0("Cellularity: ", cellularity)
 	line2 <- paste0("")
 	if(!missing(error)) {
-	  line2 <- paste0("Relative error: ", round(error, digits = 3))
+	    line2 <- paste0("Relative error: ", round(error, digits = 3))
 	}
 	if(missing(chrsubset)){
-  	ggplot() +
-  		scale_y_continuous(name = "copies", limits = c(0,cap), breaks = c(0:cap), expand=c(0,0)) +
-  		scale_x_continuous(name = "chromosome", limits = c(0,binchrend[22]), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
-  		geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
-  		geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
-  		geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
-  		geom_point(aes(x = bin,y = copynumbers),data=df, size = 0.1, color = 'black') +
-  	  geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'black', shape = 24) +
-  	  geom_point(aes(x = bin,y = copynumbers),data=toppedcopynumbers, size = 0.5, color = 'black', shape = 25) +
-  		geom_point(aes(x = bin,y = segments),data=df, size = 1, color = 'darkorange') +
-  	  geom_point(aes(x = bin,y = segments),data=cappedsegments, size = 1, color = 'darkorange', shape = 24) +
-  	  geom_point(aes(x = bin,y = segments),data=toppedsegments, size = 1, color = 'darkorange', shape = 25) +
-	    theme_classic() + theme(
-	      axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
-	    ggtitle(title) +
-  	  theme(plot.title = element_text(hjust = 0.5)) +
-  		geom_rect(aes(xmin=binchrmdl[1]/10, xmax = binchrmdl[4], ymin = cap-0.9, ymax = cap), fill = 'white') +
-  		annotate("text", x = binchrmdl[2], y = cap-0.3, label = line1) +
-  		annotate("text", x = binchrmdl[2], y = cap-0.7, label = line2)
+  	    #tempplot = ggplot() +
+        ggplot() +
+  	        scale_y_continuous(name = "copies", limits = c(0,cap), breaks = c(0:cap), expand=c(0,0)) +
+  	    	scale_x_continuous(name = "chromosome", limits = c(0,binchrend[22]), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
+  	    	geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
+  	    	geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
+  	    	geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
+  	    	geom_point(aes(x = bin,y = copynumbers),data=df, size = 0.1, color = 'black') +
+  	        geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'black', shape = 24) +
+  	        geom_point(aes(x = bin,y = copynumbers),data=toppedcopynumbers, size = 0.5, color = 'black', shape = 25) +
+  	    	geom_point(aes(x = bin,y = segments),data=df, size = 1, color = 'darkorange') +
+  	        geom_point(aes(x = bin,y = segments),data=cappedsegments, size = 1, color = 'darkorange', shape = 24) +
+  	        geom_point(aes(x = bin,y = segments),data=toppedsegments, size = 1, color = 'darkorange', shape = 25) +
+	        theme_classic() +
+            theme(axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
+	        ggtitle(title) +
+  	        theme(plot.title = element_text(hjust = 0.5)) +
+  	    	geom_rect(aes(xmin=binchrmdl[1]/10, xmax = binchrmdl[4], ymin = cap-0.9, ymax = cap), fill = 'white') +
+  	    	annotate("text", x = binchrmdl[2], y = cap-0.3, label = line1) +
+  	    	annotate("text", x = binchrmdl[2], y = cap-0.7, label = line2)
 	} else {
-	  firstchr <- range(chrsubset)[1]
-	  lastchr <- range(chrsubset)[2]
-	  if(firstchr==1){firstbin<-0
-	  } else {firstbin<-binchrend[firstchr-1]+1}
-	  ggplot() +
-	    scale_y_continuous(name = "copies", limits = c(0,cap), breaks = c(0:cap), expand=c(0,0)) +
-	    scale_x_continuous(name = "chromosome", limits = c(firstbin,binchrend[lastchr]), breaks = binchrmdl[firstchr:lastchr], labels = firstchr:lastchr, expand = c(0,0)) +
-	    geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
-	    geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
-	    geom_vline(xintercept = binchrend[firstchr:lastchr], color = "#666666", linetype = "dashed") +
-	    geom_point(aes(x = bin,y = copynumbers),data=df, size = 0.1, color = 'black') +
-	    geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'black', shape = 24) +
-	    geom_point(aes(x = bin,y = copynumbers),data=toppedcopynumbers, size = 0.5, color = 'black', shape = 25) +
-	    geom_point(aes(x = bin,y = segments),data=df, size = 1, color = 'darkorange') +
-	    geom_point(aes(x = bin,y = segments),data=cappedsegments, size = 1, color = 'darkorange', shape = 24) +
-	    geom_point(aes(x = bin,y = segments),data=toppedsegments, size = 1, color = 'darkorange', shape = 25) +
-	    theme_classic() + theme(
-	      axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
-	    ggtitle(title) +
-	    theme(plot.title = element_text(hjust = 0.5))
+	    firstchr <- range(chrsubset)[1]
+	    lastchr <- range(chrsubset)[2]
+	    if(firstchr==1){firstbin<-0} else {firstbin<-binchrend[firstchr-1]+1}
+	    ggplot() +
+	        scale_y_continuous(name = "copies", limits = c(0,cap), breaks = c(0:cap), expand=c(0,0)) +
+	        scale_x_continuous(name = "chromosome", limits = c(firstbin,binchrend[lastchr]), breaks = binchrmdl[firstchr:lastchr], labels = firstchr:lastchr, expand = c(0,0)) +
+	        geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
+	        geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
+	        geom_vline(xintercept = binchrend[firstchr:lastchr], color = "#666666", linetype = "dashed") +
+	        geom_point(aes(x = bin,y = copynumbers),data=df, size = 0.1, color = 'black') +
+	        geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'black', shape = 24) +
+	        geom_point(aes(x = bin,y = copynumbers),data=toppedcopynumbers, size = 0.5, color = 'black', shape = 25) +
+	        geom_point(aes(x = bin,y = segments),data=df, size = 1, color = 'darkorange') +
+	        geom_point(aes(x = bin,y = segments),data=cappedsegments, size = 1, color = 'darkorange', shape = 24) +
+	        geom_point(aes(x = bin,y = segments),data=toppedsegments, size = 1, color = 'darkorange', shape = 25) +
+	        theme_classic() +
+            theme(axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
+	        ggtitle(title) +
+	        theme(plot.title = element_text(hjust = 0.5))
 	}
 }
 
@@ -747,7 +744,7 @@ linkmutationdata <- function(filename, segmentdf, cellularity = 1,chrindex=1,pos
       fn <- gsub(".xls","_ACE.xls",fn)
       write.table(output, file = fn ,sep="\t",row.names = FALSE, quote=FALSE)
     } else {
-      if (dir.exists(outputdir)==FALSE) {dir.create(outputdir)}
+      if (!dir.exists(outputdir)) {dir.create(outputdir)}
       if (dirname(filename)==".") {newpath <- file.path(outputdir,filename)}
       else {newpath <- sub(dirname(filename),outputdir,filename)}
       fn <- gsub(".csv","_ACE.csv",newpath)
@@ -784,93 +781,97 @@ linkmutationdata <- function(filename, segmentdf, cellularity = 1,chrindex=1,pos
 postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix="",postfix="",trncname=FALSE,inputdir=FALSE,
                              chrindex=1,posindex=2,freqindex=3,append=TRUE,dontmatchnames=FALSE,
                              printsegmentfiles=TRUE,printnewplots=TRUE,imagetype='pdf',outputdir="./"){
-  if(!dir.exists(outputdir)) {dir.create(outputdir)}
-  if(inputdir!=FALSE){
-    if(missing(copyNumbersSegmented)) {
-      files <- list.files(inputdir, pattern = "\\.rds$")
-      if(length(files)==0){print("no rds-file detected")}
-      if(length(files)>1){print(paste0("multiple rds-files detected, using first file: ",files[1]))}
-      copyNumbersSegmented <- readRDS(file.path(inputdir,files[1]))
+    if(!dir.exists(outputdir)) {dir.create(outputdir)}
+    if(inputdir!=FALSE){
+        if(missing(copyNumbersSegmented)) {
+            files <- list.files(inputdir, pattern = "\\.rds$")
+            if(length(files)==0){print("no rds-file detected")}
+            if(length(files)>1){print(paste0("multiple rds-files detected, using first file: ",files[1]))}
+            copyNumbersSegmented <- readRDS(file.path(inputdir,files[1]))
+        }
+        if(missing(modelsfile)){models <- try(read.table(file.path(inputdir,"models.txt"), header = TRUE, comment.char = "", sep = "\t",colClasses = "character")) # dont convert sample "026" to sample 26 Erik Bosch 28-01-2021 
+        } else {models <- read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t",colClasses = "character")} # dont convert sample "026" to sample 26 Erik Bosch 28-01-2021 }
+        if(inherits(models, "try-error")) {print("failed to read modelsfile")}
+        if(missing(mutationdata)) {
+            if (dir.exists(file.path(inputdir,"mutationdata"))) {
+                mutationdata <- file.path(inputdir,"mutationdata")
+            } else { mutationdata <- inputdir}
+        }
     }
-    if(missing(modelsfile)){models <- try(read.table(file.path(inputdir,"models.txt"), header = TRUE, comment.char = "", sep = "\t",colClasses = "character")) # dont convert sample "026" to sample 26 Erik Bosch 28-01-2021 
-    } else {models <- read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t",colClasses = "character")} # dont convert sample "026" to sample 26 Erik Bosch 28-01-2021 }
+    if(missing(copyNumbersSegmented)){print("this function requires a QDNAseq-object")}
+    if(class(copyNumbersSegmented)=="character") {copyNumbersSegmented <- try(readRDS(copyNumbersSegmented))}
+    if(inherits(copyNumbersSegmented, "try-error")) {print("failed to read RDS-file")}
+    if(missing(modelsfile)&&inputdir==FALSE){print("this function requires a tab-delimited file with model information per sample")}
+    if(!missing(modelsfile)&&class(modelsfile)=="character") {models <- try(read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t",colClasses = "character"))} # dont convert sample "026" to sample 26 Erik Bosch 28-01-2021 
     if(inherits(models, "try-error")) {print("failed to read modelsfile")}
-    if(missing(mutationdata)) {
-      if (dir.exists(file.path(inputdir,"mutationdata"))) {
-        mutationdata <- file.path(inputdir,"mutationdata")
-      } else { mutationdata <- inputdir}
+    if(missing(mutationdata)){print("not linking mutation data")}
+    if(!missing(mutationdata)) {
+        if (length(list.files(mutationdata, pattern = "\\.csv$"))>0) {mutext<-".csv"
+        } else if (length(list.files(mutationdata, pattern = "\\.txt$"))>0) {mutext<-".txt"
+        } else if (length(list.files(mutationdata, pattern = "\\.tsv$"))>0) {mutext<-".tsv"
+        } else if (length(list.files(mutationdata, pattern = "\\.xls$"))>0) {mutext<-".xls"
+        } else {
+            print("file extension of mutation files not supported: use .csv, .txt, .tsv, or .xls")
+        }
     }
-  }
-  if(missing(copyNumbersSegmented)){print("this function requires a QDNAseq-object")}
-  if(class(copyNumbersSegmented)=="character") {copyNumbersSegmented <- try(readRDS(copyNumbersSegmented))}
-  if(inherits(copyNumbersSegmented, "try-error")) {print("failed to read RDS-file")}
-  if(missing(modelsfile)&&inputdir==FALSE){print("this function requires a tab-delimited file with model information per sample")}
-  if(!missing(modelsfile)&&class(modelsfile)=="character") {models <- try(read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t",colClasses = "character"))} # dont convert sample "026" to sample 26 Erik Bosch 28-01-2021 
-  if(inherits(models, "try-error")) {print("failed to read modelsfile")}
-  if(missing(mutationdata)){print("not linking mutation data")}
-  if(!missing(mutationdata)) {
-    if (length(list.files(mutationdata, pattern = "\\.csv$"))>0) {mutext<-".csv"
-  } else if (length(list.files(mutationdata, pattern = "\\.txt$"))>0) {mutext<-".txt"
-  } else if (length(list.files(mutationdata, pattern = "\\.tsv$"))>0) {mutext<-".tsv"
-  } else if (length(list.files(mutationdata, pattern = "\\.xls$"))>0) {mutext<-".xls"
-  } else {print("file extension of mutation files not supported: use .csv, .txt, .tsv, or .xls")}
-  }
-  suppressMessages(library(Biobase))
-  fd <- fData(copyNumbersSegmented)
-  pd <- pData(copyNumbersSegmented)
-  if(trncname==TRUE) {pd$name <- gsub("_.*","",pd$name)}
-  if(trncname!=TRUE&&trncname!=FALSE) {pd$name <- gsub(trncname,"",pd$name)}
-  newplots <- vector(mode = 'list', length = (length(pd$name)))
-  for (a in 1:length(pd$name)) {
-    if(dontmatchnames==TRUE) { currentindex <- a
-    } else { currentindex <- which(models[,1]==pd$name[a]) }
-    if(length(currentindex)==1){
-      cellularity <- as.numeric(models[currentindex,2])
-      if(is.na(cellularity)){
-        print(paste0("no valid cellularity given for ", pd$name[a]))
-        newplots[[a]] <- ggplot() +
-          annotate("text", x=1, y=1, label = paste0("no plot available for ",pd$name[a]," - missing cellularity")) +
-          theme_classic() +
-          theme(line = element_blank(), axis.title =  element_blank(), axis.text = element_blank())
-      } else {
-        ploidy <- as.numeric(models[currentindex,3])
-        if(is.na(ploidy)||length(ploidy)==0) {
-          print(paste0("ploidy assumed 2 for ", pd$name[a]))
-          ploidy <- 2
+    suppressMessages(library(Biobase))
+    fd <- fData(copyNumbersSegmented)
+    pd <- pData(copyNumbersSegmented)
+    if(trncname==TRUE) {pd$name <- gsub("_.*","",pd$name)}
+    if(trncname!=TRUE&&trncname!=FALSE) {pd$name <- gsub(trncname,"",pd$name)}
+    newplots <- vector(mode = 'list', length = (length(pd$name)))
+    for (a in 1:length(pd$name)) {
+        if(dontmatchnames==TRUE) { currentindex <- a
+        } else { currentindex <- which(models[,1]==pd$name[a]) }
+        if(length(currentindex)==1){
+            cellularity <- as.numeric(models[currentindex,2])
+            if(is.na(cellularity)){
+                print(paste0("no valid cellularity given for ", pd$name[a]))
+                newplots[[a]] <- ggplot() +
+                    annotate("text", x=1, y=1, label = paste0("no plot available for ",pd$name[a]," - missing cellularity")) +
+                    theme_classic() +
+                    theme(line = element_blank(), axis.title =  element_blank(), axis.text = element_blank())
+            } else {
+                ploidy <- as.numeric(models[currentindex,3])
+                if(is.na(ploidy)||length(ploidy)==0) {
+                    print(paste0("ploidy assumed 2 for ", pd$name[a]))
+                    ploidy <- 2
+                }
+                standard <- as.numeric(models[currentindex,4])
+                if(is.na(standard)||length(standard)==0) {
+                    print(paste0("standard assumed 1 for ", pd$name[a]))
+                    standard <- 1
+                }
+                newplots[[a]] <- singleplot(copyNumbersSegmented,cellularity=cellularity,ploidy=ploidy,standard=standard,QDNAseqobjectsample=a,title=pd$name[a])
+                imagefunction <- get(imagetype)
+                if(printnewplots==TRUE) {
+                    if (!dir.exists(file.path(outputdir,"newplots"))) {dir.create(file.path(outputdir,"newplots"))}
+                    if(imagetype %in% c('pdf','svg')) {
+                        imagefunction(file.path(outputdir,"newplots",paste0(pd$name[a],".",imagetype)),width=10.5)
+                        print(newplots[[a]])
+                        dev.off()
+                    } else {
+                        imagefunction(file.path(outputdir,"newplots",paste0(pd$name[a],".",imagetype)), width=720)
+                        print(newplots[[a]])
+                        dev.off()
+                    }
+                }
+                segmentdf <- getadjustedsegments(copyNumbersSegmented,cellularity=cellularity,ploidy=ploidy,standard=standard,QDNAseqobjectsample=a)
+                if(!missing(mutationdata)) {
+                    mutationfile <- file.path(mutationdata,paste0(prefix,pd$name[a],postfix,mutext))
+                    folder <- file.path(outputdir,"mutationdata")
+                    linkmutationdata(mutationfile,segmentdf,cellularity,chrindex,posindex,freqindex,append,outputdir=folder)
+                }
+                if(printsegmentfiles==TRUE){
+                    if (!dir.exists(file.path(outputdir,"segmentfiles"))) {dir.create(file.path(outputdir,"segmentfiles"))}
+                    fn <- file.path(outputdir,"segmentfiles",paste0(pd$name[a],"_segments.tsv"))
+                    write.table(segmentdf,fn,sep="\t",row.names = FALSE, quote=FALSE)
+                }
+            }
+        } else {
+            print(paste0("none or multiple models for ",pd$name[a]))
         }
-        standard <- as.numeric(models[currentindex,4])
-        if(is.na(standard)||length(standard)==0) {
-          print(paste0("standard assumed 1 for ", pd$name[a]))
-          standard <- 1
-        }
-        newplots[[a]] <- singleplot(copyNumbersSegmented,cellularity=cellularity,ploidy=ploidy,standard=standard,QDNAseqobjectsample=a,title=pd$name[a])
-        imagefunction <- get(imagetype)
-        if(printnewplots==TRUE) {
-          if (!dir.exists(file.path(outputdir,"newplots"))) {dir.create(file.path(outputdir,"newplots"))}
-          if(imagetype %in% c('pdf','svg')) {
-            imagefunction(file.path(outputdir,"newplots",paste0(pd$name[a],".",imagetype)),width=10.5)
-            print(newplots[[a]])
-            dev.off()
-          } else {
-            imagefunction(file.path(outputdir,"newplots",paste0(pd$name[a],".",imagetype)), width=720)
-            print(newplots[[a]])
-            dev.off()
-          }
-        }
-        segmentdf <- getadjustedsegments(copyNumbersSegmented,cellularity=cellularity,ploidy=ploidy,standard=standard,QDNAseqobjectsample=a)
-        if(!missing(mutationdata)) {
-          mutationfile <- file.path(mutationdata,paste0(prefix,pd$name[a],postfix,mutext))
-          folder <- file.path(outputdir,"mutationdata")
-          linkmutationdata(mutationfile,segmentdf,cellularity,chrindex,posindex,freqindex,append,outputdir=folder)
-        }
-        if(printsegmentfiles==TRUE){
-          if (!dir.exists(file.path(outputdir,"segmentfiles"))) {dir.create(file.path(outputdir,"segmentfiles"))}
-          fn <- file.path(outputdir,"segmentfiles",paste0(pd$name[a],"_segments.tsv"))
-          write.table(segmentdf,fn,sep="\t",row.names = FALSE, quote=FALSE)
-        }
-      }
-    } else {print(paste0("none or multiple models for ",pd$name[a]))}
-  }
+    }
   return(newplots)
 }
 
