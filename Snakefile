@@ -49,7 +49,8 @@ else: #rule all
     rule all:
         input: 
             expand(DIR_OUT + "{binSize}kbp/summary.html", binSize=BINSIZES), # summary
-            expand(DIR_OUT + "{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES), # CGH branch
+            expand(DIR_OUT + "{binSize}kbp/profiles/freqPlot/allFocalRegions.Cosmic.bed",binSize=BINSIZES), # CGHregions branch
+            expand(DIR_OUT + "{ACEbinSize}kbp/CGHtest/combined.png", ACEbinSize=ACEBINSIZES), # CGHtest branch
             expand(DIR_OUT + "{binSize}kbp/BED/{sample}_annotate_focalCNA.bed", binSize=BINSIZES ,sample=SAMPLES.keys()), # annotate_focalCNA
             expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()), # postanalysisloop_ACE
             expand(DIR_OUT + "{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds", ACEbinSize=ACEBINSIZES), # CNA_call_cellularity_based
@@ -370,24 +371,18 @@ rule postanalysisloop_ACE:
     script:
         "scripts/Run_postanalysisloop_ACE.R"
 
-# #TODO change reCalled to normal calls or cellularity based
-# rule CNA_recall:
-#     input:
-#         called=DIR_OUT + "{binSize}kbp/data/{binSize}kbp-called.rds",
-#     output:
-#         recalled=DIR_OUT + "{binSize}kbp/data/{binSize}kbp-reCalled.rds",
-#         #copynumbers=DIR_OUT + "{binSize}kbp/data/{binSize}kbp-copynumbers.igv",
-#         #segments=DIR_OUT + "{binSize}kbp/data/{binSize}kbp-segments.igv",
-#         calls=DIR_OUT + "{binSize}kbp/data/{binSize}kbp-calls.igv",
-#         allprofiles=expand(DIR_OUT + "{{binSize}}kbp/profiles/reCalled/{samples}.png",samples=SAMPLES.keys()),
-#         #copynumbersbed=expand(DIR_OUT + "{{binSize}}kbp/BED/{samples}-copynumbers.bed",samples=SAMPLES.keys()),
-#         #segmentsbed=expand(DIR_OUT + "{{binSize}}kbp/BED/{samples}-segments.bed",samples=SAMPLES.keys()),
-#     params:
-#         profiles=DIR_OUT + "{binSize}kbp/profiles/reCalled/",
-#         #copynumbersbed=DIR_OUT + "{binSize}kbp/BED/%s-copynumbers.bed",
-#         #segmentsbed=DIR_OUT + "{binSize}kbp/BED/%s-segments.bed",
-#         #bedfolder=DIR_OUT + "{binSize}kbp/BED/",
-#         failed=DIR_OUT + "{binSize}kbp/logs/failed_samples.txt",
-#     log: DIR_OUT + "{binSize}kbp/logs/recall.log"
-#     script:
-#         "scripts/CNA_recall.R"
+rule CGHtest:
+    input:
+        RegionsCGH=DIR_OUT + "{ACEbinSize}kbp/data/{ACEbinSize}kbp-RegionsCGH.rds",
+    output:
+        freqPlotCompare=DIR_OUT + "{ACEbinSize}kbp/CGHtest/freqPlotCompare.png", 
+        CGHtest=DIR_OUT + "{ACEbinSize}kbp/CGHtest/CGHtest.Rdata",
+        plotPFDR=DIR_OUT + "{ACEbinSize}kbp/CGHtest/plotPFDR.png",
+        combined=DIR_OUT + "{ACEbinSize}kbp/CGHtest/combined.png"
+    params:
+        outputdir=DIR_OUT + "{ACEbinSize}kbp/CGHtest/",
+        suppressMessages=config["all"]["suppressMessages"]
+    log:DIR_OUT + DIR_LOG + "{ACEbinSize}kbp/CGHtest_log.tsv"
+    script:
+        "scripts/CGHtest.R"
+

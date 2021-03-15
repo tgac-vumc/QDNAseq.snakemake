@@ -32,10 +32,9 @@ copyNumbersSegmented <- readRDS(inputfile)
 
 postanalysisloop(copyNumbersSegmented, modelsfile=fitpickertable, imagetype=imagetype, outputdir=outputdir, trncname=trncname)
 
-# copy file to outputdir and remove from QDNAseq-snakemake directory
+# if Rplots.pdf exists rename from QDNAseq-snakemake directory to outputdir
 if (file.exists("./Rplots.pdf")){
-    file.copy("./Rplots.pdf", paste0(outputdir,"all_samples.pdf"))
-    file.remove("./Rplots.pdf")
+    file.rename(from = "./Rplots.pdf", to = paste0(outputdir,"all_samples.pdf"))
 }
 
 failed_samples<-read.table(failed, stringsAsFactors=FALSE, header=TRUE)

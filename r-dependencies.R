@@ -9,13 +9,12 @@
 
 library(devtools)
 options(unzip = 'internal')
-#devtools::install_version("denstrip", version = '1.5.4')
-#devtools::install_version("flexmix", version = '2.3-17')
-#devtools::install_version("flexmix"')
-#install.packages("flexmix")
 
+# install WECCA from Github
 devtools::install_github("tgac-vumc/WECCA")
 
-##install.packages(file.path(getwd(),"CGHtest_1.1.tar.gz"))
-#install.packages("CGHtest_1.1.tar.gz", source=NULL, depenencies=TRUE)
+# install GGHtest from source
+fn = 'http://www.few.vu.nl/~mavdwiel/CGHtest/CGHtest_1.1.tar.gz'
+if (!file.exists('CGHtest_1.1.tar.gz')){download.file(fn, destfile="CGHtest_1.1.tar.gz")} else {untar("CGHtest_1.1.tar.gz",list=TRUE)} # download or show content ofalready downloaded
 
+install.packages("CGHtest_1.1.tar.gz", source=NULL, depenencies=TRUE)

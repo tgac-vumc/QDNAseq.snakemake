@@ -10,13 +10,13 @@ if (msg){
 suppressMessages(library(QDNAseq))
 suppressMessages(library(Biobase))
 suppressMessages(library(CGHcall))
-#suppressMessages(library(CGHtest))
+suppressMessages(library(CGHtest))
 suppressMessages(library(denstrip))
 } else{
 library(QDNAseq)
 library(Biobase)
 library(CGHcall)
-#library(CGHtest)
+library(CGHtest)
 library(denstrip)
 }
 
@@ -63,7 +63,7 @@ saveRDS(reCalled, recalled)
 ##############################################################################################################
 fitpicker$likely_fit<-paste0("cellularity: ",fitpicker$likely_fit )
 
-dir.create(profiles)
+if(!dir.exists(profiles)){dir.create(profiles)}
 plotQDNAseq(reCalled, profiles , subtitle=fitpicker$likely_fit)
 
 # frequency plot calls

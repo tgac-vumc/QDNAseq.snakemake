@@ -11,13 +11,13 @@ suppressMessages(library(QDNAseq))
 suppressMessages(library(Biobase))
 suppressMessages(library(CGHcall))
 suppressMessages(library(CGHregions))
-#suppressMessages(library(CGHtest))
+suppressMessages(library(CGHtest))
 } else{
 library(QDNAseq)
 library(Biobase)
 library(CGHcall)
 library(CGHregions)
-#library(CGHtest)
+library(CGHtest)
 }
 
 
