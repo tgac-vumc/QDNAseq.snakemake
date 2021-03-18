@@ -1,3 +1,7 @@
+###########
+# functions for applying the CGHtest, script originally from Matias Mendeville, 16-03-2021
+###########
+
 Perform_CGHtest <- function(data1,data2,name1,name2, output, teststat = "Chi-square",iterations = 1000, af = 0.1){
         combined <- combine(data1,data2)
         datainfo <- data.frame(chromosomes(combined), bpstart(combined), bpend(combined), nclone(combined), avedist(combined))
