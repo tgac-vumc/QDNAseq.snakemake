@@ -5,8 +5,10 @@
 msg <- snakemake@params[["suppressMessages"]]
 if (msg){
 suppressMessages(library(CGHtest))
+suppressMessages(library(readxl))
 } else{
 library(CGHtest)
+library(readxl)
 }
 
 source("scripts/CGHtest_functions.R", echo = FALSE)
@@ -23,12 +25,16 @@ combined_output <- snakemake@output[["combined"]]
 
 # params path
 outputdir <- snakemake@params[["outputdir"]]
+clinicaldataPath <- 'clinical.xlsx'
 clinicaldataPath <- snakemake@params[["clinicaldataPath"]]
 
-clinicaldata.col.snames <- snakemake@params[["columnSampleNames"]]
+clinicaldata_col_snames <- 1
+clinicaldata_col_snames <- snakemake@params[["columnSampleNames"]]
 
-set.clinicaldata.class.samples <- snakemake@params[["ClassSamples"]]
-set.clinicaldata.col.class.samples <- snakemake@params[["columnClassSamples"]]
+set_clinicaldata_class_samples <- c('short','long')
+set_clinicaldata_class_samples <- snakemake@params[["ClassSamples"]]
+clinicaldata_col_class_samples <- 3
+clinicaldata_col_class_samples <- snakemake@params[["columnClassSamples"]]
 
 
 log<-snakemake@log[[1]]
@@ -45,7 +51,7 @@ CGHregions_RDS_file <- readRDS(CGHregions_RDS_file_path)
 snames <- sampleNames(CGHregions_RDS_file)
 
 # read clinical data
-clinicaldata <- read.table(clinicaldataPath, colClasses="character")
+clinicaldata <- as.data.frame(read_excel(clinicaldataPath))
 clinicaldata_snames  <- clinicaldata[,clinicaldata_col_snames]
 
 if (!isTRUE(all.equal(sort(snames),sort(clinicaldata_snames)))){
@@ -54,24 +60,24 @@ if (!isTRUE(all.equal(sort(snames),sort(clinicaldata_snames)))){
 }
 # match sample names from CGHregions with sample names in clinical data
 snames_i  <- match(clinicaldata_snames, snames)
+
 # redefine clinical data matching the CGHregions names
 clinicaldata <- clinicaldata[snames_i,]
 
 # define clinical data classes and match with set classes
 clinicaldata_class_samples_all <- clinicaldata[,clinicaldata_col_class_samples]
 clinicaldata_class_samples_unique <- unique(clinicaldata_class_samples_all)
+
 tempa <- clinicaldata_class_samples_unique
 tempb <- set_clinicaldata_class_samples
-
-if (!isTRUE(all.equal(tempa,tempb)) && isTRUE(all.equal(sort(tempa),sort(tempb)))){
+if (!isTRUE(all.equal(sort(tempa),sort(tempb)))){
     print(data.frame('Classes in clinical data' = tempa, 'Classes defined by user in config' = tempb))
     stop('Classes in the clinical data do not match the classes defined for the CGHtest-setting in the configuration-file!')
 }
 
 # define groups to compare
-
-group1_index <- which(clinicaldata_class_samples_all == set_clinicaldata_class_samples[1]) # 1:9
-group2_index <- which(clinicaldata_class_samples_all == set_clinicaldata_class_samples[2]) # 10:18
+group1_index <- which(clinicaldata_class_samples_all == set_clinicaldata_class_samples[1]) # c(4,5,8,11,14,17) for clinical.xlsx
+group2_index <- which(clinicaldata_class_samples_all == set_clinicaldata_class_samples[2]) # c(1,2,3,6,7,9,10,12,13,15,16,18) for clinical.xlsx
   
 # subset data
 group1 <- CGHregions_RDS_file[,group1_index]

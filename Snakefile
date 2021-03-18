@@ -381,6 +381,10 @@ rule CGHtest:
         combined=DIR_OUT + "{ACEbinSize}kbp/CGHtest/combined.png"
     params:
         outputdir=DIR_OUT + "{ACEbinSize}kbp/CGHtest/",
+        clinicaldataPath=config["CGHtest"]["clinicaldataPath"],
+        columnSampleNames=config["CGHtest"]["columnSampleNames"],
+        ClassSamples=config["CGHtest"]["ClassSamples"],
+        columnClassSamples=config["CGHtest"]["columnClassSamples"],
         suppressMessages=config["all"]["suppressMessages"]
     log:DIR_OUT + DIR_LOG + "{ACEbinSize}kbp/CGHtest_log.tsv"
     script:

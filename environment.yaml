@@ -28,3 +28,4 @@ dependencies:
   - r-devtools
   - r-ggplot2
   - r-survival
+  - r-readxl
