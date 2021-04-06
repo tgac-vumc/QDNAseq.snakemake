@@ -1,8 +1,7 @@
-all:
-  REF: /net/nfs/PAT/data/ref/hg19/ensembl/bwa-0.7.5a/Homo_sapiens.GRCh37.69.dna_sm.primary_assembly.fa
-  THREADS: 4
+pipeline:
   setting: 'all' #options: 'service', 'research', or 'all'. Select 'service' with minimal rules for providing services. Select 'research' with rules for research purposes, select them in Snakefile under rule research. For all rules select 'all'.
-  profiletypes: ["corrected", "segmented", "called",'dewaved']
+  THREADS: 4
+  # profiletypes: ["corrected", "segmented", "called",'dewaved']
   suppressMessages: TRUE #options TRUE or FALSE, TRUE for suppressed library messages and warnings of R-packages
 
 path:
@@ -13,7 +12,12 @@ path:
   dir_stats: "stats/"
   dir_log: "log/"
 
+summary:
+  profiletypes: ["corrected", "segmented", "called",'dewaved']
+
+
 bwa:
+  REF: /net/nfs/PAT/data/ref/hg19/ensembl/bwa-0.7.5a/Homo_sapiens.GRCh37.69.dna_sm.primary_assembly.fa
   max_edit_distance: 2  #n
   read_trimming_param: 40 #q
 

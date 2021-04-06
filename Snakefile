@@ -12,7 +12,7 @@ DIR_STATS = os.path.join(config["path"]["dir_stats"],"")
 DIR_LOG = os.path.join(config["path"]["dir_log"],"")
 
 (wholenames,) = glob_wildcards(DIR_FASTQ+"{wholename}.fastq.gz")
-profiletypes = config["all"]["profiletypes"]
+profiletypes = config["summary"]["profiletypes"]
 BINSIZES=config["QDNAseq"]["BINSIZES"]
 imagetype=config["ACE"]["imagetype"]
 ACEBINSIZES=config["ACE"]["ACEBINSIZES"]
@@ -69,7 +69,7 @@ rule bwa_aln:
         ref= config['all']['REF'],
         n=config['bwa']['max_edit_distance'],
         q=config['bwa']['read_trimming_param'],
-    threads: config['all']['THREADS']
+    threads: config['pipeline']['THREADS']
     log: DIR_OUT + DIR_LOG + "bwa/{sample}.log"
     shell:
         "bwa aln -n {params.n} -t {threads} -q {params.q} {params.ref} {input} > {output.sai} 2> {log}; "
@@ -105,7 +105,7 @@ rule mark_duplicates:
 rule generate_stats:
     input:
         bam=DIR_OUT + DIR_BAM + "{sample}.bam",
-        script="scripts/stats.sh"
+        script="scripts/Run_generate_stats.sh"
     output:
         DIR_OUT + DIR_STATS + "{sample}.reads.all"
     params:
@@ -120,10 +120,10 @@ rule QDNAseq_binReadCounts:
         binReadCounts=DIR_OUT + "{binSize}kbp/data/{binSize}kbp-raw.rds"
     params:
         genome=config["QDNAseq"]["genome"],
-        suppressMessages=config["all"]["suppressMessages"]
+        suppressMessages=config["pipeline"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "QDNAseq/{binSize}kbp/binReadCounts.log"
     script:
-        "scripts/binReadCounts.R"
+        "scripts/Run_QDNAseq_binReadCounts.R"
 
 rule QDNAseq_normalize:
     input:
@@ -137,7 +137,7 @@ rule QDNAseq_normalize:
         suppressMessages=config["all"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "QDNAseq/{binSize}kbp/normalizeBins.log"
     script:
-        "scripts/QDNAseq_normalize.R"
+        "scripts/Run_QDNAseq_normalize.R"
 
 rule deWave:
     input:
@@ -151,7 +151,7 @@ rule deWave:
         suppressMessages=config["all"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "QDNAseq/{binSize}kbp/dewave.log"
     script:
-        "scripts/deWave.R"
+        "scripts/Run_deWave.R"
 
 rule QDNAseq_segment:
     input:
@@ -173,7 +173,7 @@ rule QDNAseq_segment:
         suppressMessages=config["all"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "QDNAseq/{binSize}kbp/segment.log"
     script:
-        "scripts/QDNAseq_segment.R"
+        "scripts/Run_QDNAseq_segment.R"
 
 rule CNA_call:
     input:
@@ -189,7 +189,7 @@ rule CNA_call:
         suppressMessages=config["all"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "CNA/{binSize}kbp/call.log"
     script:
-        "scripts/CNA_call.R"
+        "scripts/Run_CNA_call.R"
 
 rule CNA_call_cellularity_based:
     input:
@@ -207,7 +207,7 @@ rule CNA_call_cellularity_based:
         suppressMessages=config["all"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "CNA/{ACEbinSize}kbp/call_cellularity_based.log"
     script:
-        "scripts/CNA_call_cellularity_based.R"
+        "scripts/Run_CNA_call_cellularity_based.R"
 
 rule CNA_bedfiles:
     input:
@@ -225,7 +225,7 @@ rule CNA_bedfiles:
         suppressMessages=config["all"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "CNA/{ACEbinSize}kbp/bedfiles.log"
     script:
-        "scripts/makeCNAbedFile.R"
+        "scripts/Run_makeCNAbedFile.R"
 
 rule annotate_focalCNA:
  #TODO remove in annotateFocalCNAbed file hardcoded location: /net/nfs/PAT/home/stef/code/ENSEMBL_API/ensembl74/ensembl/modules/
@@ -254,7 +254,7 @@ rule CGHregions:
         suppressMessages=config["all"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "{ACEbinSize}kbp/CGHregions.log"
     script:
-        "scripts/CGHregions.R"
+        "scripts/Run_CGHregions.R"
 
 rule makeCGHregionsTable:
     input:
@@ -269,7 +269,7 @@ rule makeCGHregionsTable:
         suppressMessages=config["all"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "{binSize}kbp/CGHregionstable.log"
     script:
-        "scripts/makeCGHregionstable.R"
+        "scripts/Run_makeCGHregionstable.R"
 
 rule annotate_RegionsFocalCNAbed:
     input:
@@ -301,7 +301,7 @@ rule summary:
     input:
         stats=expand(DIR_OUT + DIR_STATS + "{sample}.reads.all", sample=SAMPLES.keys()),
         index=expand(DIR_OUT + "{{binSize}}kbp/profiles/{profiletype}/index.html", profiletype=profiletypes),
-        script="scripts/lane-summary.sh",
+        script="scripts/Run_lane-summary.sh",
         qcfastq=expand(DIR_OUT + DIR_QC +  "qc-fastq/{wholename}_fastqc.html", wholename=wholenames),
         bamqc=expand(DIR_OUT + DIR_QC +  "qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
     output:
@@ -323,7 +323,7 @@ rule qcfastq:
         qczip=temp(DIR_OUT + DIR_QC +  "qc-fastq/{sample}_fastqc.zip")
         #qcfastq=expand(DIR_OUT + DIR_QC +  "qc-fastq/{{sample}}.fastqc.html", sample=SAMPLES.keys()),
         #qczip=temp(expand(DIR_OUT + DIR_QC +  "qc-fastq/{{sample}}_fastqc.zip", sample=SAMPLES.keys()))
-    threads: config['all']['THREADS']
+    threads: config['pipeline']['THREADS']
     params:
         qcfastqdir=DIR_OUT + DIR_QC + "qc-fastq/"
     log: DIR_OUT + DIR_LOG + DIR_QC + "qc-fastq/{sample}.log"
@@ -336,7 +336,7 @@ rule qcbam:
     output:
         bamqc=DIR_OUT + DIR_QC +  "qc-bam/{sample}_fastqc.html",
         bamqczip=temp(DIR_OUT + DIR_QC +  "qc-bam/{sample}_fastqc.zip"),
-    threads: config['all']['THREADS']
+    threads: config['pipeline']['THREADS']
     params:
         qcbamdir=DIR_OUT + DIR_QC + "qc-bam/"
     log: DIR_OUT + DIR_LOG + DIR_QC + "qc-bam/{sample}.log"
@@ -388,5 +388,5 @@ rule CGHtest:
         suppressMessages=config["all"]["suppressMessages"]
     log:DIR_OUT + DIR_LOG + "{ACEbinSize}kbp/CGHtest_log.tsv"
     script:
-        "scripts/CGHtest.R"
+        "scripts/Run_CGHtest.R"
 
