@@ -16,7 +16,7 @@ profiletypes = config["summary"]["profiletypes"]
 BINSIZES=config["QDNAseq"]["BINSIZES"]
 imagetype=config["ACE"]["imagetype"]
 ACEBINSIZES=config["ACE"]["ACEBINSIZES"]
-setting = config["all"]["setting"]
+setting = config["pipeline"]["setting"]
 
 def getnames():
     SAMPLES=dict()
@@ -66,7 +66,7 @@ rule bwa_aln:
         sai=temp(DIR_OUT + DIR_BAM +  "{sample}.sai"),
         samse=temp(DIR_OUT + DIR_BAM + "{sample}.samse.sam")
     params:
-        ref= config['all']['REF'],
+        ref=config['bwa']['REF'],
         n=config['bwa']['max_edit_distance'],
         q=config['bwa']['read_trimming_param'],
     threads: config['pipeline']['THREADS']
@@ -134,7 +134,7 @@ rule QDNAseq_normalize:
     params:
         profiles=DIR_OUT + "{binSize}kbp/profiles/corrected/",
         chrom_filter=config["QDNAseq"]["chrom_filter"],
-        suppressMessages=config["all"]["suppressMessages"]
+        suppressMessages=config["pipeline"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "QDNAseq/{binSize}kbp/normalizeBins.log"
     script:
         "scripts/Run_QDNAseq_normalize.R"
@@ -148,7 +148,7 @@ rule deWave:
     params:
         profiles=DIR_OUT + "{binSize}kbp/profiles/dewaved/",
         dewave_data=config["QDNAseq"]["dewave_data"],
-        suppressMessages=config["all"]["suppressMessages"]
+        suppressMessages=config["pipeline"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "QDNAseq/{binSize}kbp/dewave.log"
     script:
         "scripts/Run_deWave.R"
@@ -170,7 +170,7 @@ rule QDNAseq_segment:
         copynumbersbed=DIR_OUT + "{binSize}kbp/BED/%s-copynumbers.bed",
         segmentsbed=DIR_OUT + "{binSize}kbp/BED/%s-segments.bed",
         bedfolder=DIR_OUT + "{binSize}kbp/BED/",
-        suppressMessages=config["all"]["suppressMessages"]
+        suppressMessages=config["pipeline"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "QDNAseq/{binSize}kbp/segment.log"
     script:
         "scripts/Run_QDNAseq_segment.R"
@@ -186,7 +186,7 @@ rule CNA_call:
     params:
         profiles=DIR_OUT + "{binSize}kbp/profiles/called/",
         failed=DIR_OUT + "{binSize}kbp/failed_samples.txt",
-        suppressMessages=config["all"]["suppressMessages"]
+        suppressMessages=config["pipeline"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "CNA/{binSize}kbp/call.log"
     script:
         "scripts/Run_CNA_call.R"
@@ -204,7 +204,7 @@ rule CNA_call_cellularity_based:
         profiles=DIR_OUT + "{ACEbinSize}kbp/profiles/call_cellularity_based/",
         failed=DIR_OUT + "{ACEbinSize}kbp/failed_samples.txt",
         minimum_cellularity=config["QDNAseq"]["minimum_cellularity"],
-        suppressMessages=config["all"]["suppressMessages"]
+        suppressMessages=config["pipeline"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "CNA/{ACEbinSize}kbp/call_cellularity_based.log"
     script:
         "scripts/Run_CNA_call_cellularity_based.R"
@@ -222,7 +222,7 @@ rule CNA_bedfiles:
         cytobands=config["CGHregions"]["cytobands"],
         max_focal_size_bed=config["BED"]["max_focal_size_bed"],
         failed=DIR_OUT + "{ACEbinSize}kbp/failed_samples.txt",
-        suppressMessages=config["all"]["suppressMessages"]
+        suppressMessages=config["pipeline"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "CNA/{ACEbinSize}kbp/bedfiles.log"
     script:
         "scripts/Run_makeCNAbedFile.R"
@@ -251,7 +251,7 @@ rule CGHregions:
         profiles=DIR_OUT + "{ACEbinSize}kbp/profiles/freqPlot/freqPlotREGIONS_{ACEbinSize}kbp.png"
     params:
         averr=config["CGHregions"]["averror"],
-        suppressMessages=config["all"]["suppressMessages"]
+        suppressMessages=config["pipeline"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "{ACEbinSize}kbp/CGHregions.log"
     script:
         "scripts/Run_CGHregions.R"
@@ -266,7 +266,7 @@ rule makeCGHregionsTable:
         min_freq_focal=config["CGHregions"]["min_freq_focal"],
         max_focal_size_mb=config["CGHregions"]["max_focal_size_mb"],
         cytobands=config["CGHregions"]["cytobands"],
-        suppressMessages=config["all"]["suppressMessages"]
+        suppressMessages=config["pipeline"]["suppressMessages"]
     log: DIR_OUT + DIR_LOG + "{binSize}kbp/CGHregionstable.log"
     script:
         "scripts/Run_makeCGHregionstable.R"
@@ -352,7 +352,7 @@ rule ACE:
     params:
         outputdir=DIR_OUT + "{ACEbinSize}kbp/ACE/",
         failed=DIR_OUT + "{ACEbinSize}kbp/failed_samples.txt",
-        suppressMessages=config["all"]["suppressMessages"]
+        suppressMessages=config["pipeline"]["suppressMessages"]
     log:DIR_OUT + DIR_LOG + "ACE/{ACEbinSize}kbp/{ploidy}N/ACE_log.tsv"
     script:
         "scripts/Run_ACE.R"
@@ -366,7 +366,7 @@ rule postanalysisloop_ACE:
     params:
         outputdir=DIR_OUT + "{ACEbinSize}kbp/ACE/{ploidy}N/",
         failed=DIR_OUT + "{ACEbinSize}kbp/failed_samples.txt",
-        suppressMessages=config["all"]["suppressMessages"]
+        suppressMessages=config["pipeline"]["suppressMessages"]
     log:DIR_OUT + DIR_LOG + "ACE/{ACEbinSize}kbp/{ploidy}N/ACE_post_log.tsv"
     script:
         "scripts/Run_postanalysisloop_ACE.R"
@@ -385,7 +385,7 @@ rule CGHtest:
         columnSampleNames=config["CGHtest"]["columnSampleNames"],
         ClassSamples=config["CGHtest"]["ClassSamples"],
         columnClassSamples=config["CGHtest"]["columnClassSamples"],
-        suppressMessages=config["all"]["suppressMessages"]
+        suppressMessages=config["pipeline"]["suppressMessages"]
     log:DIR_OUT + DIR_LOG + "{ACEbinSize}kbp/CGHtest_log.tsv"
     script:
         "scripts/Run_CGHtest.R"

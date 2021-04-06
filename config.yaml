@@ -1,7 +1,6 @@
 pipeline:
   setting: 'all' #options: 'service', 'research', or 'all'. Select 'service' with minimal rules for providing services. Select 'research' with rules for research purposes, select them in Snakefile under rule research. For all rules select 'all'.
   THREADS: 4
-  # profiletypes: ["corrected", "segmented", "called",'dewaved']
   suppressMessages: TRUE #options TRUE or FALSE, TRUE for suppressed library messages and warnings of R-packages
 
 path:
@@ -53,7 +52,7 @@ ACE:
   ACEBINSIZES: [100] #required binsizes comma seperated 15 30 100 1000, be careful not to ask for binsizes not created by QDNAseq. Smaller binsizes are computationally harder.
 
 CGHtest:
-    clinicaldataPath: 'clinical.xlsx'  # string, input path to clincal data set, assumed excel sheet
+    clinicaldataPath: 'data/clinical.xlsx'  # string, input path to clincal data set, assumed excel sheet
     columnSampleNames: 1    # integer, what is index of the column containing the sample names, in the clinical data
     ClassSamples: ['short', 'long'] # list containing two strings,  what are the classes that the samples are identified with
     columnClassSamples: 3   # integer, what is index of the column containing the sample classes, in the clinical data 
