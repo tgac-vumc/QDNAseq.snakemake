@@ -242,9 +242,7 @@ rule annotate_focalCNA:
         "{input.script} {input.bedfile} {wildcards.sample} {params.outdir} {output} {log} 2> {log}"
 
 rule CGHregions:
-#TODO change reCalled to normal calls or cellularity based
     input:
-        #recalled=DIR_OUT + "{binSize}kbp/data/{binSize}kbp-reCalled.rds",
         recalled=DIR_OUT + "{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds",
     output:
         RegionsCGH=DIR_OUT + "{ACEbinSize}kbp/data/{ACEbinSize}kbp-RegionsCGH.rds",
