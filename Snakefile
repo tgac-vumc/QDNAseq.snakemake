@@ -21,14 +21,14 @@ setting = config["pipeline"]["setting"]
 def getnames():
     SAMPLES=dict()
     for wholename in wholenames:
-        sample = re.match('[a-zA-Z0-9\-]*', wholename).group(0)
+        sample = wholename
         #fastqfile="../fastq/"+wholename+".fastq.gz"
         fastqfile=DIR_FASTQ+wholename+".fastq.gz"
         SAMPLES[sample]=fastqfile
     return(SAMPLES)
 
 SAMPLES=getnames()
-
+#print(SAMPLES)
 
 if setting == "service": #rule service
     rule service:
