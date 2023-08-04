@@ -35,7 +35,7 @@ QRC <- readRDS(binReadCounts)
 
 QRC.f <- applyFilters(QRC, residual=TRUE, blacklist=TRUE, mappability=FALSE, bases=FALSE , chromosomes=chrom_filter)
 
-featureData(QRC.f)$use[c(22232:22237)]<-F  # segment 14:22400001-22500000 t/m 14:22900001-23000000 on chr14
+#featureData(QRC.f)$use[c(22232:22237)]<-F  # segment 14:22400001-22500000 t/m 14:22900001-23000000 on chr14
 QRC.f <- estimateCorrection(QRC.f)
 #QRC.f <- applyFilters(QRC, residual=TRUE, blacklist=TRUE, mappability=FALSE, bases=FALSE)  - used for bia-ALCL (2019-07-09 not)
 #QRC.f <- estimateCorrection(QRC.f, residual=TRUE, blacklist=TRUE, mappability=FALSE, bases=FALSE) - used for bia-ALCL(2019-07-09 not)

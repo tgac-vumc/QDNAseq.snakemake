@@ -28,7 +28,7 @@ def getnames():
     return(SAMPLES)
 
 SAMPLES=getnames()
-#print(SAMPLES)
+print(SAMPLES)
 
 if setting == "service": #rule service
     rule service:

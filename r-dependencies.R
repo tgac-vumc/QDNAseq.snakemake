@@ -10,6 +10,10 @@
 library(devtools)
 options(unzip = 'internal')
 
+if (!require("BiocManager", quietly = TRUE))
+	    install.packages("BiocManager")
+BiocManager::install("DNAcopy")
+
 # install WECCA from Github
 devtools::install_github("tgac-vumc/WECCA")
 

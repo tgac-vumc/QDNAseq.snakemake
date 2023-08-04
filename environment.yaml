@@ -9,7 +9,7 @@ dependencies:
   - samtools
   - snakemake=5.31
   - pyyaml
-  - picard
+  - picard==2.20.8
   - fastqc
   - perl-bioperl
   - perl-dbd-mysql
