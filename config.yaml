@@ -4,8 +4,8 @@ pipeline:
   suppressMessages: TRUE #options TRUE or FALSE, TRUE for suppressed library messages and warnings of R-packages
 
 path:
-  dir_fastq: "/net/beegfs/cfg/tgac/yokim/Birgit/fastq" # directory that contains the fastq-files 
-  dir_out: "/net/beegfs/cfg/tgac/yokim/Birgit/"  # directory where the output should be created, all other directories below are branches of this directory
+  dir_fastq: "/net/nfs/PAT/analysis/MPS-438/fastq" # directory that contains the fastq-files 
+  dir_out: "/net/nfs/PAT/analysis/MPS-438/"  # directory where the output should be created, all other directories below are branches of this directory
   dir_qc: "qc/"
   dir_bam: "bam/"
   dir_stats: "stats/"
@@ -16,12 +16,12 @@ summary:
 
 
 bwa:
-  REF: "/net/beegfs/cfg/tgac/Resource/fasta/hg19.fa"
+  REF: "/net/nfs/PAT/archive/Resource/fasta/hg19.fa"
   max_edit_distance: 2  #n
   read_trimming_param: 40 #q
 
 QDNAseq:
-  BINSIZES: ["30", "100", "1000"]   #required binsizes comma seperated  1 5 10 15 30 100 1000
+  BINSIZES: ["15", "30", "100", "1000"]   #required binsizes comma seperated  1 5 10 15 30 100 1000
   genome: hg19
   chrom_filter: ["Y", "X"] # comma separated quoted to specify which chromosomes to filter out. "X","Y"
   dewave: True #dewaving is an optional setting, if True samples will be dewaved before segmentation, if False dewaving will be skipped.
