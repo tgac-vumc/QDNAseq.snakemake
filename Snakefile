@@ -1,5 +1,6 @@
 import re
 import os
+import glob
 
 configfile: "config.yaml"
 
@@ -11,7 +12,7 @@ DIR_BAM = os.path.join(config["path"]["dir_bam"],"")
 DIR_STATS = os.path.join(config["path"]["dir_stats"],"")
 DIR_LOG = os.path.join(config["path"]["dir_log"],"")
 
-(wholenames,) = glob_wildcards(DIR_FASTQ+"{wholename}.fastq.gz")
+(wholenames,) = glob_wildcards(DIR_FASTQ+"{wholename}_R1.fastq.gz")
 profiletypes = config["summary"]["profiletypes"]
 BINSIZES=config["QDNAseq"]["BINSIZES"]
 imagetype=config["ACE"]["imagetype"]
@@ -22,8 +23,8 @@ def getnames():
     SAMPLES=dict()
     for wholename in wholenames:
         sample = wholename
-        #fastqfile="../fastq/"+wholename+".fastq.gz"
-        fastqfile=DIR_FASTQ+wholename+".fastq.gz"
+        #fastqfile=DIR_FASTQ+wholename+"*.fastq.gz"
+        fastqfile=glob.glob(DIR_FASTQ+wholename+"*.fastq.gz")
         SAMPLES[sample]=fastqfile
     return(SAMPLES)
 
@@ -43,7 +44,7 @@ elif setting == "research": #rule research
             expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()), # postanalysisloop_ACE
             expand(DIR_OUT + "{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds", ACEbinSize=ACEBINSIZES), # CNA_call_cellularity_based
             expand(DIR_OUT + "{ACEbinSize}kbp/profiles/call_cellularity_based/index.html",ACEbinSize=ACEBINSIZES), # lightBox
-            expand(DIR_OUT + DIR_QC + "qc-fastq/{sample}_fastqc.html", sample=wholenames), # qcfastq
+            #expand(DIR_OUT + DIR_QC + "qc-fastq/{sample}_fastqc.html", sample=wholenames), # qcfastq
             expand(DIR_OUT + DIR_QC + "qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()), # qcbam
 else: #rule all
     rule all:
@@ -55,7 +56,7 @@ else: #rule all
             expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/segmentfiles/{sample}_segments.tsv", binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()), # postanalysisloop_ACE
             expand(DIR_OUT + "{ACEbinSize}kbp/data/{ACEbinSize}kbp-call_cellularity_based.rds", ACEbinSize=ACEBINSIZES), # CNA_call_cellularity_based
             expand(DIR_OUT + "{ACEbinSize}kbp/profiles/call_cellularity_based/index.html",ACEbinSize=ACEBINSIZES), # lightBox
-            expand(DIR_OUT + DIR_QC + "qc-fastq/{sample}_fastqc.html", sample=wholenames), # qcfastq
+            #expand(DIR_OUT + DIR_QC + "qc-fastq/{sample}_fastqc.html", sample=wholenames), # qcfastq
             expand(DIR_OUT + DIR_QC + "qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()), # qcbam
             ##expand(DIR_OUT + "{binSize}kbp/ACE/{ploidy}N/{sample}/summary_{sample}.{imagetype}", imagetype=imagetype ,binSize=ACEBINSIZES, ploidy=config["ACE"]["ploidies"], sample=SAMPLES.keys()),
 
@@ -63,8 +64,7 @@ rule bwa_aln:
     input:
         lambda wildcards: SAMPLES[wildcards.sample],
     output:
-        sai=temp(DIR_OUT + DIR_BAM +  "{sample}.sai"),
-        samse=temp(DIR_OUT + DIR_BAM + "{sample}.samse.sam")
+        bam=temp(DIR_OUT + DIR_BAM + "{sample}.align.bam")
     params:
         ref=config['bwa']['REF'],
         n=config['bwa']['max_edit_distance'],
@@ -72,21 +72,18 @@ rule bwa_aln:
     threads: config['pipeline']['THREADS']
     log: DIR_OUT + DIR_LOG + "bwa/{sample}.log"
     shell:
-        "bwa aln -n {params.n} -t {threads} -q {params.q} {params.ref} {input} > {output.sai} 2> {log}; "
-        "bwa samse -f {output.samse} -r '@RG\\tID:{wildcards.sample}\\tSM:{wildcards.sample}'" 
-        " {params.ref} {output.sai} {input} 2>> {log}"
+        "bwa mem -t {threads} {params.ref} {input} | samtools view -bS - > {output.bam} 2> {log}"
 
 rule samtools_sort:
     input:
-        samse=DIR_OUT + DIR_BAM + "{sample}.samse.sam",
-	    sai=DIR_OUT + DIR_BAM + "{sample}.sai"
+        bam=DIR_OUT + DIR_BAM + "{sample}.align.bam"
     output:
         temp(DIR_OUT + "tmp/{sample}.all.bam")
     params:
         output=DIR_OUT + "tmp/{sample}.all"
     log: DIR_OUT + DIR_LOG + "samtools/{sample}.log"
     shell:
-        "samtools view -uS {input.samse} 2> {log}| samtools sort - -o {output} 2>> {log}"
+        "samtools sort {input.bam} -o {output} 2>> {log}"
 
 rule mark_duplicates:
     input:
@@ -300,7 +297,7 @@ rule summary:
         stats=expand(DIR_OUT + DIR_STATS + "{sample}.reads.all", sample=SAMPLES.keys()),
         index=expand(DIR_OUT + "{{binSize}}kbp/profiles/{profiletype}/index.html", profiletype=profiletypes),
         script="scripts/Run_lane-summary.sh",
-        qcfastq=expand(DIR_OUT + DIR_QC +  "qc-fastq/{wholename}_fastqc.html", wholename=wholenames),
+        qcfastq=expand(DIR_OUT + DIR_QC +  "qc-bam/{wholename}_fastqc.html", wholename=wholenames),
         bamqc=expand(DIR_OUT + DIR_QC +  "qc-bam/{sample}_fastqc.html", sample=SAMPLES.keys()),
     output:
         DIR_OUT + "{binSize}kbp/summary.html"

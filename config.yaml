@@ -1,30 +1,30 @@
 pipeline:
-  setting: 'service' #options: 'service', 'research', or 'all'. Select 'service' with minimal rules for providing services. Select 'research' with rules for research purposes, select them in Snakefile under rule research. For all rules select 'all'.
+  setting: 'research' #options: 'service', 'research', or 'all'. Select 'service' with minimal rules for providing services. Select 'research' with rules for research purposes, select them in Snakefile under rule research. For all rules select 'all'.
   THREADS: 4
   suppressMessages: TRUE #options TRUE or FALSE, TRUE for suppressed library messages and warnings of R-packages
 
 path:
-  dir_fastq: "/net/beegfs/cfg/tgac/yokim/Birgit/fastq" # directory that contains the fastq-files 
-  dir_out: "/net/beegfs/cfg/tgac/yokim/Birgit/"  # directory where the output should be created, all other directories below are branches of this directory
+  dir_fastq: "/net/beegfs/cfg/tgac/yokim/FB09229586_9/fastq/sorted/" # directory that contains the fastq-files 
+  dir_out: "/net/beegfs/cfg/tgac/yokim/FB09229586_9/"  # directory where the output should be created, all other directories below are branches of this directory
   dir_qc: "qc/"
   dir_bam: "bam/"
   dir_stats: "stats/"
   dir_log: "log/"
 
 summary:
-  profiletypes: ["corrected", "segmented", "called",'dewaved']
+  profiletypes: ["corrected", "segmented", "called"] # if dewaving is skipped, delete dewaved
 
 
 bwa:
-  REF: "/net/beegfs/cfg/tgac/Resource/fasta/hg19.fa"
+  REF: "/net/nfs/PAT/archive/Resource/fasta/hg19.fa"
   max_edit_distance: 2  #n
   read_trimming_param: 40 #q
 
 QDNAseq:
-  BINSIZES: ["30", "100", "1000"]   #required binsizes comma seperated  1 5 10 15 30 100 1000
+  BINSIZES: ["15", "30",  "100", "500", "1000"]   #required binsizes comma seperated  1 5 10 15 30 100 1000
   genome: hg19
   chrom_filter: ["Y", "X"] # comma separated quoted to specify which chromosomes to filter out. "X","Y"
-  dewave: True #dewaving is an optional setting, if True samples will be dewaved before segmentation, if False dewaving will be skipped.
+  dewave: False #dewaving is an optional setting, if True samples will be dewaved before segmentation, if False dewaving will be skipped.
   dewave_dir: scripts/QDNAseq.dev-dewave/R
   # dewave_data: scripts/QDNAseq.dev-dewave/data/NormalCalibrationSet_{binSize}kb.rda
   dewave_data: data/NormalCalibrationSet_{binSize}kb.rda
@@ -38,7 +38,7 @@ CGHregions:
   averror: 0.01  #0.0075	 # default = 0.01
   min_freq_focal: 25
   max_focal_size_mb: 15
-  cytobands: /net/beegfs/cfg/tgac/Resource/cytoBand.txt.gz
+  cytobands: /net/beegfs/cfg/tgac/Resource/fasta/cytoBand.txt.gz
 
 ACE:
   ploidies: [2] # [2,4]   #required ploidies comma seperated

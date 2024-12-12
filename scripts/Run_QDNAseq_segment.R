@@ -37,6 +37,7 @@ sink(log, append=TRUE , split=FALSE)
 if (bin==15) {SDundo=0.75; alph=1e-15}
 if (bin==30) {SDundo=0.75; alph=1e-15}
 if (bin==100) {SDundo=0.10; alph=1e-20} # default = 1e-20 # 0.01 used for PELLL_FS8_a0.01
+if (bin==500) {SDundo=0.10; alph=1e-20} # default = 1e-20 # 0.01 used for PELLL_FS8_a0.01
 if (bin==1000) {SDundo=0.10; alph=1e-20}
 # TODO: mogelijk hogere alpha nodig, om meer segmenten te krijgen: 0.01 (1e-2). Deze setting used in tmp_100kbp
 
