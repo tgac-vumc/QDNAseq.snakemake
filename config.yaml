@@ -21,7 +21,7 @@ bwa:
   read_trimming_param: 40 #q
 
 QDNAseq:
-  BINSIZES: ["15", "30",  "100", "500", "1000"]   #required binsizes comma seperated  1 5 10 15 30 100 1000
+  BINSIZES: ["15", "30", "100", "1000"]   #required binsizes comma seperated  1 5 10 15 30 100 1000
   genome: hg19
   chrom_filter: ["Y", "X"] # comma separated quoted to specify which chromosomes to filter out. "X","Y"
   dewave: False #dewaving is an optional setting, if True samples will be dewaved before segmentation, if False dewaving will be skipped.

@@ -11,11 +11,11 @@ library(devtools)
 options(unzip = 'internal')
 
 if (!require("BiocManager", quietly = TRUE))
-	    install.packages("BiocManager")
+	    install.packages("BiocManager",repos="http://cran.us.r-project.org")
 BiocManager::install("DNAcopy")
 
 # install WECCA from Github
-devtools::install_github("tgac-vumc/WECCA")
+devtools::install_github("tgac-vumc/WECCA", force=TRUE)
 
 # install GGHtest from source
 fn = 'http://www.few.vu.nl/~mavdwiel/CGHtest/CGHtest_1.1.tar.gz'
